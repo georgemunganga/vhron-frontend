@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Mail, Lock, User, Building2, Briefcase, ArrowLeft, MapPin, Phone } from "lucide-react";
 import Logo from "@/components/Logo";
-import { API } from "@/App";
+import { API, BACKEND_URL } from "@/App";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -161,8 +161,8 @@ const Register = () => {
   };
 
   const handleGoogleSignup = () => {
-    const redirectUrl = window.location.origin + '/dashboard';
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    // Redirect to backend which initiates Google OAuth 2.0 flow
+    window.location.href = `${BACKEND_URL}/api/auth/google`;
   };
 
   return (

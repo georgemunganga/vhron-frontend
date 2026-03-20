@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
@@ -33,10 +33,6 @@ export const useAuth = () => {
   }, []);
 
   const checkAuth = async () => {
-    if (window.location.hash?.includes('session_id=')) {
-      setLoading(false);
-      return;
-    }
     try {
       const response = await fetch(`${API}/auth/me`, { credentials: 'include' });
       if (response.ok) {
@@ -62,49 +58,6 @@ export const useAuth = () => {
   };
 
   return { user, setUser, loading, logout, checkAuth, isOnline };
-};
-
-// OAuth Callback Handler
-const AuthCallback = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const hasProcessed = useRef(false);
-
-  useEffect(() => {
-    if (hasProcessed.current) return;
-    hasProcessed.current = true;
-    const processSession = async () => {
-      const sessionId = location.hash.split('session_id=')[1]?.split('&')[0];
-      if (!sessionId) { navigate('/login'); return; }
-      try {
-        const response = await fetch(`${API}/auth/session`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_id: sessionId }),
-          credentials: 'include',
-        });
-        if (response.ok) {
-          const data = await response.json();
-          localStorage.setItem('vchron_token', data.session_token || '');
-          navigate(data.needs_registration ? '/complete-registration' : '/dashboard', { state: { user: data } });
-        } else {
-          navigate('/login');
-        }
-      } catch {
-        navigate('/login');
-      }
-    };
-    processSession();
-  }, [location, navigate]);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <div className="w-12 h-12 border-4 border-teal-700 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-slate-600">Signing you in...</p>
-      </div>
-    </div>
-  );
 };
 
 // Protected Route
@@ -147,8 +100,6 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
 
 // Router
 function AppRouter() {
-  const location = useLocation();
-  if (location.hash?.includes('session_id=')) return <AuthCallback />;
   return (
     <Routes>
       <Route path="/" element={<Landing />} />

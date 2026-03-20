@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Mail, Lock, ArrowLeft } from "lucide-react";
-import { API } from "@/App";
+import { API, BACKEND_URL } from "@/App";
 import Logo from "@/components/Logo";
 
 const Login = () => {
@@ -59,9 +59,8 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    const redirectUrl = window.location.origin + '/dashboard';
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    // Redirect to backend which initiates Google OAuth 2.0 flow
+    window.location.href = `${BACKEND_URL}/api/auth/google`;
   };
 
   return (
