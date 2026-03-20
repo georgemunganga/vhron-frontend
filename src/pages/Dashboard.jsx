@@ -50,9 +50,48 @@ const Dashboard = () => {
   const [selectedShift, setSelectedShift] = useState("");
   const [assignedShift, setAssignedShift] = useState(null);
 
-  // NOTE: syncOfflineRecords is defined below (after fetchStatus), referenced here via stable useCallback ref
-  // Check online status — dependency added after syncOfflineRecords is declared
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Fetch attendance status
+  const fetchStatus = useCallback(async () => {
+    if (!isOnline) return;
+    
+    try {
+      const response = await authFetch(`${API}/attendance/status`, {
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setStatus(data);
+      }
+    } catch (error) {
+      console.error("Error fetching status:", error);
+    }
+  }, [isOnline]);
+
+  // Sync offline records (declared before the online/offline useEffect that depends on it)
+  const syncOfflineRecords = useCallback(async () => {
+    try {
+      const offlineRecords = await offlineStore.getItem("pendingRecords") || [];
+      
+      if (offlineRecords.length === 0) return;
+
+      const response = await authFetch(`${API}/attendance/sync`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ records: offlineRecords })
+      });
+
+      if (response.ok) {
+        await offlineStore.setItem("pendingRecords", []);
+        setPendingSync(0);
+        toast.success(`Synced ${offlineRecords.length} offline record(s)`);
+        fetchStatus();
+      }
+    } catch (error) {
+      console.error("Sync error:", error);
+    }
+  }, [fetchStatus]);
+
+  // Check online status
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
@@ -134,23 +173,6 @@ const Dashboard = () => {
     fetchUser();
   }, [navigate]);
 
-  // Fetch attendance status
-  const fetchStatus = useCallback(async () => {
-    if (!isOnline) return;
-    
-    try {
-      const response = await authFetch(`${API}/attendance/status`, {
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setStatus(data);
-      }
-    } catch (error) {
-      console.error("Error fetching status:", error);
-    }
-  }, [isOnline]);
-
   useEffect(() => {
     if (user) {
       fetchStatus();
@@ -193,30 +215,6 @@ const Dashboard = () => {
         setLocationError(error.message);
       });
   }, []);
-
-  // Sync offline records
-  const syncOfflineRecords = useCallback(async () => {
-    try {
-      const offlineRecords = await offlineStore.getItem("pendingRecords") || [];
-      
-      if (offlineRecords.length === 0) return;
-
-      const response = await authFetch(`${API}/attendance/sync`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ records: offlineRecords })
-      });
-
-      if (response.ok) {
-        await offlineStore.setItem("pendingRecords", []);
-        setPendingSync(0);
-        toast.success(`Synced ${offlineRecords.length} offline record(s)`);
-        fetchStatus();
-      }
-    } catch (error) {
-      console.error("Sync error:", error);
-    }
-  }, [fetchStatus]);
 
   // Check pending sync count
   useEffect(() => {
