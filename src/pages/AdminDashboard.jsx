@@ -34,6 +34,7 @@ import {
   X
 } from "lucide-react";
 import { API } from "@/App";
+import Logo from "@/components/Logo";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -302,13 +303,8 @@ const AdminDashboard = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center">
-                <Shield className="w-6 h-6 text-teal-600" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-slate-900 font-['Manrope']">Admin Dashboard</h1>
-                <p className="text-xs text-slate-500">V-Chron Management</p>
-              </div>
+              <Logo variant="dark" size="sm" />
+              <Badge variant="outline" className="text-teal-700 border-teal-200 bg-teal-50">Admin</Badge>
             </div>
           </div>
           

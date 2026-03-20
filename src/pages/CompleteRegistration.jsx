@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Clock, Building2, Briefcase, MapPin, Phone } from "lucide-react";
+import { Building2, Briefcase, MapPin, Phone } from "lucide-react";
 import { API } from "@/App";
+import Logo from "@/components/Logo";
 
 const CompleteRegistration = () => {
   const navigate = useNavigate();
@@ -154,8 +155,8 @@ const CompleteRegistration = () => {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md border-slate-200 shadow-lg">
         <CardHeader className="text-center pb-2">
-          <div className="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Clock className="w-8 h-8 text-teal-600" />
+          <div className="flex justify-center mb-4">
+            <Logo variant="dark" size="lg" />
           </div>
           <CardTitle className="text-2xl font-bold font-['Manrope'] text-slate-900">
             Complete Your Profile

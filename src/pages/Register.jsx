@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Clock, Mail, Lock, User, Building2, Briefcase, ArrowLeft, MapPin, Phone } from "lucide-react";
+import { Mail, Lock, User, Building2, Briefcase, ArrowLeft, MapPin, Phone } from "lucide-react";
+import Logo from "@/components/Logo";
 import { API } from "@/App";
 
 const Register = () => {
@@ -183,14 +184,14 @@ const Register = () => {
       <div className="flex-1 flex items-center justify-center p-4 pb-8">
         <Card className="w-full max-w-md border-slate-200 shadow-lg">
           <CardHeader className="text-center pb-2">
-            <div className="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Clock className="w-8 h-8 text-teal-600" />
+            <div className="flex justify-center mb-4">
+              <Logo variant="dark" size="lg" />
             </div>
             <CardTitle className="text-2xl font-bold font-['Manrope'] text-slate-900">
               Create Account
             </CardTitle>
             <CardDescription className="text-slate-500">
-              Join V-Chron healthcare attendance system
+              Join VChron healthcare attendance system
             </CardDescription>
           </CardHeader>
 

@@ -17,6 +17,7 @@ import {
   ChevronRight, AlertTriangle, CheckCircle2, XCircle, RefreshCw, Plus
 } from "lucide-react";
 import { API } from "@/App";
+import Logo from "@/components/Logo";
 
 const SuperUserDashboard = () => {
   const navigate = useNavigate();
@@ -67,13 +68,8 @@ const SuperUserDashboard = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center">
-                <Shield className="w-6 h-6 text-amber-400" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-white font-['Manrope']">Super User Panel</h1>
-                <p className="text-xs text-slate-500">{currentUser?.email}</p>
-              </div>
+              <Logo variant="light" size="sm" />
+              <span className="text-xs text-slate-400 hidden sm:block">{currentUser?.email}</span>
             </div>
           </div>
           <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">SUPERUSER</Badge>

@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Clock, Mail, Lock, ArrowLeft } from "lucide-react";
+import { Mail, Lock, ArrowLeft } from "lucide-react";
 import { API } from "@/App";
+import Logo from "@/components/Logo";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -82,14 +83,14 @@ const Login = () => {
       <div className="flex-1 flex items-center justify-center p-4">
         <Card className="w-full max-w-md border-slate-200 shadow-lg">
           <CardHeader className="text-center pb-2">
-            <div className="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Clock className="w-8 h-8 text-teal-600" />
+            <div className="flex justify-center mb-4">
+              <Logo variant="dark" size="lg" />
             </div>
             <CardTitle className="text-2xl font-bold font-['Manrope'] text-slate-900">
               Welcome Back
             </CardTitle>
             <CardDescription className="text-slate-500">
-              Sign in to your V-Chron account
+              Sign in to your VChron account
             </CardDescription>
           </CardHeader>
 

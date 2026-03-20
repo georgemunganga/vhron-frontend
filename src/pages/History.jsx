@@ -13,6 +13,7 @@ import {
   Calendar
 } from "lucide-react";
 import { API } from "@/App";
+import Logo from "@/components/Logo";
 
 const History = () => {
   const navigate = useNavigate();
@@ -82,13 +83,8 @@ const History = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center">
-              <Clock className="w-6 h-6 text-teal-600" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-slate-900 font-['Manrope']">Attendance History</h1>
-              <p className="text-xs text-slate-500">{total} total records</p>
-            </div>
+            <Logo variant="dark" size="sm" />
+            <span className="text-xs text-slate-500">{total} total records</span>
           </div>
         </div>
       </header>

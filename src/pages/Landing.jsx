@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Clock, MapPin, Shield, Users, ChevronRight } from "lucide-react";
+import { MapPin, Shield, Users, ChevronRight, Clock } from "lucide-react";
+import Logo from "@/components/Logo";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const Landing = () => {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         {/* Background Image with Overlay */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1653508311277-1ecf6ee52c5e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwzfHxkb2N0b3JzJTIwbnVyc2VzJTIwaG9zcGl0YWwlMjBzdGFmZiUyMG1lZGljYWwlMjB0ZWFtJTIwdW5pZm9ybXxlbnwwfHx8fDE3NzMyOTgxMjZ8MA&ixlib=rb-4.1.0&q=85')`
@@ -46,25 +47,18 @@ const Landing = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Nav */}
           <nav className="flex items-center justify-between py-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <Clock className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-white font-['Manrope']">V-Chron</h1>
-                <p className="text-xs text-teal-200">The Truth of Time</p>
-              </div>
-            </div>
+            {/* Light logo on dark hero */}
+            <Logo variant="light" size="lg" />
             <div className="flex gap-3">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="text-white hover:bg-white/10"
                 onClick={() => navigate('/login')}
                 data-testid="nav-login-btn"
               >
                 Sign In
               </Button>
-              <Button 
+              <Button
                 className="bg-white text-teal-700 hover:bg-teal-50"
                 onClick={() => navigate('/register')}
                 data-testid="nav-register-btn"
@@ -80,19 +74,19 @@ const Landing = () => {
               <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
               <span className="text-sm text-teal-100">Healthcare Attendance System</span>
             </div>
-            
+
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 font-['Manrope'] tracking-tight">
-              Track Attendance with 
+              Track Attendance with
               <span className="text-teal-300"> Precision</span>
             </h1>
-            
+
             <p className="text-lg text-teal-100 mb-10 max-w-2xl mx-auto leading-relaxed">
-              A modern attendance tracking solution for healthcare workers. 
+              A modern attendance tracking solution for healthcare workers.
               Record your shifts, capture GPS coordinates, and stay accountable.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
+              <Button
                 size="lg"
                 className="bg-white text-teal-700 hover:bg-teal-50 h-14 px-8 text-lg rounded-full shadow-lg shadow-black/20"
                 onClick={() => navigate('/register')}
@@ -101,7 +95,7 @@ const Landing = () => {
                 Get Started
                 <ChevronRight className="w-5 h-5 ml-2" />
               </Button>
-              <Button 
+              <Button
                 size="lg"
                 variant="outline"
                 className="border-2 border-white/30 text-white hover:bg-white/10 h-14 px-8 text-lg rounded-full"
@@ -135,7 +129,7 @@ const Landing = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => (
-            <div 
+            <div
               key={index}
               className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-200"
               data-testid={`feature-card-${index}`}
@@ -161,9 +155,9 @@ const Landing = () => {
             Ready to Get Started?
           </h2>
           <p className="text-teal-100 mb-8 max-w-xl mx-auto">
-            Join healthcare facilities across the region using V-Chron for reliable attendance tracking.
+            Join healthcare facilities across the region using VChron for reliable attendance tracking.
           </p>
-          <Button 
+          <Button
             size="lg"
             className="bg-white text-teal-700 hover:bg-teal-50 h-14 px-10 text-lg rounded-full"
             onClick={() => navigate('/register')}
@@ -178,14 +172,10 @@ const Landing = () => {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-slate-200">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-teal-600" />
-            <span className="font-semibold text-slate-900 font-['Manrope']">V-Chron</span>
-            <span className="text-slate-400">|</span>
-            <span className="text-sm text-slate-500">The Truth of Time</span>
-          </div>
+          {/* Dark logo on white footer */}
+          <Logo variant="dark" size="sm" />
           <p className="text-sm text-slate-500">
-            &copy; {new Date().getFullYear()} V-Chron. Healthcare Attendance System.
+            &copy; {new Date().getFullYear()} VChron. Verified Workforce Intelligence.
           </p>
         </div>
       </footer>
