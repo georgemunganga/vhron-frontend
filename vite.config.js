@@ -18,7 +18,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
   },
   server: {
-    port: 3000,
-    allowedHosts: 'all',
+    port: 3003,
+    allowedHosts: true,
   },
 })

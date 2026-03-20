@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { Component, useEffect, useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
@@ -11,8 +11,6 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import SuperUserDashboard from "@/pages/SuperUserDashboard";
 import CompleteRegistration from "@/pages/CompleteRegistration";
 
-// All API helpers live in lib/api.js — imported here AND by pages.
-// Pages must import from "@/lib/api" NOT from "@/App" to avoid circular deps.
 import {
   API,
   BACKEND_URL,
@@ -21,17 +19,55 @@ import {
   clearStoredToken,
 } from "@/lib/api";
 
-// Re-export for any legacy import sites (will be cleaned up over time)
+// Re-export for legacy import sites
 export { API, BACKEND_URL, authFetch, setStoredToken, clearStoredToken };
 export { getStoredToken } from "@/lib/api";
 
+// ─── Global Error Boundary ────────────────────────────────────────────────────
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, info) {
+    console.error("App Error Boundary caught:", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-8">
+          <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1>
+            <p className="text-slate-600 mb-6 text-sm">
+              {this.state.error?.message || "An unexpected error occurred."}
+            </p>
+            <button
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                window.location.href = '/login';
+              }}
+              className="bg-teal-700 text-white px-6 py-2 rounded-lg hover:bg-teal-800 transition-colors"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ─── Token capture on OAuth redirect ─────────────────────────────────────────
-// When the backend redirects back after Google OAuth it appends ?token=...
-// This component reads it, stores it, and cleans the URL.
 function OAuthTokenCapture({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
-
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get('token');
@@ -42,7 +78,6 @@ function OAuthTokenCapture({ children }) {
       navigate(location.pathname + (newSearch ? `?${newSearch}` : ''), { replace: true });
     }
   }, [location.search, location.pathname, navigate]);
-
   return children;
 }
 
@@ -53,9 +88,11 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const location = useLocation();
 
   useEffect(() => {
+    let cancelled = false;
     const checkAuth = async () => {
       try {
         const response = await authFetch(`${API}/auth/me`);
+        if (cancelled) return;
         if (response.ok) {
           const user = await response.json();
           setUserData(user);
@@ -65,10 +102,11 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
           setIsAuthenticated(false);
         }
       } catch {
-        setIsAuthenticated(false);
+        if (!cancelled) setIsAuthenticated(false);
       }
     };
     checkAuth();
+    return () => { cancelled = true; };
   }, [location.pathname]);
 
   if (isAuthenticated === null) {
@@ -78,9 +116,9 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
       </div>
     );
   }
-  if (!isAuthenticated) return <Navigate to="/login" />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (requireAdmin && userData?.role !== 'admin' && userData?.role !== 'superuser') {
-    return <Navigate to="/dashboard" />;
+    return <Navigate to="/dashboard" replace />;
   }
   return children;
 };
@@ -93,11 +131,47 @@ function AppRouter() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/complete-registration" element={<ProtectedRoute><CompleteRegistration /></ProtectedRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
-        <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/superuser" element={<ProtectedRoute requireAdmin><SuperUserDashboard /></ProtectedRoute>} />
+        <Route
+          path="/complete-registration"
+          element={
+            <ProtectedRoute>
+              <CompleteRegistration />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <History />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requireAdmin>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/superuser"
+          element={
+            <ProtectedRoute requireAdmin>
+              <SuperUserDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </OAuthTokenCapture>
   );
@@ -105,12 +179,14 @@ function AppRouter() {
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <AppRouter />
-        <Toaster position="top-center" richColors />
-      </BrowserRouter>
-    </div>
+    <ErrorBoundary>
+      <div className="App">
+        <BrowserRouter>
+          <AppRouter />
+          <Toaster position="top-center" richColors />
+        </BrowserRouter>
+      </div>
+    </ErrorBoundary>
   );
 }
 
