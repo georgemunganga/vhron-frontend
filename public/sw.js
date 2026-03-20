@@ -1,10 +1,9 @@
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'vchron-v1';
+const CACHE_NAME = 'vchron-v2';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/static/js/bundle.js',
   '/manifest.json'
 ];
 
@@ -25,6 +24,14 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  // Never intercept API calls — always go straight to network
+  if (request.url.includes('/api/') || request.url.includes('api.vcron.cloud')) return;
+
+  // Skip non-GET and non-http(s) requests (e.g. chrome-extension://)
+  if (request.method !== 'GET' || !request.url.startsWith('http')) return;
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
@@ -52,7 +59,10 @@ self.addEventListener('fetch', (event) => {
             if (event.request.mode === 'navigate') {
               return caches.match('/');
             }
-            return new Response('Offline', { status: 503 });
+            return new Response(JSON.stringify({ error: 'offline' }), {
+              status: 503,
+              headers: { 'Content-Type': 'application/json' }
+            });
           });
       })
   );
