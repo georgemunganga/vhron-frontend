@@ -12,7 +12,7 @@ import SuperUserDashboard from "@/pages/SuperUserDashboard";
 import CompleteRegistration from "@/pages/CompleteRegistration";
 
 // Vite exposes env vars via import.meta.env.VITE_*
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8001";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 const API = `${BACKEND_URL}/api`;
 
 // Auth Context hook
