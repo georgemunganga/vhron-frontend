@@ -1,15 +1,19 @@
-import React, { Component, useEffect, useState } from "react";
+import React, { Component, Suspense, useEffect, useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
+
+// Eagerly loaded pages (no leaflet dependency)
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import History from "@/pages/History";
-import AdminDashboard from "@/pages/AdminDashboard";
-import SuperUserDashboard from "@/pages/SuperUserDashboard";
 import CompleteRegistration from "@/pages/CompleteRegistration";
+
+// Lazy-loaded pages that import react-leaflet (prevents LeafletContext TDZ crash)
+const AdminDashboard = React.lazy(() => import("@/pages/AdminDashboard"));
+const SuperUserDashboard = React.lazy(() => import("@/pages/SuperUserDashboard"));
 
 import {
   API,
@@ -22,6 +26,13 @@ import {
 // Re-export for legacy import sites
 export { API, BACKEND_URL, authFetch, setStoredToken, clearStoredToken };
 export { getStoredToken } from "@/lib/api";
+
+// ─── Lazy load fallback ───────────────────────────────────────────────────────
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="w-12 h-12 border-4 border-teal-700 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 // ─── Global Error Boundary ────────────────────────────────────────────────────
 class ErrorBoundary extends Component {
@@ -110,11 +121,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
   }, [location.pathname]);
 
   if (isAuthenticated === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-12 h-12 border-4 border-teal-700 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <PageLoader />;
   }
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (requireAdmin && userData?.role !== 'admin' && userData?.role !== 'superuser') {
@@ -159,7 +166,9 @@ function AppRouter() {
           path="/admin"
           element={
             <ProtectedRoute requireAdmin>
-              <AdminDashboard />
+              <Suspense fallback={<PageLoader />}>
+                <AdminDashboard />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -167,7 +176,9 @@ function AppRouter() {
           path="/superuser"
           element={
             <ProtectedRoute requireAdmin>
-              <SuperUserDashboard />
+              <Suspense fallback={<PageLoader />}>
+                <SuperUserDashboard />
+              </Suspense>
             </ProtectedRoute>
           }
         />
