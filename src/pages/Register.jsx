@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Mail, Lock, User, Building2, Briefcase, ArrowLeft, MapPin, Phone } from "lucide-react";
 import Logo from "@/components/Logo";
-import { API, BACKEND_URL } from "@/App";
+import { API, BACKEND_URL, authFetch } from "@/App";
 
 const Register = () => {
   const navigate = useNavigate();

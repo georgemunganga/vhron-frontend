@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Mail, Lock, ArrowLeft } from "lucide-react";
-import { API, BACKEND_URL } from "@/App";
+import { API, BACKEND_URL, authFetch } from "@/App";
 import Logo from "@/components/Logo";
 
 const Login = () => {

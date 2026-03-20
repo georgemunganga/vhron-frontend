@@ -16,7 +16,7 @@ import {
   Edit, Trash2, KeyRound, UserPlus, Clock, Settings, BarChart3,
   ChevronRight, AlertTriangle, CheckCircle2, XCircle, RefreshCw, Plus
 } from "lucide-react";
-import { API } from "@/App";
+import { API, authFetch } from "@/App";
 import Logo from "@/components/Logo";
 
 const SuperUserDashboard = () => {
@@ -29,7 +29,7 @@ const SuperUserDashboard = () => {
   useEffect(() => {
     const checkAccess = async () => {
       try {
-        const res = await fetch(`${API}/auth/me`, { credentials: "include" });
+        const res = await authFetch(`${API}/auth/me`, { });
         if (res.ok) {
           const user = await res.json();
           if (user.role !== "superuser") {
@@ -119,7 +119,7 @@ const OverviewTab = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch(`${API}/superuser/stats`, { credentials: "include" });
+        const res = await authFetch(`${API}/superuser/stats`, { });
         if (res.ok) setStats(await res.json());
       } catch (e) { console.error(e); }
     };
@@ -171,7 +171,7 @@ const UsersTab = ({ currentUser }) => {
       if (search) params.append("search", search);
       if (roleFilter !== "all") params.append("role", roleFilter);
       params.append("limit", "100");
-      const res = await fetch(`${API}/superuser/users?${params}`, { credentials: "include" });
+      const res = await authFetch(`${API}/superuser/users?${params}`, { });
       if (res.ok) {
         const data = await res.json();
         setUsers(data.users || []);
@@ -184,7 +184,7 @@ const UsersTab = ({ currentUser }) => {
 
   const handleDelete = async (userId) => {
     try {
-      const res = await fetch(`${API}/superuser/users/${userId}`, { method: "DELETE", credentials: "include" });
+      const res = await authFetch(`${API}/superuser/users/${userId}`, { method: "DELETE" });
       if (res.ok) { toast.success("User deleted"); fetchUsers(); }
       else { const e = await res.json(); toast.error(e.detail); }
     } catch { toast.error("Failed to delete user"); }
@@ -192,9 +192,9 @@ const UsersTab = ({ currentUser }) => {
 
   const handleRoleChange = async (userId, role) => {
     try {
-      const res = await fetch(`${API}/superuser/users/${userId}/role`, {
+      const res = await authFetch(`${API}/superuser/users/${userId}/role`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }), credentials: "include"
+        body: JSON.stringify({ role })
       });
       if (res.ok) { toast.success("Role updated"); fetchUsers(); }
       else { const e = await res.json(); toast.error(e.detail); }
@@ -203,9 +203,9 @@ const UsersTab = ({ currentUser }) => {
 
   const handleResetPassword = async (userId, newPassword) => {
     try {
-      const res = await fetch(`${API}/superuser/users/${userId}/reset-password`, {
+      const res = await authFetch(`${API}/superuser/users/${userId}/reset-password`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ new_password: newPassword }), credentials: "include"
+        body: JSON.stringify({ new_password: newPassword })
       });
       if (res.ok) { toast.success("Password reset"); }
       else { const e = await res.json(); toast.error(e.detail); }
@@ -304,7 +304,7 @@ const FacilitiesTab = () => {
 
   const fetchFacilities = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/superuser/facilities`, { credentials: "include" });
+      const res = await authFetch(`${API}/superuser/facilities`, { });
       if (res.ok) { const data = await res.json(); setFacilities(data.facilities || []); }
     } catch (e) { console.error(e); }
   }, []);
@@ -314,8 +314,8 @@ const FacilitiesTab = () => {
     const fetchLocations = async () => {
       try {
         const [pRes, dRes] = await Promise.all([
-          fetch(`${API}/superuser/provinces`, { credentials: "include" }),
-          fetch(`${API}/superuser/districts`, { credentials: "include" })
+          authFetch(`${API}/superuser/provinces`, { }),
+          authFetch(`${API}/superuser/districts`, { })
         ]);
         if (pRes.ok) { const d = await pRes.json(); setProvinces(d.provinces || []); }
         if (dRes.ok) { const d = await dRes.json(); setDistricts(d.districts || {}); }
@@ -330,9 +330,9 @@ const FacilitiesTab = () => {
     }
     setAdding(true);
     try {
-      const res = await fetch(`${API}/superuser/facilities`, {
+      const res = await authFetch(`${API}/superuser/facilities`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newFacility), credentials: "include"
+        body: JSON.stringify(newFacility)
       });
       if (res.ok) { toast.success("Facility added"); setNewFacility({ name: "", district: "", province: "" }); fetchFacilities(); }
       else { const e = await res.json(); toast.error(e.detail); }
@@ -342,7 +342,7 @@ const FacilitiesTab = () => {
 
   const handleDeleteFacility = async (facilityId) => {
     try {
-      const res = await fetch(`${API}/superuser/facilities/${facilityId}`, { method: "DELETE", credentials: "include" });
+      const res = await authFetch(`${API}/superuser/facilities/${facilityId}`, { method: "DELETE" });
       if (res.ok) { toast.success("Facility deleted"); fetchFacilities(); }
       else { const e = await res.json(); toast.error(e.detail); }
     } catch { toast.error("Failed to delete facility"); }
@@ -471,7 +471,7 @@ const ShiftsTab = () => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const res = await fetch(`${API}/superuser/shifts`, { credentials: "include" });
+        const res = await authFetch(`${API}/superuser/shifts`, { });
         if (res.ok) setConfig(await res.json());
       } catch (e) { console.error(e); }
     };
@@ -481,9 +481,9 @@ const ShiftsTab = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`${API}/superuser/shifts`, {
+      const res = await authFetch(`${API}/superuser/shifts`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(config), credentials: "include"
+        body: JSON.stringify(config)
       });
       if (res.ok) { toast.success("Shift configuration saved"); setConfig(await res.json()); }
       else { const e = await res.json(); toast.error(e.detail); }
@@ -560,7 +560,7 @@ const ReportsTab = () => {
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const res = await fetch(`${API}/provinces`);
+        const res = await authFetch(`${API}/provinces`);
         if (res.ok) { const d = await res.json(); setProvinces(d.provinces || []); }
       } catch (e) { console.error(e); }
     };
@@ -572,7 +572,7 @@ const ReportsTab = () => {
     if (!provinceFilter) { setDistrictsList([]); setDistrictFilter(""); setFacilitiesList([]); setFacilityFilter(""); return; }
     const fetchDistricts = async () => {
       try {
-        const res = await fetch(`${API}/districts/${encodeURIComponent(provinceFilter)}`);
+        const res = await authFetch(`${API}/districts/${encodeURIComponent(provinceFilter)}`);
         if (res.ok) { const d = await res.json(); setDistrictsList(d.districts || []); }
       } catch (e) { console.error(e); }
     };
@@ -587,7 +587,7 @@ const ReportsTab = () => {
     if (!districtFilter) { setFacilitiesList([]); setFacilityFilter(""); return; }
     const fetchFacilities = async () => {
       try {
-        const res = await fetch(`${API}/facilities/${encodeURIComponent(districtFilter)}`);
+        const res = await authFetch(`${API}/facilities/${encodeURIComponent(districtFilter)}`);
         if (res.ok) { const d = await res.json(); setFacilitiesList(d.facilities || []); }
       } catch (e) { console.error(e); }
     };
@@ -603,7 +603,7 @@ const ReportsTab = () => {
       if (provinceFilter) params.append("province", provinceFilter);
       if (districtFilter) params.append("district", districtFilter);
       if (facilityFilter) params.append("facility", facilityFilter);
-      const res = await fetch(`${API}/superuser/attendance-report?${params}`, { credentials: "include" });
+      const res = await authFetch(`${API}/superuser/attendance-report?${params}`, { });
       if (res.ok) setReport(await res.json());
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -619,7 +619,7 @@ const ReportsTab = () => {
       if (districtFilter) params.append("district", districtFilter);
       if (facilityFilter) params.append("facility", facilityFilter);
       params.append("format", format);
-      const res = await fetch(`${API}/superuser/export?${params}`, { credentials: "include" });
+      const res = await authFetch(`${API}/superuser/export?${params}`, { });
       if (res.ok) {
         const arrayBuffer = await res.arrayBuffer();
         const mimeType = format === "csv"
@@ -861,11 +861,10 @@ const RoleChangeDialog = ({ user, onRoleChange }) => {
       onRoleChange(user.user_id, role);
       // If admin, also assign jurisdiction
       if (role === "admin" && jurisdictionValue) {
-        await fetch(`${API}/superuser/users/${user.user_id}/jurisdiction`, {
+        await authFetch(`${API}/superuser/users/${user.user_id}/jurisdiction`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: jurisdictionType, value: jurisdictionValue }),
-          credentials: "include"
+          body: JSON.stringify({ type: jurisdictionType, value: jurisdictionValue })
         });
         toast.success("Jurisdiction assigned");
       }

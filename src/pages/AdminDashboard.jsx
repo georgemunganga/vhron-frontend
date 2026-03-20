@@ -33,7 +33,7 @@ import {
   Navigation,
   X
 } from "lucide-react";
-import { API } from "@/App";
+import { API, authFetch } from "@/App";
 import Logo from "@/components/Logo";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -70,8 +70,8 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const [facilitiesRes, positionsRes] = await Promise.all([
-          fetch(`${API}/facilities`),
-          fetch(`${API}/positions`)
+          authFetch(`${API}/facilities`),
+          authFetch(`${API}/positions`)
         ]);
         
         const facilitiesData = await facilitiesRes.json();
@@ -90,8 +90,7 @@ const AdminDashboard = () => {
   // Fetch realtime data
   const fetchRealtime = useCallback(async () => {
     try {
-      const response = await fetch(`${API}/admin/attendance/realtime`, {
-        credentials: "include"
+      const response = await authFetch(`${API}/admin/attendance/realtime`, {
       });
       
       if (response.ok) {
@@ -115,8 +114,7 @@ const AdminDashboard = () => {
       const params = new URLSearchParams();
       if (facilityFilter !== "all") params.append("facility", facilityFilter);
       
-      const response = await fetch(`${API}/admin/users?${params}`, {
-        credentials: "include"
+      const response = await authFetch(`${API}/admin/users?${params}`, {
       });
       
       if (response.ok) {
@@ -136,8 +134,7 @@ const AdminDashboard = () => {
       if (selectedDate) params.append("date", selectedDate.toISOString());
       if (searchQuery) params.append("user_name", searchQuery);
       
-      const response = await fetch(`${API}/admin/attendance?${params}`, {
-        credentials: "include"
+      const response = await authFetch(`${API}/admin/attendance?${params}`, {
       });
       
       if (response.ok) {
@@ -152,7 +149,7 @@ const AdminDashboard = () => {
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/admin/notifications?limit=50`, { credentials: "include" });
+      const res = await authFetch(`${API}/admin/notifications?limit=50`, { });
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications || []);
@@ -162,12 +159,12 @@ const AdminDashboard = () => {
   }, []);
 
   const markNotifRead = async (id) => {
-    await fetch(`${API}/admin/notifications/${id}/read`, { method: "PUT", credentials: "include" });
+    await authFetch(`${API}/admin/notifications/${id}/read`, { method: "PUT" });
     fetchNotifications();
   };
 
   const markAllRead = async () => {
-    await fetch(`${API}/admin/notifications/read-all`, { method: "PUT", credentials: "include" });
+    await authFetch(`${API}/admin/notifications/read-all`, { method: "PUT" });
     fetchNotifications();
   };
 
@@ -193,11 +190,10 @@ const AdminDashboard = () => {
   // Update user
   const handleUpdateUser = async (userId, updates) => {
     try {
-      const response = await fetch(`${API}/admin/users/${userId}`, {
+      const response = await authFetch(`${API}/admin/users/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
-        credentials: "include"
+        body: JSON.stringify(updates)
       });
 
       if (response.ok) {
@@ -221,8 +217,7 @@ const AdminDashboard = () => {
       if (selectedDate) params.append("date", selectedDate.toISOString());
       params.append("format", format);
 
-      const response = await fetch(`${API}/admin/export?${params}`, {
-        credentials: "include"
+      const response = await authFetch(`${API}/admin/export?${params}`, {
       });
 
       if (response.ok) {
@@ -249,9 +244,8 @@ const AdminDashboard = () => {
       const params = new URLSearchParams();
       if (selectedDate) params.append("date", selectedDate.toISOString());
 
-      const response = await fetch(`${API}/admin/send-backup?${params}`, {
-        method: "POST",
-        credentials: "include"
+      const response = await authFetch(`${API}/admin/send-backup?${params}`, {
+        method: "POST"
       });
 
       if (response.ok) {
@@ -870,7 +864,7 @@ const EditUserForm = ({ user, positions, facilities, onSave }) => {
   useEffect(() => {
     const fetchShifts = async () => {
       try {
-        const res = await fetch(`${API}/admin/shifts`, { credentials: "include" });
+        const res = await authFetch(`${API}/admin/shifts`, { });
         if (res.ok) setShiftConfig(await res.json());
       } catch (e) { console.error(e); }
     };
@@ -889,11 +883,10 @@ const EditUserForm = ({ user, positions, facilities, onSave }) => {
         body.custom_start = customStart;
         body.custom_end = customEnd;
       }
-      const res = await fetch(`${API}/admin/users/${user.user_id}/shift`, {
+      const res = await authFetch(`${API}/admin/users/${user.user_id}/shift`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        credentials: "include"
+        body: JSON.stringify(body)
       });
       if (res.ok) {
         toast.success("Shift assigned successfully");

@@ -23,7 +23,7 @@ import {
   Phone,
   Shield
 } from "lucide-react";
-import { API } from "@/App";
+import { API, authFetch } from "@/App";
 import localforage from "localforage";
 import Logo from "@/components/Logo";
 
@@ -73,7 +73,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchAreas = async () => {
       try {
-        const response = await fetch(`${API}/areas`);
+        const response = await authFetch(`${API}/areas`);
         if (response.ok) {
           const data = await response.json();
           setAreas(data.areas || []);
@@ -89,7 +89,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchShifts = async () => {
       try {
-        const response = await fetch(`${API}/shifts/available`, { credentials: "include" });
+        const response = await authFetch(`${API}/shifts/available`, { });
         if (response.ok) {
           const data = await response.json();
           setAvailableShifts(data.shifts || []);
@@ -109,8 +109,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch(`${API}/auth/me`, {
-          credentials: "include"
+        const response = await authFetch(`${API}/auth/me`, {
         });
         
         if (response.ok) {
@@ -140,8 +139,7 @@ const Dashboard = () => {
     if (!isOnline) return;
     
     try {
-      const response = await fetch(`${API}/attendance/status`, {
-        credentials: "include"
+      const response = await authFetch(`${API}/attendance/status`, {
       });
       
       if (response.ok) {
@@ -203,11 +201,10 @@ const Dashboard = () => {
       
       if (offlineRecords.length === 0) return;
 
-      const response = await fetch(`${API}/attendance/sync`, {
+      const response = await authFetch(`${API}/attendance/sync`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ records: offlineRecords }),
-        credentials: "include"
+        body: JSON.stringify({ records: offlineRecords })
       });
 
       if (response.ok) {
@@ -263,11 +260,10 @@ const Dashboard = () => {
       };
 
       if (isOnline) {
-        const response = await fetch(`${API}/attendance`, {
+        const response = await authFetch(`${API}/attendance`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(record),
-          credentials: "include"
+          body: JSON.stringify(record)
         });
 
         if (response.ok) {
@@ -300,8 +296,9 @@ const Dashboard = () => {
 
         // Update local status
         setStatus({
-          status: action === "login" ? "on_duty" : "off_duty",
-          last_action: { action, timestamp: new Date().toISOString() }
+          is_on_duty: action === "login",
+          last_action: action,
+          last_timestamp: new Date().toISOString()
         });
         if (action === "logout") {
           setSelectedArea("");
@@ -318,9 +315,8 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch(`${API}/auth/logout`, {
-        method: "POST",
-        credentials: "include"
+      await authFetch(`${API}/auth/logout`, {
+        method: "POST"
       });
     } catch (error) {
       console.error("Logout error:", error);
@@ -337,7 +333,7 @@ const Dashboard = () => {
     );
   }
 
-  const isOnDuty = status?.status === "on_duty";
+  const isOnDuty = status?.is_on_duty === true;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -675,15 +671,15 @@ const Dashboard = () => {
         </div>
 
         {/* Last Action Info */}
-        {status?.last_action && (
+        {status?.last_action && status?.last_timestamp && (
           <Card className="border-slate-200 shadow-sm">
             <CardContent className="p-4">
               <p className="text-sm text-slate-500">
                 Last action: <span className="font-medium text-slate-700">
-                  {status.last_action.action === "login" ? "Reported for duty" : "Ended shift"}
+                  {status.last_action === "login" ? "Reported for duty" : "Ended shift"}
                 </span> at{" "}
                 <span className="font-mono text-xs text-slate-600">
-                  {new Date(status.last_action.timestamp).toLocaleString()}
+                  {new Date(status.last_timestamp).toLocaleString()}
                 </span>
               </p>
             </CardContent>
