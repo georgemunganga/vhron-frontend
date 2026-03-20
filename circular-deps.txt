@@ -1,0 +1,32 @@
+{
+	"src/App.jsx": [
+		[
+			"src/App.jsx",
+			"src/pages/Login.jsx"
+		],
+		[
+			"src/App.jsx",
+			"src/pages/Register.jsx"
+		],
+		[
+			"src/App.jsx",
+			"src/pages/Dashboard.jsx"
+		],
+		[
+			"src/App.jsx",
+			"src/pages/History.jsx"
+		],
+		[
+			"src/App.jsx",
+			"src/pages/AdminDashboard.jsx"
+		],
+		[
+			"src/App.jsx",
+			"src/pages/SuperUserDashboard.jsx"
+		],
+		[
+			"src/App.jsx",
+			"src/pages/CompleteRegistration.jsx"
+		]
+	]
+}

@@ -23,7 +23,7 @@ import {
   Phone,
   Shield
 } from "lucide-react";
-import { API, authFetch } from "@/App";
+import { API, authFetch } from "@/lib/api";
 import localforage from "localforage";
 import Logo from "@/components/Logo";
 

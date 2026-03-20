@@ -33,7 +33,7 @@ import {
   Navigation,
   X
 } from "lucide-react";
-import { API, authFetch } from "@/App";
+import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";

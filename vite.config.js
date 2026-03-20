@@ -15,10 +15,6 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    // Let Vite/Rollup handle chunk splitting automatically.
-    // Manual chunks caused a circular dependency between radix-vendor and
-    // radix-extra which produced a "Cannot access 'Ge' before initialization"
-    // ReferenceError at runtime, crashing the app on load.
     chunkSizeWarningLimit: 1000,
   },
   server: {

@@ -12,7 +12,7 @@ import {
   MapPin,
   Calendar
 } from "lucide-react";
-import { API, authFetch } from "@/App";
+import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
 
 const History = () => {

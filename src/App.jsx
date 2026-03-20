@@ -11,84 +11,19 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import SuperUserDashboard from "@/pages/SuperUserDashboard";
 import CompleteRegistration from "@/pages/CompleteRegistration";
 
-// Vite exposes env vars via import.meta.env.VITE_*
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://api.vcron.cloud";
-const API = `${BACKEND_URL}/api`;
+// All API helpers live in lib/api.js — imported here AND by pages.
+// Pages must import from "@/lib/api" NOT from "@/App" to avoid circular deps.
+import {
+  API,
+  BACKEND_URL,
+  authFetch,
+  setStoredToken,
+  clearStoredToken,
+} from "@/lib/api";
 
-// ─── Token helpers ────────────────────────────────────────────────────────────
-// Supports both cookie-based (same-origin) and localStorage-based (cross-origin)
-// token storage. After Google OAuth, the backend passes the token as ?token=...
-// in the redirect URL so the frontend can store it even if cross-origin cookies
-// are blocked by the browser.
-
-export function getStoredToken() {
-  return localStorage.getItem('vchron_token') || null;
-}
-
-export function setStoredToken(token) {
-  if (token) localStorage.setItem('vchron_token', token);
-}
-
-export function clearStoredToken() {
-  localStorage.removeItem('vchron_token');
-}
-
-// Build fetch options — always include credentials (for cookie) AND Authorization
-// header (for localStorage token fallback)
-export function authFetch(url, options = {}) {
-  const token = getStoredToken();
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(options.headers || {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-  return fetch(url, { ...options, credentials: 'include', headers });
-}
-
-// Auth Context hook
-export const useAuth = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const response = await authFetch(`${API}/auth/me`);
-      if (response.ok) {
-        setUser(await response.json());
-      } else {
-        setUser(null);
-      }
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { checkAuth(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const logout = async () => {
-    try {
-      await authFetch(`${API}/auth/logout`, { method: 'POST' });
-    } catch { /* ignore */ }
-    setUser(null);
-    clearStoredToken();
-  };
-
-  return { user, setUser, loading, logout, checkAuth, isOnline };
-};
+// Re-export for any legacy import sites (will be cleaned up over time)
+export { API, BACKEND_URL, authFetch, setStoredToken, clearStoredToken };
+export { getStoredToken } from "@/lib/api";
 
 // ─── Token capture on OAuth redirect ─────────────────────────────────────────
 // When the backend redirects back after Google OAuth it appends ?token=...
@@ -102,7 +37,6 @@ function OAuthTokenCapture({ children }) {
     const token = params.get('token');
     if (token) {
       setStoredToken(token);
-      // Remove the token from the URL without triggering a reload
       params.delete('token');
       const newSearch = params.toString();
       navigate(location.pathname + (newSearch ? `?${newSearch}` : ''), { replace: true });
@@ -181,4 +115,3 @@ function App() {
 }
 
 export default App;
-export { API, BACKEND_URL };

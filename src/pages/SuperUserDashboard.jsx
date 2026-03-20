@@ -16,7 +16,7 @@ import {
   Edit, Trash2, KeyRound, UserPlus, Clock, Settings, BarChart3,
   ChevronRight, AlertTriangle, CheckCircle2, XCircle, RefreshCw, Plus
 } from "lucide-react";
-import { API, authFetch } from "@/App";
+import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
 
 const SuperUserDashboard = () => {

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Building2, Briefcase, MapPin, Phone } from "lucide-react";
-import { API, authFetch } from "@/App";
+import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
 
 const CompleteRegistration = () => {
