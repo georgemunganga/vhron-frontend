@@ -1,30 +1,49 @@
 {
-  "short_name": "V-Chron",
-  "name": "V-Chron - The Truth of Time",
-  "description": "Healthcare Attendance Tracking System",
+  "name": "VChron — Verified Workforce Intelligence",
+  "short_name": "VChron",
+  "description": "Attendance tracking for government employees. Report for duty, view history, and manage shifts — all from your phone.",
+  "start_url": "/app/login",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0f766e",
+  "background_color": "#0f172a",
+  "lang": "en",
+  "categories": ["productivity", "utilities"],
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
+      "src": "/logo192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "logo512.png",
+      "src": "/logo512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#0f766e",
-  "background_color": "#f8fafc",
-  "orientation": "portrait-primary",
-  "categories": ["medical", "productivity", "utilities"]
+  "shortcuts": [
+    {
+      "name": "Report for Duty",
+      "short_name": "Report",
+      "description": "Quickly report for duty",
+      "url": "/app/dashboard",
+      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "View History",
+      "short_name": "History",
+      "description": "View attendance history",
+      "url": "/app/history",
+      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+    }
+  ]
 }

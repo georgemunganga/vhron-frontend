@@ -1,28 +1,46 @@
-import React, { Component, Suspense, useEffect, useState } from "react";
+import React, { Component, Suspense, lazy, useEffect, useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 
-// Eagerly loaded pages (no leaflet dependency)
+// ─── Marketing / website pages (eager) ───────────────────────────────────────
 import Landing from "@/pages/Landing";
+
+// ─── Legacy web app pages (eager, kept for backward compat) ──────────────────
 import Login from "@/pages/Login";
 import StaffLogin from "@/pages/StaffLogin";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import History from "@/pages/History";
 import CompleteRegistration from "@/pages/CompleteRegistration";
-import AboutVChron from "@/pages/AboutVChron";
-import PrivacyPolicy from "@/pages/PrivacyPolicy";
-import TermsAndConditions from "@/pages/TermsAndConditions";
-import RequestDeleteAccount from "@/pages/RequestDeleteAccount";
-import AuditTrail from "@/pages/AuditTrail";
-import Analytics from "@/pages/Analytics";
-import AdminScoping from "@/pages/AdminScoping";
-import DeletionRequests from "@/pages/DeletionRequests";
+// These pages are lazy-loaded below (both for /app/* and legacy routes)
+// Static imports removed to avoid duplicate module bundling
 
-// Lazy-loaded pages that import react-leaflet (prevents LeafletContext TDZ crash)
-const AdminDashboard = React.lazy(() => import("@/pages/AdminDashboard"));
-const SuperUserDashboard = React.lazy(() => import("@/pages/SuperUserDashboard"));
+// ─── Lazy-loaded (react-leaflet) ──────────────────────────────────────────────
+const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
+const SuperUserDashboard = lazy(() => import("@/pages/SuperUserDashboard"));
+
+// ─── PWA /app shell and pages (all lazy) ─────────────────────────────────────
+const AppLayout = lazy(() => import("@/app/AppLayout"));
+const AppLogin = lazy(() => import("@/app/AppLogin"));
+const AppStaffLogin = lazy(() => import("@/app/AppStaffLogin"));
+const AppRegister = lazy(() => import("@/app/AppRegister"));
+const OfflinePage = lazy(() => import("@/app/OfflinePage"));
+
+// /app/* pages re-use the existing page components (wrapped in AppLayout)
+// They are lazy-loaded for code splitting
+const AppDashboard = lazy(() => import("@/pages/Dashboard"));
+const AppHistory = lazy(() => import("@/pages/History"));
+const AppAdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
+const AppSuperUserDashboard = lazy(() => import("@/pages/SuperUserDashboard"));
+const AppAbout = lazy(() => import("@/pages/AboutVChron"));
+const AppPrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
+const AppTerms = lazy(() => import("@/pages/TermsAndConditions"));
+const AppRequestDeletion = lazy(() => import("@/pages/RequestDeleteAccount"));
+const AppAuditTrail = lazy(() => import("@/pages/AuditTrail"));
+const AppAnalytics = lazy(() => import("@/pages/Analytics"));
+const AppAdminScoping = lazy(() => import("@/pages/AdminScoping"));
+const AppDeletionRequests = lazy(() => import("@/pages/DeletionRequests"));
 
 import {
   API,
@@ -32,48 +50,42 @@ import {
   clearStoredToken,
 } from "@/lib/api";
 
-// Re-export for legacy import sites
 export { API, BACKEND_URL, authFetch, setStoredToken, clearStoredToken };
 export { getStoredToken } from "@/lib/api";
 
-// ─── Lazy load fallback ───────────────────────────────────────────────────────
+// ─── Loaders ──────────────────────────────────────────────────────────────────
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-slate-50">
-    <div className="w-12 h-12 border-4 border-teal-700 border-t-transparent rounded-full animate-spin" />
+  <div className="min-h-screen flex items-center justify-center bg-slate-900">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      <p className="text-slate-400 text-sm">Loading…</p>
+    </div>
   </div>
 );
 
-// ─── Global Error Boundary ────────────────────────────────────────────────────
+const AppPageLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
+// ─── Error Boundary ───────────────────────────────────────────────────────────
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null };
   }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, info) {
-    console.error("App Error Boundary caught:", error, info);
-  }
-
+  static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  componentDidCatch(error, info) { console.error("App Error Boundary:", error, info); }
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-8">
-          <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1>
-            <p className="text-slate-600 mb-6 text-sm">
-              {this.state.error?.message || "An unexpected error occurred."}
-            </p>
-            <button
-              onClick={() => {
-                this.setState({ hasError: false, error: null });
-                window.location.href = '/login';
-              }}
-              className="bg-teal-700 text-white px-6 py-2 rounded-lg hover:bg-teal-800 transition-colors"
-            >
+        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 p-8">
+          <div className="max-w-md w-full bg-slate-800 rounded-xl shadow-lg p-8 text-center">
+            <h1 className="text-2xl font-bold text-red-400 mb-4">Something went wrong</h1>
+            <p className="text-slate-400 mb-6 text-sm">{this.state.error?.message || "An unexpected error occurred."}</p>
+            <button onClick={() => { this.setState({ hasError: false, error: null }); window.location.href = '/app/login'; }}
+              className="bg-teal-700 text-white px-6 py-2 rounded-lg hover:bg-teal-600 transition-colors">
               Go to Login
             </button>
           </div>
@@ -101,7 +113,7 @@ function OAuthTokenCapture({ children }) {
   return children;
 }
 
-// ─── Protected Route ──────────────────────────────────────────────────────────
+// ─── Protected Route (legacy web) ────────────────────────────────────────────
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -121,17 +133,13 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
           clearStoredToken();
           setIsAuthenticated(false);
         }
-      } catch {
-        if (!cancelled) setIsAuthenticated(false);
-      }
+      } catch { if (!cancelled) setIsAuthenticated(false); }
     };
     checkAuth();
     return () => { cancelled = true; };
   }, [location.pathname]);
 
-  if (isAuthenticated === null) {
-    return <PageLoader />;
-  }
+  if (isAuthenticated === null) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (requireAdmin && userData?.role !== 'admin' && userData?.role !== 'superuser') {
     return <Navigate to="/dashboard" replace />;
@@ -144,111 +152,63 @@ function AppRouter() {
   return (
     <OAuthTokenCapture>
       <Routes>
+        {/* ── Marketing website ── */}
         <Route path="/" element={<Landing />} />
+
+        {/* ── Legacy web app routes (kept for backward compat) ── */}
         <Route path="/login" element={<Login />} />
         <Route path="/staff-login" element={<StaffLogin />} />
         <Route path="/register" element={<Register />} />
-        <Route
-          path="/complete-registration"
-          element={
-            <ProtectedRoute>
-              <CompleteRegistration />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/history"
-          element={
-            <ProtectedRoute>
-              <History />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requireAdmin>
-              <Suspense fallback={<PageLoader />}>
-                <AdminDashboard />
-              </Suspense>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/superuser"
-          element={
-            <ProtectedRoute requireAdmin>
-              <Suspense fallback={<PageLoader />}>
-                <SuperUserDashboard />
-              </Suspense>
-            </ProtectedRoute>
-          }
-        />
-        {/* In-app informational & account pages (protected) */}
-        <Route
-          path="/about"
-          element={
-            <ProtectedRoute>
-              <AboutVChron />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/privacy-policy"
-          element={<PrivacyPolicy />}
-        />
-        <Route
-          path="/terms"
-          element={<TermsAndConditions />}
-        />
-        <Route
-          path="/request-deletion"
-          element={
-            <ProtectedRoute>
-              <RequestDeleteAccount />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/audit-trail"
-          element={
-            <ProtectedRoute requireAdmin>
-              <AuditTrail />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/analytics"
-          element={
-            <ProtectedRoute requireAdmin>
-              <Analytics />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin-scoping"
-          element={
-            <ProtectedRoute requireAdmin>
-              <AdminScoping />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/deletion-requests"
-          element={
-            <ProtectedRoute requireAdmin>
-              <DeletionRequests />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/privacy-policy" element={<Suspense fallback={<PageLoader />}><AppPrivacyPolicy /></Suspense>} />
+        <Route path="/terms" element={<Suspense fallback={<PageLoader />}><AppTerms /></Suspense>} />
+        <Route path="/complete-registration" element={<ProtectedRoute><CompleteRegistration /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+        <Route path="/about" element={<ProtectedRoute><Suspense fallback={<PageLoader />}><AppAbout /></Suspense></ProtectedRoute>} />
+        <Route path="/request-deletion" element={<ProtectedRoute><Suspense fallback={<PageLoader />}><AppRequestDeletion /></Suspense></ProtectedRoute>} />
+        <Route path="/audit-trail" element={<ProtectedRoute requireAdmin><Suspense fallback={<PageLoader />}><AppAuditTrail /></Suspense></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute requireAdmin><Suspense fallback={<PageLoader />}><AppAnalytics /></Suspense></ProtectedRoute>} />
+        <Route path="/admin-scoping" element={<ProtectedRoute requireAdmin><Suspense fallback={<PageLoader />}><AppAdminScoping /></Suspense></ProtectedRoute>} />
+        <Route path="/deletion-requests" element={<ProtectedRoute requireAdmin><Suspense fallback={<PageLoader />}><AppDeletionRequests /></Suspense></ProtectedRoute>} />
+        <Route path="/admin" element={
+          <ProtectedRoute requireAdmin>
+            <Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense>
+          </ProtectedRoute>
+        } />
+        <Route path="/superuser" element={
+          <ProtectedRoute requireAdmin>
+            <Suspense fallback={<PageLoader />}><SuperUserDashboard /></Suspense>
+          </ProtectedRoute>
+        } />
+
+        {/* ── PWA /app routes ── */}
+        {/* Auth pages (no shell) */}
+        <Route path="/app/login" element={<Suspense fallback={<PageLoader />}><AppLogin /></Suspense>} />
+        <Route path="/app/staff-login" element={<Suspense fallback={<PageLoader />}><AppStaffLogin /></Suspense>} />
+        <Route path="/app/register" element={<Suspense fallback={<PageLoader />}><AppRegister /></Suspense>} />
+        <Route path="/app/offline" element={<Suspense fallback={<PageLoader />}><OfflinePage /></Suspense>} />
+
+        {/* App shell (with bottom nav + header) */}
+        <Route path="/app" element={<Suspense fallback={<PageLoader />}><AppLayout /></Suspense>}>
+          <Route index element={<Navigate to="/app/dashboard" replace />} />
+          <Route path="dashboard" element={<Suspense fallback={<AppPageLoader />}><AppDashboard /></Suspense>} />
+          <Route path="history" element={<Suspense fallback={<AppPageLoader />}><AppHistory /></Suspense>} />
+          <Route path="admin" element={<Suspense fallback={<AppPageLoader />}><AppAdminDashboard /></Suspense>} />
+          <Route path="superuser" element={<Suspense fallback={<AppPageLoader />}><AppSuperUserDashboard /></Suspense>} />
+          <Route path="about" element={<Suspense fallback={<AppPageLoader />}><AppAbout /></Suspense>} />
+          <Route path="privacy-policy" element={<Suspense fallback={<AppPageLoader />}><AppPrivacyPolicy /></Suspense>} />
+          <Route path="terms" element={<Suspense fallback={<AppPageLoader />}><AppTerms /></Suspense>} />
+          <Route path="request-deletion" element={<Suspense fallback={<AppPageLoader />}><AppRequestDeletion /></Suspense>} />
+          <Route path="audit-trail" element={<Suspense fallback={<AppPageLoader />}><AppAuditTrail /></Suspense>} />
+          <Route path="analytics" element={<Suspense fallback={<AppPageLoader />}><AppAnalytics /></Suspense>} />
+          <Route path="admin-scoping" element={<Suspense fallback={<AppPageLoader />}><AppAdminScoping /></Suspense>} />
+          <Route path="deletion-requests" element={<Suspense fallback={<AppPageLoader />}><AppDeletionRequests /></Suspense>} />
+        </Route>
+
+        {/* Redirect /app/* unknown to /app/login */}
+        <Route path="/app/*" element={<Navigate to="/app/login" replace />} />
+
+        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </OAuthTokenCapture>
