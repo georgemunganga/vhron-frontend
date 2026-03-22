@@ -96,12 +96,12 @@ export default function AboutVChron() {
         </div>
 
         {/* GreenWebb */}
-        <div className="bg-slate-800 rounded-2xl p-6 text-white space-y-3">
+        <div className="bg-slate-100 rounded-2xl p-6 text-slate-900 space-y-3">
           <h2 className="text-base font-bold">About GreenWebb Technologies</h2>
-          <p className="text-sm text-slate-300 leading-relaxed">
+          <p className="text-sm text-slate-600 leading-relaxed">
             GreenWebb Technologies is a Zambian technology company building digital solutions for the public sector. Our mission is to modernise government operations through accessible, reliable, and secure software.
           </p>
-          <p className="text-sm text-slate-300 leading-relaxed">
+          <p className="text-sm text-slate-600 leading-relaxed">
             VChron is our flagship workforce management product, designed specifically for the operational realities of Zambia's government ministries — including limited connectivity, diverse device types, and multi-ministry deployment.
           </p>
           <a href="mailto:vchron@greenwebb.tech" className="inline-flex items-center gap-2 text-teal-400 text-sm font-medium hover:text-teal-300 transition-colors">

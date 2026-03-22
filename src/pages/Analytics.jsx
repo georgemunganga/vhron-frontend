@@ -148,20 +148,20 @@ const Analytics = () => {
     new Date(iso).toLocaleDateString("en-ZM", { day: "2-digit", month: "short", year: "numeric" });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="sm"
-              className="text-slate-400 hover:text-white"
+              className="text-slate-400 hover:text-slate-900"
               onClick={() => navigate("/superuser")}
             >
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
             </Button>
-            <div className="h-5 w-px bg-slate-700" />
+            <div className="h-5 w-px bg-slate-200" />
             <Logo variant="light" size="sm" />
           </div>
           <div className="flex items-center gap-2">
@@ -171,7 +171,7 @@ const Analytics = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-slate-900"
             onClick={fetchAnalytics}
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -182,9 +182,9 @@ const Analytics = () => {
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
         {/* ── Filters ─────────────────────────────────────────────────────── */}
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-white border-slate-200">
           <CardHeader className="pb-3 pt-4 px-5">
-            <CardTitle className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-slate-600 flex items-center gap-2">
               <Filter className="w-4 h-4" /> Filters
             </CardTitle>
           </CardHeader>
@@ -198,7 +198,7 @@ const Analytics = () => {
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     period === opt.value
                       ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
-                      : "bg-slate-800 text-slate-400 border border-slate-700 hover:text-white"
+                      : "bg-slate-100 text-slate-400 border border-slate-200 hover:text-slate-900"
                   }`}
                 >
                   {opt.label}
@@ -213,14 +213,14 @@ const Analytics = () => {
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
                 <span className="text-slate-500 text-sm">to</span>
                 <input
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
                 <Button
                   size="sm"
@@ -238,7 +238,7 @@ const Analytics = () => {
               <select
                 value={province}
                 onChange={(e) => setProvince(e.target.value)}
-                className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
               >
                 <option value="">All Provinces</option>
                 {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
@@ -248,7 +248,7 @@ const Analytics = () => {
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
                 disabled={!province}
-                className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-40"
+                className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-40"
               >
                 <option value="">All Districts</option>
                 {districts.map((d) => <option key={d} value={d}>{d}</option>)}
@@ -258,7 +258,7 @@ const Analytics = () => {
                 value={facility}
                 onChange={(e) => setFacility(e.target.value)}
                 disabled={!district}
-                className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-40"
+                className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-40"
               >
                 <option value="">All Facilities</option>
                 {facilities.map((f) => <option key={f} value={f}>{f}</option>)}
@@ -281,14 +281,14 @@ const Analytics = () => {
           <>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Total */}
-              <Card className="bg-slate-900 border-slate-800">
+              <Card className="bg-white border-slate-200">
                 <CardContent className="pt-5 pb-4 px-5">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-slate-800 rounded-lg">
+                    <div className="p-2 bg-slate-100 rounded-lg">
                       <Users className="w-5 h-5 text-slate-400" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-white">{data.total_logins}</p>
+                      <p className="text-2xl font-bold text-slate-900">{data.total_logins}</p>
                       <p className="text-xs text-slate-500">Total Check-ins</p>
                     </div>
                   </div>
@@ -296,7 +296,7 @@ const Analytics = () => {
               </Card>
 
               {/* Early */}
-              <Card className="bg-slate-900 border-teal-800/40">
+              <Card className="bg-white border-teal-800/40">
                 <CardContent className="pt-5 pb-4 px-5">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-teal-900/40 rounded-lg">
@@ -307,14 +307,14 @@ const Analytics = () => {
                       <p className="text-xs text-slate-500">Early ({data.early.count})</p>
                     </div>
                   </div>
-                  <div className="mt-3 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="mt-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-teal-500 rounded-full" style={{ width: `${data.early.percent}%` }} />
                   </div>
                 </CardContent>
               </Card>
 
               {/* On Time */}
-              <Card className="bg-slate-900 border-green-800/40">
+              <Card className="bg-white border-green-800/40">
                 <CardContent className="pt-5 pb-4 px-5">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-green-900/40 rounded-lg">
@@ -325,14 +325,14 @@ const Analytics = () => {
                       <p className="text-xs text-slate-500">On Time ({data.on_time.count})</p>
                     </div>
                   </div>
-                  <div className="mt-3 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="mt-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-green-500 rounded-full" style={{ width: `${data.on_time.percent}%` }} />
                   </div>
                 </CardContent>
               </Card>
 
               {/* Late */}
-              <Card className="bg-slate-900 border-red-800/40">
+              <Card className="bg-white border-red-800/40">
                 <CardContent className="pt-5 pb-4 px-5">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-red-900/40 rounded-lg">
@@ -343,7 +343,7 @@ const Analytics = () => {
                       <p className="text-xs text-slate-500">Late ({data.late.count})</p>
                     </div>
                   </div>
-                  <div className="mt-3 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="mt-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-red-500 rounded-full" style={{ width: `${data.late.percent}%` }} />
                   </div>
                 </CardContent>
@@ -354,9 +354,9 @@ const Analytics = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Bar chart — daily breakdown */}
               {data.daily_breakdown?.length > 0 && (
-                <Card className="bg-slate-900 border-slate-800 lg:col-span-2">
+                <Card className="bg-white border-slate-200 lg:col-span-2">
                   <CardHeader className="pb-2 pt-4 px-5">
-                    <CardTitle className="text-sm font-semibold text-slate-300">Daily Breakdown</CardTitle>
+                    <CardTitle className="text-sm font-semibold text-slate-600">Daily Breakdown</CardTitle>
                   </CardHeader>
                   <CardContent className="px-2 pb-4">
                     <ResponsiveContainer width="100%" height={220}>
@@ -385,9 +385,9 @@ const Analytics = () => {
 
               {/* Pie chart — overall distribution */}
               {pieData.length > 0 && (
-                <Card className="bg-slate-900 border-slate-800">
+                <Card className="bg-white border-slate-200">
                   <CardHeader className="pb-2 pt-4 px-5">
-                    <CardTitle className="text-sm font-semibold text-slate-300">Distribution</CardTitle>
+                    <CardTitle className="text-sm font-semibold text-slate-600">Distribution</CardTitle>
                   </CardHeader>
                   <CardContent className="flex flex-col items-center pb-4">
                     <ResponsiveContainer width="100%" height={180}>
@@ -426,9 +426,9 @@ const Analytics = () => {
 
             {/* ── Late details table ─────────────────────────────────────── */}
             {lateDetails.length > 0 && (
-              <Card className="bg-slate-900 border-slate-800">
+              <Card className="bg-white border-slate-200">
                 <CardHeader className="pb-2 pt-4 px-5">
-                  <CardTitle className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                  <CardTitle className="text-sm font-semibold text-slate-600 flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-red-400" />
                     Late Arrivals — {lateDetails.length} records
                   </CardTitle>
@@ -436,7 +436,7 @@ const Analytics = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-800 bg-slate-800/50">
+                      <tr className="border-b border-slate-200 bg-slate-100/50">
                         <th className="text-left px-4 py-3 text-slate-400 font-medium">Name</th>
                         <th className="text-left px-4 py-3 text-slate-400 font-medium">Facility</th>
                         <th className="text-left px-4 py-3 text-slate-400 font-medium">Shift</th>
@@ -446,11 +446,11 @@ const Analytics = () => {
                     </thead>
                     <tbody>
                       {latePageItems.map((r, i) => (
-                        <tr key={i} className="border-b border-slate-800/60 hover:bg-slate-800/30">
-                          <td className="px-4 py-3 text-slate-200 font-medium">{r.user_name}</td>
+                        <tr key={i} className="border-b border-slate-200/60 hover:bg-slate-100/30">
+                          <td className="px-4 py-3 text-slate-700 font-medium">{r.user_name}</td>
                           <td className="px-4 py-3 text-slate-400 text-xs">{r.facility}</td>
                           <td className="px-4 py-3">
-                            <span className="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded capitalize">
+                            <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded capitalize">
                               {r.shift_type?.replace("_", " ")}
                             </span>
                           </td>
@@ -468,7 +468,7 @@ const Analytics = () => {
                   </table>
                 </div>
                 {lateTotalPages > 1 && (
-                  <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800">
+                  <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200">
                     <span className="text-xs text-slate-500">
                       {(latePage - 1) * LATE_PAGE_SIZE + 1}–{Math.min(latePage * LATE_PAGE_SIZE, lateDetails.length)} of {lateDetails.length}
                     </span>
@@ -476,7 +476,7 @@ const Analytics = () => {
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-400" disabled={latePage === 1} onClick={() => setLatePage((p) => p - 1)}>
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-                      <span className="text-sm text-slate-300">{latePage} / {lateTotalPages}</span>
+                      <span className="text-sm text-slate-600">{latePage} / {lateTotalPages}</span>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-400" disabled={latePage === lateTotalPages} onClick={() => setLatePage((p) => p + 1)}>
                         <ChevronRight className="w-4 h-4" />
                       </Button>
@@ -488,7 +488,7 @@ const Analytics = () => {
 
             {/* Empty state */}
             {data.total_logins === 0 && (
-              <Card className="bg-slate-900 border-slate-800">
+              <Card className="bg-white border-slate-200">
                 <CardContent className="py-16 text-center text-slate-500">
                   <BarChart3 className="w-10 h-10 mx-auto mb-3 opacity-30" />
                   <p>No attendance records found for the selected period and filters.</p>
@@ -500,7 +500,7 @@ const Analytics = () => {
 
         {/* Loading state */}
         {loading && !data && (
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-white border-slate-200">
             <CardContent className="py-16 text-center text-slate-500">
               <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-3" />
               Loading analytics…

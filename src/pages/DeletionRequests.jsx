@@ -23,14 +23,14 @@ const STATUS_TABS = [
   { value: "pending",  label: "Pending",  color: "text-amber-400",  bg: "bg-amber-500/10 border-amber-500/30" },
   { value: "approved", label: "Approved", color: "text-red-400",    bg: "bg-red-500/10 border-red-500/30" },
   { value: "rejected", label: "Rejected", color: "text-slate-400",  bg: "bg-slate-500/10 border-slate-500/30" },
-  { value: "all",      label: "All",      color: "text-slate-300",  bg: "bg-slate-700/30 border-slate-600/30" },
+  { value: "all",      label: "All",      color: "text-slate-600",  bg: "bg-slate-200/30 border-slate-600/30" },
 ];
 
 const StatusBadge = ({ status }) => {
   const map = {
     pending:  { label: "Pending",  cls: "bg-amber-900/40 text-amber-300 border-amber-700/40" },
     approved: { label: "Approved", cls: "bg-red-900/40 text-red-300 border-red-700/40" },
-    rejected: { label: "Rejected", cls: "bg-slate-800 text-slate-400 border-slate-700" },
+    rejected: { label: "Rejected", cls: "bg-slate-100 text-slate-400 border-slate-200" },
   };
   const s = map[status] || map.pending;
   return <Badge className={`${s.cls} border text-xs capitalize`}>{s.label}</Badge>;
@@ -67,11 +67,11 @@ const RejectModal = ({ request, onClose, onRejected }) => {
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="p-5 border-b border-slate-800">
-          <h2 className="text-base font-semibold text-white">Reject Deletion Request</h2>
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="p-5 border-b border-slate-200">
+          <h2 className="text-base font-semibold text-slate-900">Reject Deletion Request</h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Rejecting request from <strong className="text-slate-200">{request.user_name}</strong>
+            Rejecting request from <strong className="text-slate-700">{request.user_name}</strong>
           </p>
         </div>
         <div className="p-5">
@@ -83,13 +83,13 @@ const RejectModal = ({ request, onClose, onRejected }) => {
             onChange={(e) => setReason(e.target.value)}
             rows={3}
             placeholder="e.g. Request does not meet policy requirements…"
-            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
+            className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
           />
         </div>
-        <div className="flex gap-3 p-5 border-t border-slate-800">
+        <div className="flex gap-3 p-5 border-t border-slate-200">
           <Button
             variant="outline"
-            className="flex-1 border-slate-700 text-slate-300 hover:text-white"
+            className="flex-1 border-slate-200 text-slate-600 hover:text-slate-900"
             onClick={onClose}
           >
             Cancel
@@ -134,20 +134,20 @@ const ApproveModal = ({ request, onClose, onApproved }) => {
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border border-red-900/50 rounded-2xl w-full max-w-md shadow-2xl">
+      <div className="bg-white border border-red-900/50 rounded-2xl w-full max-w-md shadow-2xl">
         <div className="p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-red-900/30 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-red-400" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-white">Confirm Account Deletion</h2>
+              <h2 className="text-base font-semibold text-slate-900">Confirm Account Deletion</h2>
               <p className="text-xs text-slate-400 mt-0.5">This action is irreversible</p>
             </div>
           </div>
-          <div className="bg-slate-800 rounded-lg p-3 mb-4 text-sm text-slate-300">
+          <div className="bg-slate-100 rounded-lg p-3 mb-4 text-sm text-slate-600">
             <p>You are about to permanently delete the account of:</p>
-            <p className="font-semibold text-white mt-1">{request.user_name}</p>
+            <p className="font-semibold text-slate-900 mt-1">{request.user_name}</p>
             <p className="text-slate-400 text-xs">{request.user_email}</p>
             {request.reason && (
               <p className="text-slate-400 text-xs mt-2 italic">Reason: "{request.reason}"</p>
@@ -161,7 +161,7 @@ const ApproveModal = ({ request, onClose, onApproved }) => {
         <div className="flex gap-3 px-5 pb-5">
           <Button
             variant="outline"
-            className="flex-1 border-slate-700 text-slate-300 hover:text-white"
+            className="flex-1 border-slate-200 text-slate-600 hover:text-slate-900"
             onClick={onClose}
           >
             Cancel
@@ -231,20 +231,20 @@ const DeletionRequests = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="sm"
-              className="text-slate-400 hover:text-white"
+              className="text-slate-400 hover:text-slate-900"
               onClick={() => navigate(-1)}
             >
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
             </Button>
-            <div className="h-5 w-px bg-slate-700" />
+            <div className="h-5 w-px bg-slate-200" />
             <Logo variant="light" size="sm" />
           </div>
           <div className="flex items-center gap-2">
@@ -254,7 +254,7 @@ const DeletionRequests = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-slate-900"
             onClick={fetchRequests}
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -272,7 +272,7 @@ const DeletionRequests = () => {
               className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                 activeTab === tab.value
                   ? `${tab.bg} ${tab.color}`
-                  : "bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-300"
+                  : "bg-white border-slate-200 text-slate-500 hover:text-slate-600"
               }`}
             >
               {tab.label}
@@ -300,7 +300,7 @@ const DeletionRequests = () => {
         ) : (
           <div className="space-y-3">
             {requests.map((req) => (
-              <Card key={req.request_id} className="bg-slate-900 border-slate-800">
+              <Card key={req.request_id} className="bg-white border-slate-200">
                 <CardContent className="pt-4 pb-4 px-5">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 min-w-0">
@@ -310,7 +310,7 @@ const DeletionRequests = () => {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-medium text-white text-sm">{req.user_name}</p>
+                          <p className="font-medium text-slate-900 text-sm">{req.user_name}</p>
                           <StatusBadge status={req.status} />
                         </div>
                         <p className="text-xs text-slate-400 mt-0.5">{req.user_email}</p>
@@ -345,7 +345,7 @@ const DeletionRequests = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 text-xs"
+                          className="border-slate-200 text-slate-400 hover:text-white hover:bg-slate-100 text-xs"
                           onClick={() => setRejectTarget(req)}
                         >
                           <XCircle className="w-3.5 h-3.5 mr-1" />
@@ -374,7 +374,7 @@ const DeletionRequests = () => {
             <Button
               variant="outline"
               size="sm"
-              className="border-slate-700 text-slate-400 hover:text-white"
+              className="border-slate-200 text-slate-400 hover:text-slate-900"
               disabled={page === 1}
               onClick={() => setPage((p) => p - 1)}
             >
@@ -386,7 +386,7 @@ const DeletionRequests = () => {
             <Button
               variant="outline"
               size="sm"
-              className="border-slate-700 text-slate-400 hover:text-white"
+              className="border-slate-200 text-slate-400 hover:text-slate-900"
               disabled={page >= Math.ceil(total / 20)}
               onClick={() => setPage((p) => p + 1)}
             >

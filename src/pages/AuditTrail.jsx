@@ -122,20 +122,20 @@ const AuditTrail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="sm"
-              className="text-slate-400 hover:text-white"
+              className="text-slate-400 hover:text-slate-900"
               onClick={() => navigate("/superuser")}
             >
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
             </Button>
-            <div className="h-5 w-px bg-slate-700" />
+            <div className="h-5 w-px bg-slate-200" />
             <Logo variant="light" size="sm" />
           </div>
           <div className="flex items-center gap-2">
@@ -148,7 +148,7 @@ const AuditTrail = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-slate-900"
             onClick={fetchLogs}
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -160,16 +160,16 @@ const AuditTrail = () => {
         {/* Stats bar */}
         <div className="flex items-center gap-4 text-sm text-slate-400">
           <span>
-            <span className="text-white font-semibold">{total.toLocaleString()}</span> total events
+            <span className="text-slate-900 font-semibold">{total.toLocaleString()}</span> total events
           </span>
           <span className="text-slate-600">·</span>
           <span>Page {page} of {totalPages || 1}</span>
         </div>
 
         {/* Filters */}
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-white border-slate-200">
           <CardHeader className="pb-3 pt-4 px-5">
-            <CardTitle className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-slate-600 flex items-center gap-2">
               <Filter className="w-4 h-4" /> Filters
             </CardTitle>
           </CardHeader>
@@ -183,7 +183,7 @@ const AuditTrail = () => {
                   placeholder="Search actor name or email…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
                 />
               </div>
 
@@ -191,7 +191,7 @@ const AuditTrail = () => {
               <select
                 value={actionFilter}
                 onChange={(e) => setActionFilter(e.target.value)}
-                className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-500"
               >
                 <option value="">All Actions</option>
                 {Object.entries(ACTION_META).map(([key, { label }]) => (
@@ -203,7 +203,7 @@ const AuditTrail = () => {
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-500"
               >
                 <option value="">All Roles</option>
                 <option value="admin">Admin</option>
@@ -216,14 +216,14 @@ const AuditTrail = () => {
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="flex-1 px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  className="flex-1 px-2 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-500"
                   title="From date"
                 />
                 <input
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="flex-1 px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  className="flex-1 px-2 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-500"
                   title="To date"
                 />
               </div>
@@ -242,11 +242,11 @@ const AuditTrail = () => {
         </Card>
 
         {/* Table */}
-        <Card className="bg-slate-900 border-slate-800 overflow-hidden">
+        <Card className="bg-white border-slate-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-800/50">
+                <tr className="border-b border-slate-200 bg-slate-100/50">
                   <th className="text-left px-4 py-3 text-slate-400 font-medium whitespace-nowrap">Timestamp</th>
                   <th className="text-left px-4 py-3 text-slate-400 font-medium whitespace-nowrap">Actor</th>
                   <th className="text-left px-4 py-3 text-slate-400 font-medium whitespace-nowrap">Role</th>
@@ -278,7 +278,7 @@ const AuditTrail = () => {
                     return (
                       <tr
                         key={log.id}
-                        className="border-b border-slate-800/60 hover:bg-slate-800/30 transition-colors"
+                        className="border-b border-slate-200/60 hover:bg-slate-100/30 transition-colors"
                       >
                         {/* Timestamp */}
                         <td className="px-4 py-3 text-slate-400 whitespace-nowrap font-mono text-xs">
@@ -287,7 +287,7 @@ const AuditTrail = () => {
 
                         {/* Actor */}
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="font-medium text-slate-200">{log.actor_name}</div>
+                          <div className="font-medium text-slate-700">{log.actor_name}</div>
                           <div className="text-xs text-slate-500 font-mono">{log.actor_id}</div>
                         </td>
 
@@ -313,7 +313,7 @@ const AuditTrail = () => {
                         {/* Target */}
                         <td className="px-4 py-3 whitespace-nowrap">
                           {log.target_type && (
-                            <div className="text-slate-300 text-xs">
+                            <div className="text-slate-600 text-xs">
                               <span className="text-slate-500">{log.target_type}</span>
                               {log.target_id && (
                                 <span className="ml-1 font-mono text-slate-400">#{log.target_id.slice(0, 8)}</span>
@@ -340,7 +340,7 @@ const AuditTrail = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800">
+            <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200">
               <span className="text-xs text-slate-500">
                 Showing {(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, total)} of {total}
               </span>
@@ -354,7 +354,7 @@ const AuditTrail = () => {
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <span className="text-sm text-slate-300 px-2">{page} / {totalPages}</span>
+                <span className="text-sm text-slate-600 px-2">{page} / {totalPages}</span>
                 <Button
                   variant="ghost"
                   size="sm"

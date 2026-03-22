@@ -73,12 +73,12 @@ const StaffLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
       <div className="p-4">
         <Button
           variant="ghost"
-          className="text-slate-400 hover:text-white hover:bg-slate-800"
+          className="text-slate-400 hover:text-slate-900 hover:bg-slate-100"
           onClick={() => navigate("/login")}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -88,7 +88,7 @@ const StaffLogin = () => {
 
       {/* Main */}
       <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-slate-800 border-slate-700 shadow-2xl">
+        <Card className="w-full max-w-md bg-slate-100 border-slate-200 shadow-2xl">
           <CardHeader className="text-center pb-2">
             <div className="flex justify-center mb-4">
               <Logo variant="light" size="lg" />
@@ -102,7 +102,7 @@ const StaffLogin = () => {
               </div>
             </div>
 
-            <CardTitle className="text-2xl font-bold font-['Manrope'] text-white">
+            <CardTitle className="text-2xl font-bold font-['Manrope'] text-slate-900">
               Staff Login
             </CardTitle>
             <CardDescription className="text-slate-400">
@@ -113,7 +113,7 @@ const StaffLogin = () => {
           <CardContent className="space-y-5">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-300">
+                <Label htmlFor="email" className="text-slate-600">
                   Email Address
                 </Label>
                 <div className="relative">
@@ -125,7 +125,7 @@ const StaffLogin = () => {
                     placeholder="admin@vcron.cloud"
                     value={formData.email}
                     onChange={handleChange}
-                    className="pl-10 h-12 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-teal-500"
+                    className="pl-10 h-12 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-teal-500"
                     required
                     autoFocus
                   />
@@ -133,7 +133,7 @@ const StaffLogin = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-300">
+                <Label htmlFor="password" className="text-slate-600">
                   Password
                 </Label>
                 <div className="relative">
@@ -145,13 +145,13 @@ const StaffLogin = () => {
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="pl-10 pr-10 h-12 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-teal-500"
+                    className="pl-10 pr-10 h-12 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-teal-500"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600 transition-colors"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

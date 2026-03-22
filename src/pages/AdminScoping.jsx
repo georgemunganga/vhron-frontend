@@ -16,6 +16,8 @@ import {
   Globe,
   Edit2,
   X,
+  Map,
+  Hospital,
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
@@ -25,22 +27,29 @@ const PROVINCES = [
   "Muchinga", "Northern", "North-Western", "Southern", "Western",
 ];
 
+const SCOPE_TYPE_ICONS = {
+  national: Globe,
+  province: Map,
+  district: MapPin,
+  facility: Hospital,
+};
+
 const SCOPE_TYPES = [
-  { value: "national",  label: "National",  icon: "🌍", desc: "Access to all data across all provinces" },
-  { value: "province",  label: "Province",  icon: "🗺️", desc: "Access limited to a specific province" },
-  { value: "district",  label: "District",  icon: "📍", desc: "Access limited to a specific district" },
-  { value: "facility",  label: "Facility",  icon: "🏥", desc: "Access limited to a specific facility" },
+  { value: "national",  label: "National",  Icon: Globe,    desc: "Access to all data across all provinces" },
+  { value: "province",  label: "Province",  Icon: Map,      desc: "Access limited to a specific province" },
+  { value: "district",  label: "District",  Icon: MapPin,   desc: "Access limited to a specific district" },
+  { value: "facility",  label: "Facility",  Icon: Hospital, desc: "Access limited to a specific facility" },
 ];
 
 // ─── Scope badge ──────────────────────────────────────────────────────────────
 const ScopeBadge = ({ jurisdiction }) => {
-  if (!jurisdiction) return <Badge variant="outline" className="text-slate-500 border-slate-700">Not Set</Badge>;
+  if (!jurisdiction) return <Badge variant="outline" className="text-slate-500 border-slate-200">Not Set</Badge>;
   const { type, value } = jurisdiction;
   const colors = {
-    national: "bg-purple-900/40 text-purple-300 border-purple-700/40",
-    province: "bg-blue-900/40 text-blue-300 border-blue-700/40",
-    district: "bg-teal-900/40 text-teal-300 border-teal-700/40",
-    facility: "bg-amber-900/40 text-amber-300 border-amber-700/40",
+    national: "bg-purple-100 text-purple-700 border-purple-200",
+    province: "bg-blue-100 text-blue-700 border-blue-200",
+    district: "bg-teal-100 text-teal-700 border-teal-200",
+    facility: "bg-amber-100 text-amber-700 border-amber-200",
   };
   return (
     <Badge className={`${colors[type] || ""} border text-xs capitalize`}>
@@ -113,14 +122,14 @@ const EditScopeModal = ({ admin, ministries, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200">
           <div>
-            <h2 className="text-base font-semibold text-white">Edit Admin Scope</h2>
+            <h2 className="text-base font-semibold text-slate-900">Edit Admin Scope</h2>
             <p className="text-xs text-slate-400 mt-0.5">{admin.name} · {admin.email}</p>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-white">
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-900">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -132,7 +141,7 @@ const EditScopeModal = ({ admin, ministries, onClose, onSave }) => {
             <select
               value={ministryId}
               onChange={(e) => setMinistryId(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
             >
               <option value="">No specific ministry (all)</option>
               {ministries.map((m) => (
@@ -151,11 +160,11 @@ const EditScopeModal = ({ admin, ministries, onClose, onSave }) => {
                   onClick={() => { setScopeType(s.value); setScopeValue(""); setProvince(""); }}
                   className={`p-2.5 rounded-lg border text-left transition-colors ${
                     scopeType === s.value
-                      ? "bg-amber-500/10 border-amber-500/50 text-amber-300"
-                      : "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"
+                      ? "bg-amber-50 border-amber-400 text-amber-700"
+                      : "bg-slate-100 border-slate-200 text-slate-400 hover:text-slate-900"
                   }`}
                 >
-                  <div className="text-base mb-0.5">{s.icon}</div>
+                  <s.Icon className="w-4 h-4 mb-0.5" />
                   <div className="text-xs font-medium">{s.label}</div>
                   <div className="text-xs opacity-60 leading-tight">{s.desc}</div>
                 </button>
@@ -173,7 +182,7 @@ const EditScopeModal = ({ admin, ministries, onClose, onSave }) => {
                   if (scopeType === "province") setScopeValue(e.target.value);
                   else { setProvince(e.target.value); setScopeValue(""); }
                 }}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
               >
                 <option value="">Select province…</option>
                 {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
@@ -189,7 +198,7 @@ const EditScopeModal = ({ admin, ministries, onClose, onSave }) => {
                 value={scopeType === "district" ? scopeValue : scopeValue}
                 onChange={(e) => setScopeValue(e.target.value)}
                 disabled={!province && !districts.length}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-40"
+                className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-40"
               >
                 <option value="">Select district…</option>
                 {districts.map((d) => <option key={d} value={d}>{d}</option>)}
@@ -205,7 +214,7 @@ const EditScopeModal = ({ admin, ministries, onClose, onSave }) => {
                 value={scopeValue}
                 onChange={(e) => setScopeValue(e.target.value)}
                 disabled={!facilities.length}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-40"
+                className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-40"
               >
                 <option value="">Select facility…</option>
                 {facilities.map((f) => <option key={f} value={f}>{f}</option>)}
@@ -215,8 +224,8 @@ const EditScopeModal = ({ admin, ministries, onClose, onSave }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 p-5 border-t border-slate-800">
-          <Button variant="outline" className="flex-1 border-slate-700 text-slate-300 hover:text-white" onClick={onClose}>
+        <div className="flex gap-3 p-5 border-t border-slate-200">
+          <Button variant="outline" className="flex-1 border-slate-200 text-slate-600 hover:text-slate-900" onClick={onClose}>
             Cancel
           </Button>
           <Button
@@ -273,20 +282,20 @@ const AdminScoping = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="sm"
-              className="text-slate-400 hover:text-white"
+              className="text-slate-400 hover:text-slate-900"
               onClick={() => navigate("/superuser")}
             >
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
             </Button>
-            <div className="h-5 w-px bg-slate-700" />
+            <div className="h-5 w-px bg-slate-200" />
             <Logo variant="light" size="sm" />
           </div>
           <div className="flex items-center gap-2">
@@ -296,7 +305,7 @@ const AdminScoping = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-slate-900"
             onClick={fetchAdmins}
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -306,14 +315,14 @@ const AdminScoping = () => {
 
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-5">
         {/* Intro */}
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-white border-slate-200">
           <CardContent className="pt-4 pb-4 px-5">
             <div className="flex items-start gap-3">
               <div className="p-2 bg-amber-900/30 rounded-lg mt-0.5">
                 <Globe className="w-5 h-5 text-amber-400" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-white">Ministry & Geographic Scope Assignment</h2>
+                <h2 className="text-sm font-semibold text-slate-900">Ministry & Geographic Scope Assignment</h2>
                 <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                   Assign each administrator to a specific ministry and limit their data access to a
                   national, province, district, or facility level. Admins will only see attendance
@@ -332,7 +341,7 @@ const AdminScoping = () => {
             placeholder="Search admins by name or email…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
           />
         </div>
 
@@ -350,7 +359,7 @@ const AdminScoping = () => {
         ) : (
           <div className="space-y-3">
             {filtered.map((admin) => (
-              <Card key={admin.user_id} className="bg-slate-900 border-slate-800 hover:border-slate-700 transition-colors">
+              <Card key={admin.user_id} className="bg-white border-slate-200 hover:border-slate-200 transition-colors">
                 <CardContent className="pt-4 pb-4 px-5">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 min-w-0">
@@ -362,7 +371,7 @@ const AdminScoping = () => {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-medium text-white text-sm">{admin.name}</p>
+                          <p className="font-medium text-slate-900 text-sm">{admin.name}</p>
                           <Badge
                             className={`text-xs capitalize ${
                               admin.role === "superuser"
@@ -397,7 +406,7 @@ const AdminScoping = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 flex-shrink-0"
+                      className="border-slate-200 text-slate-600 hover:text-white hover:bg-slate-100 flex-shrink-0"
                       onClick={() => setEditAdmin(admin)}
                     >
                       <Edit2 className="w-3.5 h-3.5 mr-1.5" />
