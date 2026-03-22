@@ -16,6 +16,8 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsAndConditions from "@/pages/TermsAndConditions";
 import RequestDeleteAccount from "@/pages/RequestDeleteAccount";
 import AuditTrail from "@/pages/AuditTrail";
+import Analytics from "@/pages/Analytics";
+import AdminScoping from "@/pages/AdminScoping";
 
 // Lazy-loaded pages that import react-leaflet (prevents LeafletContext TDZ crash)
 const AdminDashboard = React.lazy(() => import("@/pages/AdminDashboard"));
@@ -219,6 +221,22 @@ function AppRouter() {
           element={
             <ProtectedRoute requireAdmin>
               <AuditTrail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute requireAdmin>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin-scoping"
+          element={
+            <ProtectedRoute requireAdmin>
+              <AdminScoping />
             </ProtectedRoute>
           }
         />

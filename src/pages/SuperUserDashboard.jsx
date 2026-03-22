@@ -76,11 +76,29 @@ const SuperUserDashboard = () => {
             <Button
               variant="ghost"
               size="sm"
+              className="text-slate-400 hover:text-white hover:bg-slate-800 text-xs"
+              onClick={() => navigate('/analytics')}
+            >
+              <BarChart3 className="w-3.5 h-3.5 mr-1" />
+              <span className="hidden sm:inline">Analytics</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-slate-400 hover:text-white hover:bg-slate-800 text-xs"
+              onClick={() => navigate('/admin-scoping')}
+            >
+              <Building2 className="w-3.5 h-3.5 mr-1" />
+              <span className="hidden sm:inline">Admin Scope</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               className="text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 text-xs"
               onClick={() => navigate('/audit-trail')}
             >
               <Shield className="w-3.5 h-3.5 mr-1" />
-              Audit Trail
+              <span className="hidden sm:inline">Audit Trail</span>
             </Button>
             <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">SUPERUSER</Badge>
           </div>

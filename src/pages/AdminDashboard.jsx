@@ -474,16 +474,29 @@ const AdminDashboard = () => {
                                       {staff.shift_type.replace("_", " ")} shift
                                     </span>
                                   )}
+                                  {/* Lateness badge */}
+                                  {staff.late_display && (
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <span className="text-xs font-mono font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                                        Late: {staff.late_display}
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
                                 <div className="text-right">
-                                  <Badge className="bg-emerald-100 text-emerald-700 border-0">
-                                    On Duty
-                                  </Badge>
+                                  {/* Status badge */}
+                                  {staff.status === 'late' ? (
+                                    <Badge className="bg-red-100 text-red-700 border-0">Late</Badge>
+                                  ) : staff.status === 'on_time' ? (
+                                    <Badge className="bg-emerald-100 text-emerald-700 border-0">On Time</Badge>
+                                  ) : (
+                                    <Badge className="bg-emerald-100 text-emerald-700 border-0">On Duty</Badge>
+                                  )}
                                   <p className="text-xs text-slate-500 mt-1 font-mono">
                                     {loginTime.toLocaleTimeString()}
                                   </p>
                                   <p className="text-xs text-slate-400">
-                                    {hoursOnDuty}h {minsOnDuty}m
+                                    {hoursOnDuty}h {minsOnDuty}m on duty
                                   </p>
                                   {staff.latitude && staff.longitude && (
                                     <div className="flex items-center gap-1 text-xs text-blue-500 mt-1">
