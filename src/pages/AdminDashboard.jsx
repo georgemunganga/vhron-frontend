@@ -32,7 +32,11 @@ import {
   AlertTriangle,
   Navigation,
   X,
-  Trash2
+  Trash2,
+  Network,
+  ChevronDown,
+  ChevronRight,
+  User2
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
@@ -330,7 +334,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full max-w-lg">
+          <TabsList className="grid grid-cols-5 w-full max-w-2xl">
             <TabsTrigger value="realtime" data-testid="tab-realtime">
               <Activity className="w-4 h-4 mr-2" />
               Real-time
@@ -349,6 +353,10 @@ const AdminDashboard = () => {
               {notifCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">{notifCount}</span>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="org-tree" data-testid="tab-org-tree">
+              <Network className="w-4 h-4 mr-2" />
+              Org Tree
             </TabsTrigger>
           </TabsList>
 
@@ -864,8 +872,133 @@ const AdminDashboard = () => {
               )}
             </div>
           </TabsContent>
+
+          {/* Org Tree Tab */}
+          <TabsContent value="org-tree" className="space-y-6">
+            <OrgTreeAdminTab />
+          </TabsContent>
         </Tabs>
       </main>
+    </div>
+  );
+};
+
+// ============ ORG TREE (ADMIN SCOPED VIEW) ============
+const OrgTreeAdminTab = () => {
+  const [tree, setTree] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState({});
+
+  useEffect(() => {
+    authFetch(`${API}/admin/org-tree`)
+      .then(r => r.ok ? r.json() : { tree: [] })
+      .then(d => { setTree(d.tree || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const toggle = (key) => setExpanded(p => ({ ...p, [key]: !p[key] }));
+  const totalUsers = tree.reduce((s, p) => s + (p.user_count || 0), 0);
+
+  if (loading) return <div className="text-center py-12 text-slate-500">Loading organisation tree...</div>;
+
+  if (tree.length === 0) return (
+    <Card className="border-slate-200 shadow-sm">
+      <CardContent className="py-12 text-center text-slate-400">
+        <Network className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+        <p>No organisation data within your assigned scope.</p>
+        <p className="text-sm mt-1">Contact your super user to assign your jurisdiction.</p>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold text-slate-800">Your Organisation Scope</h2>
+        <p className="text-sm text-slate-500">{totalUsers} staff across {tree.length} province{tree.length !== 1 ? "s" : ""} in your jurisdiction</p>
+      </div>
+      <div className="space-y-2">
+        {tree.map((prov) => (
+          <Card key={prov.id} className="border-slate-200 shadow-sm">
+            <button
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
+              onClick={() => toggle(`prov-${prov.id}`)}
+            >
+              <div className="flex items-center gap-3">
+                {expanded[`prov-${prov.id}`] ? <ChevronDown className="w-4 h-4 text-teal-600" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+                <span className="font-semibold text-slate-800">{prov.name}</span>
+                <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{prov.districts?.length || 0} districts</span>
+              </div>
+              <span className="text-sm text-slate-500 flex items-center gap-1">
+                <User2 className="w-3.5 h-3.5" />{prov.user_count} staff
+              </span>
+            </button>
+
+            {expanded[`prov-${prov.id}`] && (
+              <div className="border-t border-slate-100">
+                {(prov.districts || []).map((dist) => (
+                  <div key={dist.id}>
+                    <button
+                      className="w-full flex items-center justify-between px-8 py-2.5 hover:bg-slate-50 transition-colors"
+                      onClick={() => toggle(`dist-${dist.id}`)}
+                    >
+                      <div className="flex items-center gap-3">
+                        {expanded[`dist-${dist.id}`] ? <ChevronDown className="w-3.5 h-3.5 text-teal-500" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-300" />}
+                        <span className="text-slate-700 text-sm">{dist.name}</span>
+                        <span className="text-xs text-slate-400">{dist.org_units?.length || 0} facilities</span>
+                      </div>
+                      <span className="text-xs text-slate-500 flex items-center gap-1">
+                        <User2 className="w-3 h-3" />{dist.user_count}
+                      </span>
+                    </button>
+
+                    {expanded[`dist-${dist.id}`] && (
+                      <div className="border-t border-slate-50">
+                        {(dist.org_units || []).length === 0 ? (
+                          <p className="px-16 py-2 text-xs text-slate-400">No facilities</p>
+                        ) : (dist.org_units || []).map((unit) => (
+                          <div key={unit.id}>
+                            <button
+                              className="w-full flex items-center justify-between px-14 py-2 hover:bg-slate-50 transition-colors"
+                              onClick={() => toggle(`unit-${unit.id}`)}
+                            >
+                              <div className="flex items-center gap-3">
+                                {expanded[`unit-${unit.id}`] ? <ChevronDown className="w-3 h-3 text-teal-500" /> : <ChevronRight className="w-3 h-3 text-slate-300" />}
+                                <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                                <span className="text-slate-600 text-sm">{unit.name}</span>
+                              </div>
+                              <span className="text-xs text-slate-500 flex items-center gap-1">
+                                <User2 className="w-3 h-3" />{unit.users?.length || 0}
+                              </span>
+                            </button>
+
+                            {expanded[`unit-${unit.id}`] && (
+                              <div className="px-20 py-1 space-y-1 border-t border-slate-50">
+                                {(unit.users || []).length === 0 ? (
+                                  <p className="text-xs text-slate-400 py-1">No staff assigned</p>
+                                ) : (unit.users || []).map((u) => (
+                                  <div key={u.user_id} className="flex items-center justify-between py-1">
+                                    <div className="flex items-center gap-2">
+                                      <User2 className="w-3.5 h-3.5 text-slate-400" />
+                                      <span className="text-sm text-slate-700">{u.name}</span>
+                                      <span className="text-xs text-slate-400">{u.position}</span>
+                                    </div>
+                                    <span className="text-xs text-slate-400 capitalize">{u.assigned_shift?.replace("_", " ") || "—"}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };

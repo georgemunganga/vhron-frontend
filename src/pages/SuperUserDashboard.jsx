@@ -14,7 +14,8 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Users, Activity, Download, Search, Shield, Building2,
   Edit, Trash2, KeyRound, UserPlus, Clock, Settings, BarChart3,
-  ChevronRight, AlertTriangle, CheckCircle2, XCircle, RefreshCw, Plus
+  ChevronRight, AlertTriangle, CheckCircle2, XCircle, RefreshCw, Plus,
+  Landmark, Network, ChevronDown, User2
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
@@ -107,7 +108,7 @@ const SuperUserDashboard = () => {
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-slate-900 border border-slate-800 p-1 grid grid-cols-5 w-full max-w-2xl">
+          <TabsList className="bg-slate-900 border border-slate-800 p-1 grid grid-cols-7 w-full max-w-4xl">
             <TabsTrigger value="overview" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400" data-testid="su-tab-overview">
               <BarChart3 className="w-4 h-4 mr-1" />
               <span className="hidden sm:inline">Overview</span>
@@ -128,6 +129,14 @@ const SuperUserDashboard = () => {
               <Activity className="w-4 h-4 mr-1" />
               <span className="hidden sm:inline">Reports</span>
             </TabsTrigger>
+            <TabsTrigger value="ministries" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400" data-testid="su-tab-ministries">
+              <Landmark className="w-4 h-4 mr-1" />
+              <span className="hidden sm:inline">Ministries</span>
+            </TabsTrigger>
+            <TabsTrigger value="org-tree" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400" data-testid="su-tab-org-tree">
+              <Network className="w-4 h-4 mr-1" />
+              <span className="hidden sm:inline">Org Tree</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><OverviewTab /></TabsContent>
@@ -135,6 +144,8 @@ const SuperUserDashboard = () => {
           <TabsContent value="facilities"><FacilitiesTab /></TabsContent>
           <TabsContent value="shifts"><ShiftsTab /></TabsContent>
           <TabsContent value="reports"><ReportsTab /></TabsContent>
+          <TabsContent value="ministries"><MinistriesTab /></TabsContent>
+          <TabsContent value="org-tree"><OrgTreeTab /></TabsContent>
         </Tabs>
       </main>
     </div>
@@ -1026,5 +1037,317 @@ const DeleteUserDialog = ({ user, onDelete }) => (
     </DialogContent>
   </Dialog>
 );
+
+// ============ MINISTRIES TAB ============
+const MinistriesTab = () => {
+  const [ministries, setMinistries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
+  const [form, setForm] = useState({ name: "", unit_term: "Facility", is_active: false });
+  const [saving, setSaving] = useState(false);
+
+  const fetchMinistries = async () => {
+    setLoading(true);
+    try {
+      const res = await authFetch(`${API}/superuser/ministries`);
+      if (res.ok) { const d = await res.json(); setMinistries(d.ministries || []); }
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { fetchMinistries(); }, []);
+
+  const openCreate = () => { setEditTarget(null); setForm({ name: "", unit_term: "Facility", is_active: false }); setShowForm(true); };
+  const openEdit = (m) => { setEditTarget(m); setForm({ name: m.name, unit_term: m.unit_term, is_active: m.is_active }); setShowForm(true); };
+
+  const handleSave = async () => {
+    if (!form.name.trim()) { toast.error("Ministry name is required"); return; }
+    setSaving(true);
+    try {
+      let res;
+      if (editTarget) {
+        res = await authFetch(`${API}/superuser/ministries/${editTarget.id}`, {
+          method: "PATCH", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: form.name, unit_term: form.unit_term }),
+        });
+      } else {
+        res = await authFetch(`${API}/superuser/ministries`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+      }
+      if (res.ok) {
+        toast.success(editTarget ? "Ministry updated" : "Ministry created");
+        setShowForm(false);
+        fetchMinistries();
+      } else {
+        const e = await res.json();
+        toast.error(e.detail || "Failed to save");
+      }
+    } catch { toast.error("Failed to save"); }
+    finally { setSaving(false); }
+  };
+
+  const handleToggle = async (m) => {
+    const action = m.is_active ? "deactivate" : "activate";
+    try {
+      const res = await authFetch(`${API}/superuser/ministries/${m.id}/${action}`, { method: "PATCH" });
+      if (res.ok) { toast.success(`Ministry ${action}d`); fetchMinistries(); }
+      else { const e = await res.json(); toast.error(e.detail); }
+    } catch { toast.error("Failed to update"); }
+  };
+
+  const handleDelete = async (m) => {
+    if (!window.confirm(`Delete "${m.name}"? This cannot be undone.`)) return;
+    try {
+      const res = await authFetch(`${API}/superuser/ministries/${m.id}`, { method: "DELETE" });
+      if (res.ok) { toast.success("Ministry deleted"); fetchMinistries(); }
+      else { const e = await res.json(); toast.error(e.detail); }
+    } catch { toast.error("Failed to delete"); }
+  };
+
+  return (
+    <div className="space-y-4" data-testid="su-ministries">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-white font-['Manrope']">Government Ministries</h2>
+          <p className="text-sm text-slate-400">Manage ministries available for staff registration. Active ministries appear in the signup flow.</p>
+        </div>
+        <Button onClick={openCreate} className="bg-amber-600 hover:bg-amber-700 text-white" data-testid="su-add-ministry-btn">
+          <Plus className="w-4 h-4 mr-2" />Add Ministry
+        </Button>
+      </div>
+
+      {/* Create / Edit Form */}
+      {showForm && (
+        <Card className="bg-slate-800 border-amber-500/30">
+          <CardHeader><CardTitle className="text-base text-amber-400">{editTarget ? "Edit Ministry" : "New Ministry"}</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-1">
+                <Label className="text-slate-400 text-sm mb-1 block">Ministry Name</Label>
+                <Input value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Ministry of Health" className="bg-slate-900 border-slate-700 text-white" data-testid="su-ministry-name" />
+              </div>
+              <div>
+                <Label className="text-slate-400 text-sm mb-1 block">Unit Term</Label>
+                <Input value={form.unit_term} onChange={(e) => setForm(p => ({ ...p, unit_term: e.target.value }))} placeholder="e.g. Facility, School, Office" className="bg-slate-900 border-slate-700 text-white" data-testid="su-ministry-unit-term" />
+                <p className="text-xs text-slate-500 mt-1">What org units are called in this ministry</p>
+              </div>
+              <div className="flex items-end gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.is_active} onChange={(e) => setForm(p => ({ ...p, is_active: e.target.checked }))} className="w-4 h-4 accent-amber-500" />
+                  <span className="text-sm text-slate-300">Active (visible in signup)</span>
+                </label>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSave} disabled={saving} className="bg-amber-600 hover:bg-amber-700" data-testid="su-ministry-save">{saving ? "Saving..." : "Save"}</Button>
+              <Button variant="outline" onClick={() => setShowForm(false)} className="border-slate-700 text-slate-300">Cancel</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Ministries Table */}
+      <Card className="bg-slate-900 border-slate-800">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-slate-800 hover:bg-transparent">
+                <TableHead className="text-slate-400">Ministry Name</TableHead>
+                <TableHead className="text-slate-400">Unit Term</TableHead>
+                <TableHead className="text-slate-400">Status</TableHead>
+                <TableHead className="text-slate-400">Created</TableHead>
+                <TableHead className="text-slate-400 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={5} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
+              ) : ministries.length ? (
+                ministries.map((m) => (
+                  <TableRow key={m.id} className="border-slate-800 hover:bg-slate-800/50">
+                    <TableCell className="font-medium text-white">{m.name}</TableCell>
+                    <TableCell className="text-slate-400 text-sm">{m.unit_term}</TableCell>
+                    <TableCell>
+                      <Badge className={m.is_active ? "bg-emerald-500/20 text-emerald-400 border-0" : "bg-slate-700/50 text-slate-400 border-0"}>
+                        {m.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-slate-500 text-sm">{m.created_at ? new Date(m.created_at).toLocaleDateString() : "—"}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => openEdit(m)} className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10" data-testid={`su-edit-ministry-${m.id}`}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleToggle(m)} className={m.is_active ? "text-amber-400 hover:bg-amber-500/10" : "text-emerald-400 hover:bg-emerald-500/10"} data-testid={`su-toggle-ministry-${m.id}`}>
+                          {m.is_active ? <XCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(m)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10" data-testid={`su-delete-ministry-${m.id}`}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow><TableCell colSpan={5} className="text-center py-12 text-slate-500">No ministries found. Click "Add Ministry" to create one.</TableCell></TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+// ============ ORG TREE TAB ============
+const OrgTreeTab = () => {
+  const [tree, setTree] = useState([]);
+  const [ministries, setMinistries] = useState([]);
+  const [ministryFilter, setMinistryFilter] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState({});
+
+  useEffect(() => {
+    authFetch(`${API}/superuser/ministries`)
+      .then(r => r.ok ? r.json() : { ministries: [] })
+      .then(d => setMinistries(d.ministries || []));
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    const params = ministryFilter ? `?ministry_id=${ministryFilter}` : "";
+    authFetch(`${API}/superuser/org-tree${params}`)
+      .then(r => r.ok ? r.json() : { tree: [] })
+      .then(d => { setTree(d.tree || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [ministryFilter]);
+
+  const toggle = (key) => setExpanded(p => ({ ...p, [key]: !p[key] }));
+
+  const totalUsers = tree.reduce((s, p) => s + p.user_count, 0);
+
+  return (
+    <div className="space-y-4" data-testid="su-org-tree">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-white font-['Manrope']">Organisation Structure</h2>
+          <p className="text-sm text-slate-400">{totalUsers} staff assigned across {tree.length} provinces</p>
+        </div>
+        <Select value={ministryFilter || "_all"} onValueChange={(v) => setMinistryFilter(v === "_all" ? "" : v)}>
+          <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+            <SelectValue placeholder="All Ministries" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="_all">All Ministries</SelectItem>
+            {ministries.filter(m => m.is_active).map(m => (
+              <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12 text-slate-500">Loading organisation tree...</div>
+      ) : tree.length === 0 ? (
+        <Card className="bg-slate-900 border-slate-800">
+          <CardContent className="py-12 text-center text-slate-500">
+            <Network className="w-12 h-12 mx-auto mb-3 text-slate-700" />
+            <p>No organisation data found. Seed geography data or assign staff to facilities.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {tree.map((prov) => (
+            <Card key={prov.id} className="bg-slate-900 border-slate-800">
+              {/* Province Row */}
+              <button
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-800/50 transition-colors"
+                onClick={() => toggle(`prov-${prov.id}`)}
+              >
+                <div className="flex items-center gap-3">
+                  {expanded[`prov-${prov.id}`] ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
+                  <span className="font-semibold text-white">{prov.name}</span>
+                  <Badge className="bg-slate-700/50 text-slate-400 border-0 text-xs">{prov.districts.length} districts</Badge>
+                </div>
+                <Badge className={prov.user_count > 0 ? "bg-teal-500/20 text-teal-400 border-0" : "bg-slate-700/50 text-slate-500 border-0"}>
+                  <User2 className="w-3 h-3 mr-1" />{prov.user_count} staff
+                </Badge>
+              </button>
+
+              {/* Districts */}
+              {expanded[`prov-${prov.id}`] && (
+                <div className="border-t border-slate-800">
+                  {prov.districts.map((dist) => (
+                    <div key={dist.id}>
+                      <button
+                        className="w-full flex items-center justify-between px-8 py-2.5 hover:bg-slate-800/30 transition-colors"
+                        onClick={() => toggle(`dist-${dist.id}`)}
+                      >
+                        <div className="flex items-center gap-3">
+                          {expanded[`dist-${dist.id}`] ? <ChevronDown className="w-3.5 h-3.5 text-blue-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-600" />}
+                          <span className="text-slate-200 text-sm">{dist.name}</span>
+                          <Badge className="bg-slate-800 text-slate-500 border-0 text-xs">{dist.org_units.length} facilities</Badge>
+                        </div>
+                        <Badge className={dist.user_count > 0 ? "bg-blue-500/20 text-blue-400 border-0 text-xs" : "bg-slate-800 text-slate-600 border-0 text-xs"}>
+                          <User2 className="w-3 h-3 mr-1" />{dist.user_count}
+                        </Badge>
+                      </button>
+
+                      {/* Org Units / Facilities */}
+                      {expanded[`dist-${dist.id}`] && (
+                        <div className="border-t border-slate-800/50">
+                          {dist.org_units.length === 0 ? (
+                            <p className="px-16 py-2 text-xs text-slate-600">No facilities</p>
+                          ) : dist.org_units.map((unit) => (
+                            <div key={unit.id}>
+                              <button
+                                className="w-full flex items-center justify-between px-14 py-2 hover:bg-slate-800/20 transition-colors"
+                                onClick={() => toggle(`unit-${unit.id}`)}
+                              >
+                                <div className="flex items-center gap-3">
+                                  {expanded[`unit-${unit.id}`] ? <ChevronDown className="w-3 h-3 text-teal-400" /> : <ChevronRight className="w-3 h-3 text-slate-700" />}
+                                  <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                                  <span className="text-slate-300 text-sm">{unit.name}</span>
+                                </div>
+                                <Badge className={unit.users.length > 0 ? "bg-teal-500/20 text-teal-400 border-0 text-xs" : "bg-slate-800 text-slate-600 border-0 text-xs"}>
+                                  <User2 className="w-3 h-3 mr-1" />{unit.users.length}
+                                </Badge>
+                              </button>
+
+                              {/* Users in this facility */}
+                              {expanded[`unit-${unit.id}`] && (
+                                <div className="px-20 py-1 space-y-1 border-t border-slate-800/30">
+                                  {unit.users.length === 0 ? (
+                                    <p className="text-xs text-slate-600 py-1">No staff assigned</p>
+                                  ) : unit.users.map((u) => (
+                                    <div key={u.user_id} className="flex items-center justify-between py-1">
+                                      <div className="flex items-center gap-2">
+                                        <User2 className="w-3.5 h-3.5 text-slate-500" />
+                                        <span className="text-sm text-slate-300">{u.name}</span>
+                                        <span className="text-xs text-slate-500">{u.position}</span>
+                                      </div>
+                                      <Badge className="bg-slate-800 text-slate-500 border-0 text-xs capitalize">{u.assigned_shift?.replace("_", " ") || "—"}</Badge>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default SuperUserDashboard;
