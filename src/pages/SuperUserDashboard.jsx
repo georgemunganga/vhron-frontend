@@ -53,31 +53,31 @@ const SuperUserDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-slate-50 text-slate-800">
       {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="text-slate-400 hover:text-white hover:bg-slate-800" data-testid="su-back-btn">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="text-slate-500 hover:text-slate-900 hover:bg-slate-100" data-testid="su-back-btn">
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-3">
               <Logo variant="light" size="sm" />
-              <span className="text-xs text-slate-400 hidden sm:block">{currentUser?.email}</span>
+              <span className="text-xs text-slate-500 hidden sm:block">{currentUser?.email}</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
-              className="text-slate-400 hover:text-white hover:bg-slate-800 text-xs"
+              className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 text-xs"
               onClick={() => navigate('/analytics')}
             >
               <BarChart3 className="w-3.5 h-3.5 mr-1" />
@@ -86,7 +86,7 @@ const SuperUserDashboard = () => {
             <Button
               variant="ghost"
               size="sm"
-              className="text-slate-400 hover:text-white hover:bg-slate-800 text-xs"
+              className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 text-xs"
               onClick={() => navigate('/admin-scoping')}
             >
               <Building2 className="w-3.5 h-3.5 mr-1" />
@@ -108,7 +108,7 @@ const SuperUserDashboard = () => {
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-slate-900 border border-slate-800 p-1 grid grid-cols-7 w-full max-w-4xl">
+          <TabsList className="bg-white border border-slate-200 p-1 grid grid-cols-7 w-full max-w-4xl">
             <TabsTrigger value="overview" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400" data-testid="su-tab-overview">
               <BarChart3 className="w-4 h-4 mr-1" />
               <span className="hidden sm:inline">Overview</span>
@@ -179,7 +179,7 @@ const OverviewTab = () => {
     <div className="space-y-6" data-testid="su-overview">
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {cards.map((c) => (
-          <Card key={c.label} className="bg-slate-900 border-slate-800">
+          <Card key={c.label} className="bg-white border-slate-200">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
@@ -258,10 +258,10 @@ const UsersTab = ({ currentUser }) => {
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-          <Input placeholder="Search by name or email..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-slate-900 border-slate-700 text-white" data-testid="su-user-search" />
+          <Input placeholder="Search by name or email..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-white border-slate-200 text-slate-900" data-testid="su-user-search" />
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-40 bg-slate-900 border-slate-700 text-white" data-testid="su-role-filter">
+          <SelectTrigger className="w-40 bg-white border-slate-200 text-slate-900" data-testid="su-role-filter">
             <SelectValue placeholder="Filter role" />
           </SelectTrigger>
           <SelectContent>
@@ -271,7 +271,7 @@ const UsersTab = ({ currentUser }) => {
             <SelectItem value="superuser">Super User</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" onClick={fetchUsers} className="border-slate-700 text-slate-300 hover:bg-slate-800" data-testid="su-refresh-users">
+        <Button variant="outline" onClick={fetchUsers} className="border-slate-200 text-slate-600 hover:bg-slate-100" data-testid="su-refresh-users">
           <RefreshCw className="w-4 h-4 mr-2" />Refresh
         </Button>
       </div>
@@ -279,29 +279,29 @@ const UsersTab = ({ currentUser }) => {
       <p className="text-sm text-slate-500">{total} user(s) found</p>
 
       {/* Users Table */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-white border-slate-200">
         <CardContent className="p-0">
           <ScrollArea className="max-h-[600px]">
             <Table>
               <TableHeader>
-                <TableRow className="border-slate-800 hover:bg-transparent">
-                  <TableHead className="text-slate-400">Name</TableHead>
-                  <TableHead className="text-slate-400">Email</TableHead>
-                  <TableHead className="text-slate-400">Phone</TableHead>
-                  <TableHead className="text-slate-400">Position</TableHead>
-                  <TableHead className="text-slate-400">Facility</TableHead>
-                  <TableHead className="text-slate-400">Role</TableHead>
-                  <TableHead className="text-slate-400 text-right">Actions</TableHead>
+                <TableRow className="border-slate-200 hover:bg-transparent">
+                  <TableHead className="text-slate-500">Name</TableHead>
+                  <TableHead className="text-slate-500">Email</TableHead>
+                  <TableHead className="text-slate-500">Phone</TableHead>
+                  <TableHead className="text-slate-500">Position</TableHead>
+                  <TableHead className="text-slate-500">Facility</TableHead>
+                  <TableHead className="text-slate-500">Role</TableHead>
+                  <TableHead className="text-slate-500 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.map((u) => (
-                  <TableRow key={u.user_id} className="border-slate-800 hover:bg-slate-800/50">
-                    <TableCell className="font-medium text-white">{u.name}</TableCell>
-                    <TableCell className="text-slate-400 text-sm">{u.email}</TableCell>
-                    <TableCell className="text-slate-400">{u.phone_number || "-"}</TableCell>
-                    <TableCell className="text-slate-400">{u.position || "-"}</TableCell>
-                    <TableCell className="text-slate-400 text-sm max-w-[150px] truncate">{u.facility || "-"}</TableCell>
+                  <TableRow key={u.user_id} className="border-slate-200 hover:bg-slate-50/80">
+                    <TableCell className="font-medium text-slate-900">{u.name}</TableCell>
+                    <TableCell className="text-slate-500 text-sm">{u.email}</TableCell>
+                    <TableCell className="text-slate-500">{u.phone_number || "-"}</TableCell>
+                    <TableCell className="text-slate-500">{u.position || "-"}</TableCell>
+                    <TableCell className="text-slate-500 text-sm max-w-[150px] truncate">{u.facility || "-"}</TableCell>
                     <TableCell>
                       <RoleBadge role={u.role} />
                     </TableCell>
@@ -404,16 +404,16 @@ const FacilitiesTab = () => {
   return (
     <div className="space-y-6" data-testid="su-facilities">
       {/* Add Facility */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-white border-slate-200">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-['Manrope'] text-white flex items-center gap-2">
+          <CardTitle className="text-base font-['Manrope'] text-slate-800 flex items-center gap-2">
             <Plus className="w-4 h-4 text-amber-400" /> Add New Facility
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <Select value={newFacility.province} onValueChange={(v) => setNewFacility(p => ({ ...p, province: v, district: "" }))}>
-              <SelectTrigger className="bg-slate-800 border-slate-700 text-white" data-testid="su-fac-province">
+              <SelectTrigger className="bg-slate-100 border-slate-200 text-slate-900" data-testid="su-fac-province">
                 <SelectValue placeholder="Province" />
               </SelectTrigger>
               <SelectContent>
@@ -421,14 +421,14 @@ const FacilitiesTab = () => {
               </SelectContent>
             </Select>
             <Select value={newFacility.district} onValueChange={(v) => setNewFacility(p => ({ ...p, district: v }))}>
-              <SelectTrigger className="bg-slate-800 border-slate-700 text-white" data-testid="su-fac-district">
+              <SelectTrigger className="bg-slate-100 border-slate-200 text-slate-900" data-testid="su-fac-district">
                 <SelectValue placeholder="District" />
               </SelectTrigger>
               <SelectContent>
                 {selectedProvinceDistricts.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Input placeholder="Facility name" value={newFacility.name} onChange={(e) => setNewFacility(p => ({ ...p, name: e.target.value }))} className="bg-slate-800 border-slate-700 text-white" data-testid="su-fac-name" />
+            <Input placeholder="Facility name" value={newFacility.name} onChange={(e) => setNewFacility(p => ({ ...p, name: e.target.value }))} className="bg-slate-100 border-slate-200 text-slate-900" data-testid="su-fac-name" />
             <Button onClick={handleAddFacility} disabled={adding} className="bg-amber-600 hover:bg-amber-700 text-white" data-testid="su-add-facility-btn">
               <Plus className="w-4 h-4 mr-2" />{adding ? "Adding..." : "Add"}
             </Button>
@@ -440,10 +440,10 @@ const FacilitiesTab = () => {
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-          <Input placeholder="Search facilities by name or district..." value={facilitySearch} onChange={(e) => setFacilitySearch(e.target.value)} className="pl-9 bg-slate-900 border-slate-700 text-white" data-testid="su-facility-search" />
+          <Input placeholder="Search facilities by name or district..." value={facilitySearch} onChange={(e) => setFacilitySearch(e.target.value)} className="pl-9 bg-white border-slate-200 text-slate-900" data-testid="su-facility-search" />
         </div>
         <Select value={provinceFilter} onValueChange={(v) => { setProvinceFilter(v); setDistrictFilter("all"); }}>
-          <SelectTrigger className="w-48 bg-slate-900 border-slate-700 text-white" data-testid="su-fac-filter-province">
+          <SelectTrigger className="w-48 bg-white border-slate-200 text-slate-900" data-testid="su-fac-filter-province">
             <SelectValue placeholder="Filter province" />
           </SelectTrigger>
           <SelectContent>
@@ -452,7 +452,7 @@ const FacilitiesTab = () => {
           </SelectContent>
         </Select>
         <Select value={districtFilter} onValueChange={setDistrictFilter}>
-          <SelectTrigger className="w-48 bg-slate-900 border-slate-700 text-white" data-testid="su-fac-filter-district">
+          <SelectTrigger className="w-48 bg-white border-slate-200 text-slate-900" data-testid="su-fac-filter-district">
             <SelectValue placeholder="Filter district" />
           </SelectTrigger>
           <SelectContent>
@@ -463,27 +463,27 @@ const FacilitiesTab = () => {
       </div>
 
       {/* Facilities List */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-white border-slate-200">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-['Manrope'] text-white">{filteredFacilities.length} of {facilities.length} Facilities</CardTitle>
+          <CardTitle className="text-base font-['Manrope'] text-slate-900">{filteredFacilities.length} of {facilities.length} Facilities</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="max-h-[500px]">
             <Table>
               <TableHeader>
-                <TableRow className="border-slate-800 hover:bg-transparent">
-                  <TableHead className="text-slate-400">Name</TableHead>
-                  <TableHead className="text-slate-400">District</TableHead>
-                  <TableHead className="text-slate-400">Province</TableHead>
-                  <TableHead className="text-slate-400 text-right">Actions</TableHead>
+                <TableRow className="border-slate-200 hover:bg-transparent">
+                  <TableHead className="text-slate-500">Name</TableHead>
+                  <TableHead className="text-slate-500">District</TableHead>
+                  <TableHead className="text-slate-500">Province</TableHead>
+                  <TableHead className="text-slate-500 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredFacilities.map((f) => (
-                  <TableRow key={f.facility_id} className="border-slate-800 hover:bg-slate-800/50">
-                    <TableCell className="text-white font-medium">{f.name}</TableCell>
-                    <TableCell className="text-slate-400">{f.district}</TableCell>
-                    <TableCell className="text-slate-400">{f.province}</TableCell>
+                  <TableRow key={f.facility_id} className="border-slate-200 hover:bg-slate-50/80">
+                    <TableCell className="text-slate-900 font-medium">{f.name}</TableCell>
+                    <TableCell className="text-slate-500">{f.district}</TableCell>
+                    <TableCell className="text-slate-500">{f.province}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="sm" onClick={() => handleDeleteFacility(f.facility_id)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10" data-testid={`su-del-fac-${f.facility_id}`}>
                         <Trash2 className="w-4 h-4" />
@@ -543,9 +543,9 @@ const ShiftsTab = () => {
 
   return (
     <div className="space-y-6" data-testid="su-shifts">
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-white border-slate-200">
         <CardHeader>
-          <CardTitle className="text-base font-['Manrope'] text-white flex items-center gap-2">
+          <CardTitle className="text-base font-['Manrope'] text-slate-800 flex items-center gap-2">
             <Clock className="w-5 h-5 text-amber-400" /> Shift Time Configuration
           </CardTitle>
         </CardHeader>
@@ -555,19 +555,19 @@ const ShiftsTab = () => {
               <Label className={`font-medium ${s.color}`}>{s.label}</Label>
               <div className="flex items-center gap-2">
                 <Label className="text-slate-500 text-sm w-12">Start</Label>
-                <Input type="time" value={config[s.startKey] || ""} onChange={(e) => setConfig(p => ({ ...p, [s.startKey]: e.target.value }))} className="bg-slate-800 border-slate-700 text-white" data-testid={`su-shift-${s.startKey}`} />
+                <Input type="time" value={config[s.startKey] || ""} onChange={(e) => setConfig(p => ({ ...p, [s.startKey]: e.target.value }))} className="bg-slate-100 border-slate-200 text-slate-900" data-testid={`su-shift-${s.startKey}`} />
               </div>
               <div className="flex items-center gap-2">
                 <Label className="text-slate-500 text-sm w-12">End</Label>
-                <Input type="time" value={config[s.endKey] || ""} onChange={(e) => setConfig(p => ({ ...p, [s.endKey]: e.target.value }))} className="bg-slate-800 border-slate-700 text-white" data-testid={`su-shift-${s.endKey}`} />
+                <Input type="time" value={config[s.endKey] || ""} onChange={(e) => setConfig(p => ({ ...p, [s.endKey]: e.target.value }))} className="bg-slate-100 border-slate-200 text-slate-900" data-testid={`su-shift-${s.endKey}`} />
               </div>
             </div>
           ))}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center pt-4 border-t border-slate-800">
-            <Label className="text-slate-300 font-medium">Grace Period</Label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center pt-4 border-t border-slate-200">
+            <Label className="text-slate-600 font-medium">Grace Period</Label>
             <div className="flex items-center gap-2 md:col-span-2">
-              <Input type="number" value={config.grace_period_minutes || 15} onChange={(e) => setConfig(p => ({ ...p, grace_period_minutes: parseInt(e.target.value) || 0 }))} className="bg-slate-800 border-slate-700 text-white w-24" data-testid="su-shift-grace" />
+              <Input type="number" value={config.grace_period_minutes || 15} onChange={(e) => setConfig(p => ({ ...p, grace_period_minutes: parseInt(e.target.value) || 0 }))} className="bg-slate-100 border-slate-200 text-slate-900 w-24" data-testid="su-shift-grace" />
               <span className="text-slate-500 text-sm">minutes</span>
             </div>
           </div>
@@ -710,11 +710,11 @@ const ReportsTab = () => {
   return (
     <div className="space-y-4" data-testid="su-reports">
       {/* Location Filters Row */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-white border-slate-200">
         <CardContent className="p-4">
           <div className="flex items-center gap-2 mb-3">
             <Activity className="w-4 h-4 text-amber-400" />
-            <span className="text-sm font-medium text-slate-300">Filter by Location</span>
+            <span className="text-sm font-medium text-slate-600">Filter by Location</span>
             {activeFilterCount > 0 && (
               <Badge className="bg-amber-500/20 text-amber-400 border-0 text-xs">{activeFilterCount} active</Badge>
             )}
@@ -724,7 +724,7 @@ const ReportsTab = () => {
             <div>
               <Label className="text-slate-500 text-xs mb-1 block">Province</Label>
               <Select value={provinceFilter || "_none"} onValueChange={(v) => setProvinceFilter(v === "_none" ? "" : v)}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white" data-testid="su-report-province">
+                <SelectTrigger className="bg-slate-100 border-slate-200 text-slate-900" data-testid="su-report-province">
                   <SelectValue placeholder="All Provinces" />
                 </SelectTrigger>
                 <SelectContent>
@@ -737,7 +737,7 @@ const ReportsTab = () => {
             <div>
               <Label className="text-slate-500 text-xs mb-1 block">District</Label>
               <Select value={districtFilter || "_none"} onValueChange={(v) => setDistrictFilter(v === "_none" ? "" : v)} disabled={!provinceFilter}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white" data-testid="su-report-district">
+                <SelectTrigger className="bg-slate-100 border-slate-200 text-slate-900" data-testid="su-report-district">
                   <SelectValue placeholder={provinceFilter ? "All Districts" : "Select province first"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -750,7 +750,7 @@ const ReportsTab = () => {
             <div>
               <Label className="text-slate-500 text-xs mb-1 block">Facility</Label>
               <Select value={facilityFilter || "_none"} onValueChange={(v) => setFacilityFilter(v === "_none" ? "" : v)} disabled={!districtFilter}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white" data-testid="su-report-facility">
+                <SelectTrigger className="bg-slate-100 border-slate-200 text-slate-900" data-testid="su-report-facility">
                   <SelectValue placeholder={districtFilter ? "All Facilities" : "Select district first"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -762,7 +762,7 @@ const ReportsTab = () => {
             {/* Date */}
             <div>
               <Label className="text-slate-500 text-xs mb-1 block">Date</Label>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-slate-800 border-slate-700 text-white" data-testid="su-report-date" />
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-slate-100 border-slate-200 text-slate-900" data-testid="su-report-date" />
             </div>
           </div>
         </CardContent>
@@ -772,16 +772,16 @@ const ReportsTab = () => {
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-          <Input placeholder="Search by staff name, facility, position..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 bg-slate-900 border-slate-700 text-white" data-testid="su-report-search" />
+          <Input placeholder="Search by staff name, facility, position..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 bg-white border-slate-200 text-slate-900" data-testid="su-report-search" />
         </div>
-        <Button variant="outline" onClick={handleClearFilters} className="border-slate-700 text-slate-300 hover:bg-slate-800" data-testid="su-report-clear">
+        <Button variant="outline" onClick={handleClearFilters} className="border-slate-200 text-slate-600 hover:bg-slate-100" data-testid="su-report-clear">
           <XCircle className="w-4 h-4 mr-2" />Clear
         </Button>
-        <Button variant="outline" onClick={fetchReport} className="border-slate-700 text-slate-300 hover:bg-slate-800" data-testid="su-report-refresh">
+        <Button variant="outline" onClick={fetchReport} className="border-slate-200 text-slate-600 hover:bg-slate-100" data-testid="su-report-refresh">
           <RefreshCw className="w-4 h-4 mr-2" />Refresh
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => handleExport("csv")} className="border-slate-700 text-slate-300 hover:bg-slate-800" data-testid="su-export-csv">
+          <Button variant="outline" onClick={() => handleExport("csv")} className="border-slate-200 text-slate-600 hover:bg-slate-100" data-testid="su-export-csv">
             <Download className="w-4 h-4 mr-2" />CSV
           </Button>
           <Button onClick={() => handleExport("xlsx")} className="bg-amber-600 hover:bg-amber-700 text-white" data-testid="su-export-xlsx">
@@ -792,9 +792,9 @@ const ReportsTab = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-white border-slate-200">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-white">{filteredSummary.total}</p>
+            <p className="text-2xl font-bold text-slate-900">{filteredSummary.total}</p>
             <p className="text-xs text-slate-500">Total Logins</p>
           </CardContent>
         </Card>
@@ -819,9 +819,9 @@ const ReportsTab = () => {
       </div>
 
       {/* Records Table */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-white border-slate-200">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm text-slate-400 font-normal">
+          <CardTitle className="text-sm text-slate-500 font-normal">
             Showing {filteredRecords.length} of {report?.records?.length || 0} records
           </CardTitle>
         </CardHeader>
@@ -829,12 +829,12 @@ const ReportsTab = () => {
           <ScrollArea className="max-h-[500px]">
             <Table>
               <TableHeader>
-                <TableRow className="border-slate-800 hover:bg-transparent">
-                  <TableHead className="text-slate-400">Name</TableHead>
-                  <TableHead className="text-slate-400">Facility</TableHead>
-                  <TableHead className="text-slate-400">Action</TableHead>
-                  <TableHead className="text-slate-400">Time</TableHead>
-                  <TableHead className="text-slate-400">Status</TableHead>
+                <TableRow className="border-slate-200 hover:bg-transparent">
+                  <TableHead className="text-slate-500">Name</TableHead>
+                  <TableHead className="text-slate-500">Facility</TableHead>
+                  <TableHead className="text-slate-500">Action</TableHead>
+                  <TableHead className="text-slate-500">Time</TableHead>
+                  <TableHead className="text-slate-500">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -842,15 +842,15 @@ const ReportsTab = () => {
                   <TableRow><TableCell colSpan={5} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
                 ) : filteredRecords.length ? (
                   filteredRecords.map((r, i) => (
-                    <TableRow key={i} className={`border-slate-800 ${r.status === "late" ? "bg-red-950/30" : r.status === "early" ? "bg-emerald-950/30" : ""}`}>
-                      <TableCell className="text-white font-medium">{r.user_name}</TableCell>
-                      <TableCell className="text-slate-400 text-sm">{r.facility}</TableCell>
+                    <TableRow key={i} className={`border-slate-200 ${r.status === "late" ? "bg-red-950/30" : r.status === "early" ? "bg-emerald-950/30" : ""}`}>
+                      <TableCell className="text-slate-900 font-medium">{r.user_name}</TableCell>
+                      <TableCell className="text-slate-500 text-sm">{r.facility}</TableCell>
                       <TableCell>
                         <Badge className={r.action === "login" ? "bg-emerald-500/20 text-emerald-400 border-0" : "bg-red-500/20 text-red-400 border-0"}>
                           {r.action.toUpperCase()}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-mono text-sm text-slate-400">
+                      <TableCell className="font-mono text-sm text-slate-500">
                         {new Date(r.timestamp).toLocaleTimeString()}
                       </TableCell>
                       <TableCell>
@@ -875,7 +875,7 @@ const RoleBadge = ({ role }) => {
   const styles = {
     superuser: "bg-amber-500/20 text-amber-400 border-amber-500/30",
     admin: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    user: "bg-slate-700/50 text-slate-400 border-slate-600"
+    user: "bg-slate-200/50 text-slate-500 border-slate-600"
   };
   return <Badge className={styles[role] || styles.user}>{role}</Badge>;
 };
@@ -918,14 +918,14 @@ const RoleChangeDialog = ({ user, onRoleChange }) => {
           <Shield className="w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white">
+      <DialogContent className="bg-white border-slate-200 text-slate-900">
         <DialogHeader>
           <DialogTitle>Change Role: {user.name}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <p className="text-sm text-slate-400">{user.email}</p>
+          <p className="text-sm text-slate-500">{user.email}</p>
           <Select value={role} onValueChange={setRole}>
-            <SelectTrigger className="bg-slate-800 border-slate-700" data-testid={`su-role-select-${user.user_id}`}>
+            <SelectTrigger className="bg-slate-100 border-slate-200" data-testid={`su-role-select-${user.user_id}`}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -937,10 +937,10 @@ const RoleChangeDialog = ({ user, onRoleChange }) => {
 
           {/* Jurisdiction assignment for admins */}
           {role === "admin" && (
-            <div className="space-y-3 border-t border-slate-800 pt-3">
-              <Label className="text-slate-400 text-sm">Assign Jurisdiction</Label>
+            <div className="space-y-3 border-t border-slate-200 pt-3">
+              <Label className="text-slate-500 text-sm">Assign Jurisdiction</Label>
               <Select value={jurisdictionType} onValueChange={setJurisdictionType}>
-                <SelectTrigger className="bg-slate-800 border-slate-700" data-testid={`su-juris-type-${user.user_id}`}>
+                <SelectTrigger className="bg-slate-100 border-slate-200" data-testid={`su-juris-type-${user.user_id}`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -953,7 +953,7 @@ const RoleChangeDialog = ({ user, onRoleChange }) => {
                 placeholder={`Enter ${jurisdictionType} name...`}
                 value={jurisdictionValue}
                 onChange={(e) => setJurisdictionValue(e.target.value)}
-                className="bg-slate-800 border-slate-700 text-white"
+                className="bg-slate-100 border-slate-200 text-slate-900"
                 data-testid={`su-juris-value-${user.user_id}`}
               />
               {user.assigned_jurisdiction && (
@@ -966,7 +966,7 @@ const RoleChangeDialog = ({ user, onRoleChange }) => {
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline" className="border-slate-700 text-slate-300">Cancel</Button>
+            <Button variant="outline" className="border-slate-200 text-slate-600">Cancel</Button>
           </DialogClose>
           <DialogClose asChild>
             <Button onClick={handleSave} disabled={saving} className="bg-amber-600 hover:bg-amber-700" data-testid={`su-role-save-${user.user_id}`}>{saving ? "Saving..." : "Save"}</Button>
@@ -987,17 +987,17 @@ const ResetPasswordDialog = ({ user, onReset }) => {
           <KeyRound className="w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white">
+      <DialogContent className="bg-white border-slate-200 text-slate-900">
         <DialogHeader>
           <DialogTitle>Reset Password: {user.name}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <p className="text-sm text-slate-400">{user.email}</p>
-          <Input type="password" placeholder="New password" value={pwd} onChange={(e) => setPwd(e.target.value)} className="bg-slate-800 border-slate-700 text-white" data-testid={`su-newpwd-${user.user_id}`} />
+          <p className="text-sm text-slate-500">{user.email}</p>
+          <Input type="password" placeholder="New password" value={pwd} onChange={(e) => setPwd(e.target.value)} className="bg-slate-100 border-slate-200 text-slate-900" data-testid={`su-newpwd-${user.user_id}`} />
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline" className="border-slate-700 text-slate-300">Cancel</Button>
+            <Button variant="outline" className="border-slate-200 text-slate-600">Cancel</Button>
           </DialogClose>
           <DialogClose asChild>
             <Button onClick={() => { onReset(user.user_id, pwd); setPwd(""); }} className="bg-amber-600 hover:bg-amber-700" data-testid={`su-resetpwd-save-${user.user_id}`}>Reset</Button>
@@ -1016,19 +1016,19 @@ const DeleteUserDialog = ({ user, onDelete }) => (
         <Trash2 className="w-4 h-4" />
       </Button>
     </DialogTrigger>
-    <DialogContent className="bg-slate-900 border-slate-800 text-white">
+    <DialogContent className="bg-white border-slate-200 text-slate-900">
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2 text-red-400">
           <AlertTriangle className="w-5 h-5" /> Delete User
         </DialogTitle>
       </DialogHeader>
-      <p className="text-slate-400 py-4">
-        Are you sure you want to delete <span className="text-white font-medium">{user.name}</span> ({user.email})?
+      <p className="text-slate-500 py-4">
+        Are you sure you want to delete <span className="text-slate-900 font-medium">{user.name}</span> ({user.email})?
         This action cannot be undone.
       </p>
       <DialogFooter>
         <DialogClose asChild>
-          <Button variant="outline" className="border-slate-700 text-slate-300">Cancel</Button>
+          <Button variant="outline" className="border-slate-200 text-slate-600">Cancel</Button>
         </DialogClose>
         <DialogClose asChild>
           <Button onClick={() => onDelete(user.user_id)} className="bg-red-600 hover:bg-red-700" data-testid={`su-confirm-delete-${user.user_id}`}>Delete</Button>
@@ -1111,8 +1111,8 @@ const MinistriesTab = () => {
     <div className="space-y-4" data-testid="su-ministries">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white font-['Manrope']">Government Ministries</h2>
-          <p className="text-sm text-slate-400">Manage ministries available for staff registration. Active ministries appear in the signup flow.</p>
+          <h2 className="text-lg font-semibold text-slate-900 font-['Manrope']">Government Ministries</h2>
+          <p className="text-sm text-slate-500">Manage ministries available for staff registration. Active ministries appear in the signup flow.</p>
         </div>
         <Button onClick={openCreate} className="bg-amber-600 hover:bg-amber-700 text-white" data-testid="su-add-ministry-btn">
           <Plus className="w-4 h-4 mr-2" />Add Ministry
@@ -1121,45 +1121,45 @@ const MinistriesTab = () => {
 
       {/* Create / Edit Form */}
       {showForm && (
-        <Card className="bg-slate-800 border-amber-500/30">
+        <Card className="bg-slate-100 border-amber-500/30">
           <CardHeader><CardTitle className="text-base text-amber-400">{editTarget ? "Edit Ministry" : "New Ministry"}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-1">
-                <Label className="text-slate-400 text-sm mb-1 block">Ministry Name</Label>
-                <Input value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Ministry of Health" className="bg-slate-900 border-slate-700 text-white" data-testid="su-ministry-name" />
+                <Label className="text-slate-500 text-sm mb-1 block">Ministry Name</Label>
+                <Input value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Ministry of Health" className="bg-white border-slate-200 text-slate-900" data-testid="su-ministry-name" />
               </div>
               <div>
-                <Label className="text-slate-400 text-sm mb-1 block">Unit Term</Label>
-                <Input value={form.unit_term} onChange={(e) => setForm(p => ({ ...p, unit_term: e.target.value }))} placeholder="e.g. Facility, School, Office" className="bg-slate-900 border-slate-700 text-white" data-testid="su-ministry-unit-term" />
+                <Label className="text-slate-500 text-sm mb-1 block">Unit Term</Label>
+                <Input value={form.unit_term} onChange={(e) => setForm(p => ({ ...p, unit_term: e.target.value }))} placeholder="e.g. Facility, School, Office" className="bg-white border-slate-200 text-slate-900" data-testid="su-ministry-unit-term" />
                 <p className="text-xs text-slate-500 mt-1">What org units are called in this ministry</p>
               </div>
               <div className="flex items-end gap-3">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.is_active} onChange={(e) => setForm(p => ({ ...p, is_active: e.target.checked }))} className="w-4 h-4 accent-amber-500" />
-                  <span className="text-sm text-slate-300">Active (visible in signup)</span>
+                  <span className="text-sm text-slate-600">Active (visible in signup)</span>
                 </label>
               </div>
             </div>
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={saving} className="bg-amber-600 hover:bg-amber-700" data-testid="su-ministry-save">{saving ? "Saving..." : "Save"}</Button>
-              <Button variant="outline" onClick={() => setShowForm(false)} className="border-slate-700 text-slate-300">Cancel</Button>
+              <Button variant="outline" onClick={() => setShowForm(false)} className="border-slate-200 text-slate-600">Cancel</Button>
             </div>
           </CardContent>
         </Card>
       )}
 
       {/* Ministries Table */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-white border-slate-200">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="border-slate-800 hover:bg-transparent">
-                <TableHead className="text-slate-400">Ministry Name</TableHead>
-                <TableHead className="text-slate-400">Unit Term</TableHead>
-                <TableHead className="text-slate-400">Status</TableHead>
-                <TableHead className="text-slate-400">Created</TableHead>
-                <TableHead className="text-slate-400 text-right">Actions</TableHead>
+              <TableRow className="border-slate-200 hover:bg-transparent">
+                <TableHead className="text-slate-500">Ministry Name</TableHead>
+                <TableHead className="text-slate-500">Unit Term</TableHead>
+                <TableHead className="text-slate-500">Status</TableHead>
+                <TableHead className="text-slate-500">Created</TableHead>
+                <TableHead className="text-slate-500 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1167,11 +1167,11 @@ const MinistriesTab = () => {
                 <TableRow><TableCell colSpan={5} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
               ) : ministries.length ? (
                 ministries.map((m) => (
-                  <TableRow key={m.id} className="border-slate-800 hover:bg-slate-800/50">
-                    <TableCell className="font-medium text-white">{m.name}</TableCell>
-                    <TableCell className="text-slate-400 text-sm">{m.unit_term}</TableCell>
+                  <TableRow key={m.id} className="border-slate-200 hover:bg-slate-50/80">
+                    <TableCell className="font-medium text-slate-900">{m.name}</TableCell>
+                    <TableCell className="text-slate-500 text-sm">{m.unit_term}</TableCell>
                     <TableCell>
-                      <Badge className={m.is_active ? "bg-emerald-500/20 text-emerald-400 border-0" : "bg-slate-700/50 text-slate-400 border-0"}>
+                      <Badge className={m.is_active ? "bg-emerald-500/20 text-emerald-400 border-0" : "bg-slate-200/50 text-slate-500 border-0"}>
                         {m.is_active ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
@@ -1233,11 +1233,11 @@ const OrgTreeTab = () => {
     <div className="space-y-4" data-testid="su-org-tree">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-white font-['Manrope']">Organisation Structure</h2>
-          <p className="text-sm text-slate-400">{totalUsers} staff assigned across {tree.length} provinces</p>
+          <h2 className="text-lg font-semibold text-slate-900 font-['Manrope']">Organisation Structure</h2>
+          <p className="text-sm text-slate-500">{totalUsers} staff assigned across {tree.length} provinces</p>
         </div>
         <Select value={ministryFilter || "_all"} onValueChange={(v) => setMinistryFilter(v === "_all" ? "" : v)}>
-          <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+          <SelectTrigger className="w-56 bg-slate-100 border-slate-200 text-slate-900">
             <SelectValue placeholder="All Ministries" />
           </SelectTrigger>
           <SelectContent>
@@ -1252,7 +1252,7 @@ const OrgTreeTab = () => {
       {loading ? (
         <div className="text-center py-12 text-slate-500">Loading organisation tree...</div>
       ) : tree.length === 0 ? (
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-white border-slate-200">
           <CardContent className="py-12 text-center text-slate-500">
             <Network className="w-12 h-12 mx-auto mb-3 text-slate-700" />
             <p>No organisation data found. Seed geography data or assign staff to facilities.</p>
@@ -1261,75 +1261,75 @@ const OrgTreeTab = () => {
       ) : (
         <div className="space-y-2">
           {tree.map((prov) => (
-            <Card key={prov.id} className="bg-slate-900 border-slate-800">
+            <Card key={prov.id} className="bg-white border-slate-200">
               {/* Province Row */}
               <button
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-800/50 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50/80 transition-colors"
                 onClick={() => toggle(`prov-${prov.id}`)}
               >
                 <div className="flex items-center gap-3">
                   {expanded[`prov-${prov.id}`] ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-                  <span className="font-semibold text-white">{prov.name}</span>
-                  <Badge className="bg-slate-700/50 text-slate-400 border-0 text-xs">{prov.districts.length} districts</Badge>
+                  <span className="font-semibold text-slate-900">{prov.name}</span>
+                  <Badge className="bg-slate-200/50 text-slate-500 border-0 text-xs">{prov.districts.length} districts</Badge>
                 </div>
-                <Badge className={prov.user_count > 0 ? "bg-teal-500/20 text-teal-400 border-0" : "bg-slate-700/50 text-slate-500 border-0"}>
+                <Badge className={prov.user_count > 0 ? "bg-teal-500/20 text-teal-400 border-0" : "bg-slate-200/50 text-slate-500 border-0"}>
                   <User2 className="w-3 h-3 mr-1" />{prov.user_count} staff
                 </Badge>
               </button>
 
               {/* Districts */}
               {expanded[`prov-${prov.id}`] && (
-                <div className="border-t border-slate-800">
+                <div className="border-t border-slate-200">
                   {prov.districts.map((dist) => (
                     <div key={dist.id}>
                       <button
-                        className="w-full flex items-center justify-between px-8 py-2.5 hover:bg-slate-800/30 transition-colors"
+                        className="w-full flex items-center justify-between px-8 py-2.5 hover:bg-slate-50/50 transition-colors"
                         onClick={() => toggle(`dist-${dist.id}`)}
                       >
                         <div className="flex items-center gap-3">
                           {expanded[`dist-${dist.id}`] ? <ChevronDown className="w-3.5 h-3.5 text-blue-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-600" />}
                           <span className="text-slate-200 text-sm">{dist.name}</span>
-                          <Badge className="bg-slate-800 text-slate-500 border-0 text-xs">{dist.org_units.length} facilities</Badge>
+                          <Badge className="bg-slate-100 text-slate-500 border-0 text-xs">{dist.org_units.length} facilities</Badge>
                         </div>
-                        <Badge className={dist.user_count > 0 ? "bg-blue-500/20 text-blue-400 border-0 text-xs" : "bg-slate-800 text-slate-600 border-0 text-xs"}>
+                        <Badge className={dist.user_count > 0 ? "bg-blue-500/20 text-blue-400 border-0 text-xs" : "bg-slate-100 text-slate-600 border-0 text-xs"}>
                           <User2 className="w-3 h-3 mr-1" />{dist.user_count}
                         </Badge>
                       </button>
 
                       {/* Org Units / Facilities */}
                       {expanded[`dist-${dist.id}`] && (
-                        <div className="border-t border-slate-800/50">
+                        <div className="border-t border-slate-200/50">
                           {dist.org_units.length === 0 ? (
                             <p className="px-16 py-2 text-xs text-slate-600">No facilities</p>
                           ) : dist.org_units.map((unit) => (
                             <div key={unit.id}>
                               <button
-                                className="w-full flex items-center justify-between px-14 py-2 hover:bg-slate-800/20 transition-colors"
+                                className="w-full flex items-center justify-between px-14 py-2 hover:bg-slate-100/20 transition-colors"
                                 onClick={() => toggle(`unit-${unit.id}`)}
                               >
                                 <div className="flex items-center gap-3">
                                   {expanded[`unit-${unit.id}`] ? <ChevronDown className="w-3 h-3 text-teal-400" /> : <ChevronRight className="w-3 h-3 text-slate-700" />}
                                   <Building2 className="w-3.5 h-3.5 text-slate-500" />
-                                  <span className="text-slate-300 text-sm">{unit.name}</span>
+                                  <span className="text-slate-600 text-sm">{unit.name}</span>
                                 </div>
-                                <Badge className={unit.users.length > 0 ? "bg-teal-500/20 text-teal-400 border-0 text-xs" : "bg-slate-800 text-slate-600 border-0 text-xs"}>
+                                <Badge className={unit.users.length > 0 ? "bg-teal-500/20 text-teal-400 border-0 text-xs" : "bg-slate-100 text-slate-600 border-0 text-xs"}>
                                   <User2 className="w-3 h-3 mr-1" />{unit.users.length}
                                 </Badge>
                               </button>
 
                               {/* Users in this facility */}
                               {expanded[`unit-${unit.id}`] && (
-                                <div className="px-20 py-1 space-y-1 border-t border-slate-800/30">
+                                <div className="px-20 py-1 space-y-1 border-t border-slate-200/30">
                                   {unit.users.length === 0 ? (
                                     <p className="text-xs text-slate-600 py-1">No staff assigned</p>
                                   ) : unit.users.map((u) => (
                                     <div key={u.user_id} className="flex items-center justify-between py-1">
                                       <div className="flex items-center gap-2">
                                         <User2 className="w-3.5 h-3.5 text-slate-500" />
-                                        <span className="text-sm text-slate-300">{u.name}</span>
+                                        <span className="text-sm text-slate-600">{u.name}</span>
                                         <span className="text-xs text-slate-500">{u.position}</span>
                                       </div>
-                                      <Badge className="bg-slate-800 text-slate-500 border-0 text-xs capitalize">{u.assigned_shift?.replace("_", " ") || "—"}</Badge>
+                                      <Badge className="bg-slate-100 text-slate-500 border-0 text-xs capitalize">{u.assigned_shift?.replace("_", " ") || "—"}</Badge>
                                     </div>
                                   ))}
                                 </div>

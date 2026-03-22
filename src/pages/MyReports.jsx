@@ -61,26 +61,26 @@ function periodTypeLabel(t) {
 // ─── ReportHistoryItem ────────────────────────────────────────────────────────
 function ReportHistoryItem({ report, onDownload, downloading }) {
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col gap-2">
+    <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-2 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-white font-medium text-sm truncate">{report.period_label}</p>
-          <p className="text-slate-400 text-xs mt-0.5">
+          <p className="text-slate-900 font-medium text-sm truncate">{report.period_label}</p>
+          <p className="text-slate-500 text-xs mt-0.5">
             {formatDate(report.date_from)} – {formatDate(report.date_to)}
           </p>
         </div>
-        <span className="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">
+        <span className="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
           {periodTypeLabel(report.period_type)}
         </span>
       </div>
 
-      <div className="flex items-center gap-4 text-xs text-slate-400">
+      <div className="flex items-center gap-4 text-xs text-slate-500">
         <span className="flex items-center gap-1">
           <Clock className="w-3 h-3" />
           {report.record_count} record{report.record_count !== 1 ? 's' : ''}
         </span>
         {report.emailed && (
-          <span className="flex items-center gap-1 text-teal-400">
+          <span className="flex items-center gap-1 text-teal-600">
             <Mail className="w-3 h-3" />
             Emailed {formatDateTime(report.emailed_at)}
           </span>
@@ -91,7 +91,7 @@ function ReportHistoryItem({ report, onDownload, downloading }) {
         <button
           onClick={() => onDownload(report.report_id, report.period_label)}
           disabled={downloading === report.report_id}
-          className="flex-1 flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 disabled:bg-teal-800 disabled:opacity-60 text-white text-xs font-medium py-2 px-3 rounded-lg transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 disabled:opacity-60 text-white text-xs font-medium py-2 px-3 rounded-lg transition-colors"
         >
           {downloading === report.report_id ? (
             <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating…</>
@@ -101,7 +101,7 @@ function ReportHistoryItem({ report, onDownload, downloading }) {
         </button>
       </div>
 
-      <p className="text-slate-500 text-[11px]">
+      <p className="text-slate-400 text-[11px]">
         Generated {formatDateTime(report.created_at)}
       </p>
     </div>
@@ -249,22 +249,22 @@ export default function MyReports() {
     : 'your phone number (digits only)'
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white pb-24">
+    <div className="min-h-screen bg-slate-50 pb-24">
       {/* ── Header ── */}
-      <div className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center gap-3">
+      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-4 py-3 flex items-center gap-3">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+          className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-800"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2 flex-1">
-          <FileText className="w-5 h-5 text-teal-400" />
-          <h1 className="text-base font-semibold">My Reports</h1>
+          <FileText className="w-5 h-5 text-teal-600" />
+          <h1 className="text-base font-semibold text-slate-800">My Reports</h1>
         </div>
         <button
           onClick={fetchHistory}
-          className="p-2 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+          className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-800"
           title="Refresh history"
         >
           <RefreshCw className="w-4 h-4" />
@@ -274,15 +274,15 @@ export default function MyReports() {
       <div className="max-w-lg mx-auto px-4 pt-4 space-y-4">
 
         {/* ── Password Info Banner ── */}
-        <div className="bg-amber-900/30 border border-amber-700/50 rounded-xl p-4 flex gap-3">
-          <Lock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
+          <Lock className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
           <div>
-            <p className="text-amber-300 font-medium text-sm">Reports are password protected</p>
-            <p className="text-amber-200/70 text-xs mt-1">
+            <p className="text-amber-800 font-medium text-sm">Reports are password protected</p>
+            <p className="text-amber-700 text-xs mt-1">
               Your PDF password is your phone number (digits only).
             </p>
             {user?.phone_number && (
-              <p className="text-amber-300 text-xs mt-1 font-mono bg-amber-900/40 px-2 py-0.5 rounded inline-block">
+              <p className="text-amber-800 text-xs mt-1 font-mono bg-amber-100 px-2 py-0.5 rounded inline-block">
                 Password: {phoneHint}
               </p>
             )}
@@ -290,16 +290,16 @@ export default function MyReports() {
         </div>
 
         {/* ── Generate Report Card ── */}
-        <div className="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-700 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-teal-400" />
-            <h2 className="text-sm font-semibold text-white">Generate New Report</h2>
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-teal-600" />
+            <h2 className="text-sm font-semibold text-slate-800">Generate New Report</h2>
           </div>
 
           <div className="p-4 space-y-4">
             {/* Period selector */}
             <div>
-              <label className="text-xs font-medium text-slate-400 block mb-2">Report Period</label>
+              <label className="text-xs font-medium text-slate-500 block mb-2">Select Period</label>
               <div className="grid grid-cols-2 gap-2">
                 {PERIOD_OPTIONS.map(opt => (
                   <button
@@ -307,8 +307,8 @@ export default function MyReports() {
                     onClick={() => setPeriodType(opt.value)}
                     className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors border
                       ${periodType === opt.value
-                        ? 'bg-teal-600 border-teal-500 text-white'
-                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
+                        ? 'bg-teal-600 border-teal-600 text-white'
+                        : 'bg-white border-slate-200 text-slate-700 hover:border-teal-300 hover:bg-teal-50'
                       }`}
                   >
                     {opt.label}
@@ -321,41 +321,41 @@ export default function MyReports() {
             {periodType === 'custom' && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-400 block mb-1.5">From</label>
+                  <label className="text-xs font-medium text-slate-500 block mb-1.5">From</label>
                   <input
                     type="date"
                     value={customFrom}
                     onChange={e => setCustomFrom(e.target.value)}
                     max={customTo || new Date().toISOString().slice(0, 10)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
+                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-teal-500 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-400 block mb-1.5">To</label>
+                  <label className="text-xs font-medium text-slate-500 block mb-1.5">To</label>
                   <input
                     type="date"
                     value={customTo}
                     onChange={e => setCustomTo(e.target.value)}
                     min={customFrom}
                     max={new Date().toISOString().slice(0, 10)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-500 transition-colors"
+                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-teal-500 transition-colors"
                   />
                 </div>
               </div>
             )}
 
             {/* Email toggle */}
-            <div className="flex items-center justify-between bg-slate-800 rounded-lg px-4 py-3">
+            <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-3">
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-slate-400" />
                 <div>
-                  <p className="text-sm text-white font-medium">Send to my email</p>
-                  <p className="text-xs text-slate-400">Also email the PDF to {user?.email || 'your email'}</p>
+                  <p className="text-sm text-slate-800 font-medium">Send to my email</p>
+                  <p className="text-xs text-slate-500">Also email the PDF to {user?.email || 'your email'}</p>
                 </div>
               </div>
               <button
                 onClick={() => setSendEmail(v => !v)}
-                className={`relative w-11 h-6 rounded-full transition-colors ${sendEmail ? 'bg-teal-600' : 'bg-slate-600'}`}
+                className={`relative w-11 h-6 rounded-full transition-colors ${sendEmail ? 'bg-teal-600' : 'bg-slate-300'}`}
               >
                 <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${sendEmail ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
@@ -363,11 +363,11 @@ export default function MyReports() {
 
             {/* Success message after generation */}
             {lastGenerated && (
-              <div className="flex items-start gap-2 bg-teal-900/30 border border-teal-700/50 rounded-lg px-3 py-2.5">
-                <CheckCircle className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 bg-teal-50 border border-teal-200 rounded-lg px-3 py-2.5">
+                <CheckCircle className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-teal-300 text-sm font-medium">Report generated!</p>
-                  <p className="text-teal-200/70 text-xs mt-0.5">
+                  <p className="text-teal-800 text-sm font-medium">Report generated!</p>
+                  <p className="text-teal-700 text-xs mt-0.5">
                     {lastGenerated.recordCount} attendance record{lastGenerated.recordCount !== 1 ? 's' : ''} included.
                     {sendEmail && ' A copy was sent to your email.'}
                   </p>
@@ -379,7 +379,7 @@ export default function MyReports() {
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 disabled:bg-teal-800 disabled:opacity-60 text-white font-semibold py-3 px-4 rounded-xl transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 disabled:opacity-60 text-white font-semibold py-3 px-4 rounded-xl transition-colors"
             >
               {generating ? (
                 <><Loader2 className="w-5 h-5 animate-spin" /> Generating Report…</>
@@ -391,16 +391,16 @@ export default function MyReports() {
         </div>
 
         {/* ── Report History ── */}
-        <div className="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
           <button
             onClick={() => setShowHistory(v => !v)}
-            className="w-full px-4 py-3 border-b border-slate-700 flex items-center justify-between hover:bg-slate-800/50 transition-colors"
+            className="w-full px-4 py-3 border-b border-slate-100 flex items-center justify-between hover:bg-slate-50 transition-colors"
           >
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-teal-400" />
-              <h2 className="text-sm font-semibold text-white">Report History</h2>
+              <Clock className="w-4 h-4 text-teal-600" />
+              <h2 className="text-sm font-semibold text-slate-800">Report History</h2>
               {reports.length > 0 && (
-                <span className="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">
+                <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
                   {reports.length}
                 </span>
               )}
@@ -420,15 +420,15 @@ export default function MyReports() {
                   <span className="text-sm">Loading history…</span>
                 </div>
               ) : historyError ? (
-                <div className="flex items-center gap-2 text-red-400 py-4">
+                <div className="flex items-center gap-2 text-red-500 py-4">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <p className="text-sm">{historyError}</p>
                 </div>
               ) : reports.length === 0 ? (
                 <div className="text-center py-8">
-                  <FileText className="w-10 h-10 text-slate-600 mx-auto mb-2" />
-                  <p className="text-slate-400 text-sm">No reports generated yet.</p>
-                  <p className="text-slate-500 text-xs mt-1">Generate your first report above.</p>
+                  <FileText className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                  <p className="text-slate-500 text-sm">No reports generated yet.</p>
+                  <p className="text-slate-400 text-xs mt-1">Generate your first report above.</p>
                 </div>
               ) : (
                 <div className="space-y-3">

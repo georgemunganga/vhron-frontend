@@ -2,7 +2,7 @@
 import tailwindcssAnimate from "tailwindcss-animate"
 
 export default {
-  darkMode: ["class"],
+  darkMode: false, // dark mode disabled — app is light mode only
   content: [
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",

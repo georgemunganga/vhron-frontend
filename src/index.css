@@ -60,32 +60,7 @@ code, .mono {
         --vchron-error: #ef4444;
         --vchron-info: #3b82f6;
     }
-    .dark {
-        --background: 222 47% 11%;
-        --foreground: 210 40% 98%;
-        --card: 222 47% 11%;
-        --card-foreground: 210 40% 98%;
-        --popover: 222 47% 11%;
-        --popover-foreground: 210 40% 98%;
-        --primary: 173 58% 39%;
-        --primary-foreground: 0 0% 100%;
-        --secondary: 173 30% 18%;
-        --secondary-foreground: 141 79% 92%;
-        --muted: 217 33% 17%;
-        --muted-foreground: 215 20% 65%;
-        --accent: 199 89% 48%;
-        --accent-foreground: 0 0% 100%;
-        --destructive: 0 62% 30%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 217 33% 17%;
-        --input: 217 33% 17%;
-        --ring: 173 58% 39%;
-        --chart-1: 220 70% 50%;
-        --chart-2: 160 60% 45%;
-        --chart-3: 30 80% 55%;
-        --chart-4: 280 65% 60%;
-        --chart-5: 340 75% 55%;
-    }
+    /* dark mode removed — app is light mode only */
 }
 
 @layer base {
