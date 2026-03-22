@@ -41,6 +41,7 @@ const AppAuditTrail = lazy(() => import("@/pages/AuditTrail"));
 const AppAnalytics = lazy(() => import("@/pages/Analytics"));
 const AppAdminScoping = lazy(() => import("@/pages/AdminScoping"));
 const AppDeletionRequests = lazy(() => import("@/pages/DeletionRequests"));
+const AppMyReports = lazy(() => import("@/pages/MyReports"));
 
 import {
   API,
@@ -166,6 +167,7 @@ function AppRouter() {
         <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
         <Route path="/about" element={<ProtectedRoute><Suspense fallback={<PageLoader />}><AppAbout /></Suspense></ProtectedRoute>} />
         <Route path="/request-deletion" element={<ProtectedRoute><Suspense fallback={<PageLoader />}><AppRequestDeletion /></Suspense></ProtectedRoute>} />
+        <Route path="/my-reports" element={<ProtectedRoute><Suspense fallback={<PageLoader />}><AppMyReports /></Suspense></ProtectedRoute>} />
         <Route path="/audit-trail" element={<ProtectedRoute requireAdmin><Suspense fallback={<PageLoader />}><AppAuditTrail /></Suspense></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute requireAdmin><Suspense fallback={<PageLoader />}><AppAnalytics /></Suspense></ProtectedRoute>} />
         <Route path="/admin-scoping" element={<ProtectedRoute requireAdmin><Suspense fallback={<PageLoader />}><AppAdminScoping /></Suspense></ProtectedRoute>} />
@@ -199,6 +201,7 @@ function AppRouter() {
           <Route path="privacy-policy" element={<Suspense fallback={<AppPageLoader />}><AppPrivacyPolicy /></Suspense>} />
           <Route path="terms" element={<Suspense fallback={<AppPageLoader />}><AppTerms /></Suspense>} />
           <Route path="request-deletion" element={<Suspense fallback={<AppPageLoader />}><AppRequestDeletion /></Suspense>} />
+          <Route path="my-reports" element={<Suspense fallback={<AppPageLoader />}><AppMyReports /></Suspense>} />
           <Route path="audit-trail" element={<Suspense fallback={<AppPageLoader />}><AppAuditTrail /></Suspense>} />
           <Route path="analytics" element={<Suspense fallback={<AppPageLoader />}><AppAnalytics /></Suspense>} />
           <Route path="admin-scoping" element={<Suspense fallback={<AppPageLoader />}><AppAdminScoping /></Suspense>} />

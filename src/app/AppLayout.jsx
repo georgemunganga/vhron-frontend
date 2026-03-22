@@ -72,6 +72,7 @@ function Drawer({ open, onClose, user, role, onLogout }) {
   const navigate = useNavigate()
 
   const items = [
+    { label: 'My Reports', route: '/app/my-reports' },
     { label: 'About VChron', route: '/app/about' },
     { label: 'Privacy Policy', route: '/app/privacy-policy' },
     { label: 'Terms & Conditions', route: '/app/terms' },
@@ -246,6 +247,7 @@ export default function AppLayout() {
     '/app/admin-scoping': 'Admin Scoping',
     '/app/audit-trail': 'Audit Trail',
     '/app/deletion-requests': 'Deletion Requests',
+    '/app/my-reports': 'My Reports',
   }
   const pageTitle = titles[location.pathname] || 'VChron'
   const topOffset = showInstallBanner ? 'pt-[108px]' : 'pt-[60px]'
