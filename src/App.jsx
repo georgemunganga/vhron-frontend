@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 // Eagerly loaded pages (no leaflet dependency)
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
+import StaffLogin from "@/pages/StaffLogin";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import History from "@/pages/History";
@@ -137,6 +138,7 @@ function AppRouter() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/staff-login" element={<StaffLogin />} />
         <Route path="/register" element={<Register />} />
         <Route
           path="/complete-registration"

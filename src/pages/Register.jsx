@@ -179,9 +179,8 @@ export default function Register() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Step 1 state
-  const [creds, setCreds] = useState({ name: '', email: '', phone_number: '', password: '', confirmPassword: '' })
-  const [showPassword, setShowPassword] = useState(false)
+  // Step 1 state — no password (OTP-only auth for regular users)
+  const [creds, setCreds] = useState({ name: '', email: '', phone_number: '' })
 
   // Step 2 state
   const [otp, setOtp] = useState('')
@@ -253,14 +252,15 @@ export default function Register() {
   async function handleStep1(e) {
     e.preventDefault()
     setError('')
-    if (creds.password !== creds.confirmPassword) { setError('Passwords do not match'); return }
-    if (creds.password.length < 8) { setError('Password must be at least 8 characters'); return }
+    if (!creds.name || !creds.email || !creds.phone_number) {
+      setError('All fields are required'); return
+    }
     setLoading(true)
     try {
       const res = await fetch(`${API}/auth/register/step1`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: creds.name, email: creds.email, phone_number: creds.phone_number, password: creds.password }),
+        body: JSON.stringify({ name: creds.name, email: creds.email, phone_number: creds.phone_number }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.detail || 'Registration failed'); return }
@@ -298,7 +298,7 @@ export default function Register() {
       const res = await fetch(`${API}/auth/register/step1`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: creds.name, email: creds.email, phone_number: creds.phone_number, password: creds.password }),
+        body: JSON.stringify({ name: creds.name, email: creds.email, phone_number: creds.phone_number }),
       })
       if (res.ok) { setOtp(''); setResendCooldown(60) }
     } catch { setError('Failed to resend. Please try again.') }
@@ -369,24 +369,7 @@ export default function Register() {
                     value={creds.email} onChange={(e) => setCreds({ ...creds, email: e.target.value })}
                     className="w-full h-12 px-4 border border-slate-200 rounded-xl text-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                  <div className="relative">
-                    <input type={showPassword ? 'text' : 'password'} required placeholder="Min. 8 characters"
-                      value={creds.password} onChange={(e) => setCreds({ ...creds, password: e.target.value })}
-                      className="w-full h-12 px-4 pr-16 border border-slate-200 rounded-xl text-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-medium">
-                      {showPassword ? 'Hide' : 'Show'}
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
-                  <input type="password" required placeholder="Confirm your password"
-                    value={creds.confirmPassword} onChange={(e) => setCreds({ ...creds, confirmPassword: e.target.value })}
-                    className="w-full h-12 px-4 border border-slate-200 rounded-xl text-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none" />
-                </div>
+
                 {error && <p className="text-red-500 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
                 <button type="submit" disabled={loading}
                   className="w-full h-12 bg-teal-700 hover:bg-teal-800 text-white font-semibold rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
