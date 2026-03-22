@@ -191,7 +191,7 @@ const Register = () => {
               Create Account
             </CardTitle>
             <CardDescription className="text-slate-500">
-              Join VChron healthcare attendance system
+              Join VChron Attendance System
             </CardDescription>
           </CardHeader>
 

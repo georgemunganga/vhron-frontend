@@ -72,7 +72,7 @@ const Landing = () => {
           <div className="py-20 md:py-32 text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
               <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-              <span className="text-sm text-teal-100">Healthcare Attendance System</span>
+              <span className="text-sm text-teal-100">Attendance System</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 font-['Manrope'] tracking-tight">

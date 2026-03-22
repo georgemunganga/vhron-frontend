@@ -14,8 +14,8 @@ const SIZES = {
   xs: "h-6",
   sm: "h-8",
   md: "h-10",
-  lg: "h-12",
-  xl: "h-16",
+  lg: "h-16",
+  xl: "h-18",
 };
 
 const Logo = ({ variant = "dark", size = "md", className = "" }) => {
