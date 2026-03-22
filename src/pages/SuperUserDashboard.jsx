@@ -72,7 +72,18 @@ const SuperUserDashboard = () => {
               <span className="text-xs text-slate-400 hidden sm:block">{currentUser?.email}</span>
             </div>
           </div>
-          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">SUPERUSER</Badge>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 text-xs"
+              onClick={() => navigate('/audit-trail')}
+            >
+              <Shield className="w-3.5 h-3.5 mr-1" />
+              Audit Trail
+            </Button>
+            <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">SUPERUSER</Badge>
+          </div>
         </div>
       </header>
 

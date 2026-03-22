@@ -11,6 +11,11 @@ import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import History from "@/pages/History";
 import CompleteRegistration from "@/pages/CompleteRegistration";
+import AboutVChron from "@/pages/AboutVChron";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsAndConditions from "@/pages/TermsAndConditions";
+import RequestDeleteAccount from "@/pages/RequestDeleteAccount";
+import AuditTrail from "@/pages/AuditTrail";
 
 // Lazy-loaded pages that import react-leaflet (prevents LeafletContext TDZ crash)
 const AdminDashboard = React.lazy(() => import("@/pages/AdminDashboard"));
@@ -181,6 +186,39 @@ function AppRouter() {
               <Suspense fallback={<PageLoader />}>
                 <SuperUserDashboard />
               </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        {/* In-app informational & account pages (protected) */}
+        <Route
+          path="/about"
+          element={
+            <ProtectedRoute>
+              <AboutVChron />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/privacy-policy"
+          element={<PrivacyPolicy />}
+        />
+        <Route
+          path="/terms"
+          element={<TermsAndConditions />}
+        />
+        <Route
+          path="/request-deletion"
+          element={
+            <ProtectedRoute>
+              <RequestDeleteAccount />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/audit-trail"
+          element={
+            <ProtectedRoute requireAdmin>
+              <AuditTrail />
             </ProtectedRoute>
           }
         />

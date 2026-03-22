@@ -21,7 +21,11 @@ import {
   Menu,
   X,
   Phone,
-  Shield
+  Shield,
+  Info,
+  FileText,
+  Trash2,
+  ChevronDown
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import localforage from "localforage";
@@ -357,6 +361,34 @@ const Dashboard = () => {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-4">
+            {/* User dropdown menu */}
+            <div className="relative group">
+              <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-600 text-sm font-medium transition-colors">
+                <div className="w-7 h-7 bg-teal-100 rounded-full flex items-center justify-center">
+                  {user?.picture
+                    ? <img src={user.picture} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
+                    : <User className="w-4 h-4 text-teal-600" />}
+                </div>
+                <span className="max-w-[120px] truncate">{user?.name?.split(' ')[0]}</span>
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+              {/* Dropdown */}
+              <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-lg border border-slate-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <button onClick={() => navigate('/about')} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                  <Info className="w-4 h-4 text-teal-600" /> About VChron
+                </button>
+                <button onClick={() => navigate('/privacy-policy')} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                  <FileText className="w-4 h-4 text-teal-600" /> Privacy Policy
+                </button>
+                <button onClick={() => navigate('/terms')} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                  <FileText className="w-4 h-4 text-teal-600" /> Terms &amp; Conditions
+                </button>
+                <div className="border-t border-slate-100 my-1" />
+                <button onClick={() => navigate('/request-deletion')} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                  <Trash2 className="w-4 h-4" /> Request Account Deletion
+                </button>
+              </div>
+            </div>
             {isOnline && (
               <div className="flex items-center gap-1 text-emerald-600 text-sm">
                 <Wifi className="w-4 h-4" />
@@ -468,14 +500,36 @@ const Dashboard = () => {
                 </Button>
               </>
             )}
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-slate-600"
-              onClick={handleLogout}
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+            {/* Mobile user menu links */}
+            <div className="border-t border-slate-100 pt-2 mt-1 space-y-1">
+              <p className="text-xs font-semibold text-slate-400 px-2 pb-1">Account</p>
+              <Button variant="ghost" className="w-full justify-start text-slate-600"
+                onClick={() => { navigate('/about'); setMobileMenuOpen(false); }}>
+                <Info className="w-4 h-4 mr-2 text-teal-600" /> About VChron
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-slate-600"
+                onClick={() => { navigate('/privacy-policy'); setMobileMenuOpen(false); }}>
+                <FileText className="w-4 h-4 mr-2 text-teal-600" /> Privacy Policy
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-slate-600"
+                onClick={() => { navigate('/terms'); setMobileMenuOpen(false); }}>
+                <FileText className="w-4 h-4 mr-2 text-teal-600" /> Terms &amp; Conditions
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-red-600"
+                onClick={() => { navigate('/request-deletion'); setMobileMenuOpen(false); }}>
+                <Trash2 className="w-4 h-4 mr-2" /> Request Account Deletion
+              </Button>
+            </div>
+            <div className="border-t border-slate-100 pt-2">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-slate-600"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         )}
       </header>

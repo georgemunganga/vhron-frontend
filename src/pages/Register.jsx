@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { API } from '../lib/api'
+import PrivacyPolicy from './PrivacyPolicy'
+import TermsAndConditions from './TermsAndConditions'
 
 // ─── Searchable Dropdown Component ───────────────────────────────────────────
 
@@ -181,6 +183,8 @@ export default function Register() {
 
   // Step 1 state — no password (OTP-only auth for regular users)
   const [creds, setCreds] = useState({ name: '', email: '', phone_number: '' })
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [showPolicyModal, setShowPolicyModal] = useState(null) // 'privacy' | 'terms' | null
 
   // Step 2 state
   const [otp, setOtp] = useState('')
@@ -254,6 +258,9 @@ export default function Register() {
     setError('')
     if (!creds.name || !creds.email || !creds.phone_number) {
       setError('All fields are required'); return
+    }
+    if (!agreedToTerms) {
+      setError('You must agree to the Privacy Policy and Terms & Conditions to continue'); return
     }
     setLoading(true)
     try {
@@ -370,8 +377,31 @@ export default function Register() {
                     className="w-full h-12 px-4 border border-slate-200 rounded-xl text-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none" />
                 </div>
 
+                {/* T&C Checkbox */}
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                  <input
+                    type="checkbox"
+                    id="agree-terms"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 accent-teal-600 cursor-pointer flex-shrink-0"
+                  />
+                  <label htmlFor="agree-terms" className="text-xs text-slate-600 leading-relaxed cursor-pointer">
+                    I have read and agree to the{' '}
+                    <button type="button" onClick={() => setShowPolicyModal('privacy')}
+                      className="text-teal-600 hover:text-teal-700 font-medium underline">
+                      Privacy Policy
+                    </button>{' '}and{' '}
+                    <button type="button" onClick={() => setShowPolicyModal('terms')}
+                      className="text-teal-600 hover:text-teal-700 font-medium underline">
+                      Terms &amp; Conditions
+                    </button>.
+                    I understand that my attendance data will be processed by VChron on behalf of my employer.
+                  </label>
+                </div>
+
                 {error && <p className="text-red-500 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
-                <button type="submit" disabled={loading}
+                <button type="submit" disabled={loading || !agreedToTerms}
                   className="w-full h-12 bg-teal-700 hover:bg-teal-800 text-white font-semibold rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
                   {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Continue →'}
                 </button>
@@ -484,6 +514,25 @@ export default function Register() {
           A product of <span className="font-medium text-slate-500">GreenWebb</span>
         </p>
       </div>
+
+      {/* Policy / T&C Modal */}
+      {showPolicyModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white w-full sm:max-w-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            {showPolicyModal === 'privacy'
+              ? <PrivacyPolicy modal onClose={() => setShowPolicyModal(null)} />
+              : <TermsAndConditions modal onClose={() => setShowPolicyModal(null)} />
+            }
+            <div className="sticky bottom-0 bg-white border-t border-slate-200 p-4">
+              <button
+                onClick={() => { setAgreedToTerms(true); setShowPolicyModal(null) }}
+                className="w-full h-11 bg-teal-700 hover:bg-teal-800 text-white font-semibold rounded-xl transition-colors">
+                I Agree &amp; Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
