@@ -31,7 +31,8 @@ import {
   Bell,
   AlertTriangle,
   Navigation,
-  X
+  X,
+  Trash2
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
@@ -303,6 +304,15 @@ const AdminDashboard = () => {
           </div>
           
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/deletion-requests')}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-1" />
+              <span className="hidden sm:inline">Deletion Requests</span>
+            </Button>
             <Button
               variant="outline"
               size="sm"
