@@ -116,7 +116,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchAreas = async () => {
       try {
-        const response = await authFetch(`${API}/areas`);
+        const response = await authFetch(`${API}/data/areas`);
         if (response.ok) {
           const data = await response.json();
           setAreas(data.areas || []);
