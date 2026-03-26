@@ -39,7 +39,9 @@ import {
   User2,
   Phone,
   CalendarDays,
-  ExternalLink
+  ExternalLink,
+  CheckCircle2,
+  BarChart3
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
@@ -337,29 +339,33 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+          <TabsList className="grid grid-cols-6 w-full max-w-3xl">
             <TabsTrigger value="realtime" data-testid="tab-realtime">
               <Activity className="w-4 h-4 mr-2" />
-              Real-time
+              <span className="hidden sm:inline">Real-time</span>
             </TabsTrigger>
             <TabsTrigger value="users" data-testid="tab-users">
               <Users className="w-4 h-4 mr-2" />
-              Users
+              <span className="hidden sm:inline">Users</span>
             </TabsTrigger>
             <TabsTrigger value="attendance" data-testid="tab-attendance">
               <Clock className="w-4 h-4 mr-2" />
-              Attendance
+              <span className="hidden sm:inline">Attendance</span>
+            </TabsTrigger>
+            <TabsTrigger value="reports" data-testid="tab-reports">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Reports</span>
             </TabsTrigger>
             <TabsTrigger value="notifications" data-testid="tab-notifications" className="relative">
               <Bell className="w-4 h-4 mr-2" />
-              Alerts
+              <span className="hidden sm:inline">Alerts</span>
               {notifCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">{notifCount}</span>
               )}
             </TabsTrigger>
             <TabsTrigger value="org-tree" data-testid="tab-org-tree">
               <Network className="w-4 h-4 mr-2" />
-              Org Tree
+              <span className="hidden sm:inline">Org Tree</span>
             </TabsTrigger>
           </TabsList>
 
@@ -876,12 +882,185 @@ const AdminDashboard = () => {
             </div>
           </TabsContent>
 
+          {/* Reports Tab */}
+          <TabsContent value="reports" className="space-y-6">
+            <AdminReportsTab />
+          </TabsContent>
+
           {/* Org Tree Tab */}
           <TabsContent value="org-tree" className="space-y-6">
             <OrgTreeAdminTab />
           </TabsContent>
         </Tabs>
       </main>
+    </div>
+  );
+};
+
+// ============ ADMIN REPORTS TAB ============
+const AdminReportsTab = () => {
+  const [stats, setStats] = useState(null);
+  const [report, setReport] = useState(null);
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [facilityFilter, setFacilityFilter] = useState("");
+  const [facilities, setFacilities] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Fetch stats and facilities on mount
+  useEffect(() => {
+    authFetch(`${API}/admin/stats`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setStats(d); });
+    authFetch(`${API}/data/facilities`)
+      .then(r => r.ok ? r.json() : { facilities: [] })
+      .then(d => setFacilities(d.facilities || []));
+  }, []);
+
+  const fetchReport = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (date) params.append("date", new Date(date).toISOString());
+      if (facilityFilter) params.append("facility", facilityFilter);
+      const res = await authFetch(`${API}/admin/attendance-report?${params}`);
+      if (res.ok) setReport(await res.json());
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  }, [date, facilityFilter]);
+
+  useEffect(() => { fetchReport(); }, [fetchReport]);
+
+  const filteredRecords = (report?.attendance || []).filter(r => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return r.user_name?.toLowerCase().includes(q) || r.facility?.toLowerCase().includes(q) || r.position?.toLowerCase().includes(q);
+  });
+
+  const statCards = [
+    { label: "Today's Logins", value: stats?.today_logins || 0, icon: Activity, color: "text-teal-600", bg: "bg-teal-50" },
+    { label: "Currently On Duty", value: stats?.currently_on_duty || 0, icon: Clock, color: "text-green-600", bg: "bg-green-50" },
+    { label: "Late Today", value: stats?.today_late || 0, icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50" },
+    { label: "On Time Today", value: stats?.today_on_time || 0, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
+    { label: "Early Today", value: stats?.today_early || 0, icon: CalendarDays, color: "text-sky-600", bg: "bg-sky-50" },
+    { label: "Total Records", value: stats?.total_attendance || 0, icon: BarChart3, color: "text-purple-600", bg: "bg-purple-50" },
+  ];
+
+  return (
+    <div className="space-y-6" data-testid="admin-reports">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {statCards.map((c) => (
+          <Card key={c.label} className="border-slate-200 shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">{c.label}</p>
+                  <p className={`text-3xl font-bold font-['Manrope'] ${c.color}`}>{c.value}</p>
+                </div>
+                <div className={`w-12 h-12 ${c.bg} rounded-xl flex items-center justify-center`}>
+                  <c.icon className={`w-6 h-6 ${c.color}`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <Card className="border-slate-200 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-3 items-end">
+            <div>
+              <Label className="text-xs text-slate-500 mb-1 block">Date</Label>
+              <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-40" data-testid="admin-report-date" />
+            </div>
+            <div>
+              <Label className="text-xs text-slate-500 mb-1 block">Facility</Label>
+              <Select value={facilityFilter || "_none"} onValueChange={v => setFacilityFilter(v === "_none" ? "" : v)}>
+                <SelectTrigger className="w-48" data-testid="admin-report-facility">
+                  <SelectValue placeholder="All Facilities" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">All Facilities</SelectItem>
+                  {facilities.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1 min-w-48">
+              <Label className="text-xs text-slate-500 mb-1 block">Search</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input placeholder="Name, facility..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9" data-testid="admin-report-search" />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Records Table */}
+      <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-['Manrope'] flex items-center gap-2">
+            <Activity className="w-4 h-4 text-teal-600" />
+            Attendance Records
+            {report && <Badge variant="outline" className="ml-2 text-xs">{filteredRecords.length} records</Badge>}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : filteredRecords.length === 0 ? (
+            <div className="text-center py-12 text-slate-400">
+              <Activity className="w-12 h-12 mx-auto mb-3 text-slate-200" />
+              <p>No attendance records found</p>
+            </div>
+          ) : (
+            <ScrollArea className="h-[500px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Position</TableHead>
+                    <TableHead>Facility</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead>Shift</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredRecords.map(r => (
+                    <TableRow key={r.attendance_id}>
+                      <TableCell className="font-medium">{r.user_name}</TableCell>
+                      <TableCell className="text-slate-500 text-sm">{r.position}</TableCell>
+                      <TableCell className="text-slate-500 text-sm">{r.facility}</TableCell>
+                      <TableCell>
+                        <Badge className={r.action === 'login' ? 'bg-teal-100 text-teal-700 border-0' : 'bg-slate-100 text-slate-600 border-0'}>
+                          {r.action === 'login' ? 'Clock In' : 'Clock Out'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">{new Date(r.timestamp).toLocaleTimeString()}</TableCell>
+                      <TableCell className="text-sm capitalize">{r.shift_type?.replace('_', ' ') || '-'}</TableCell>
+                      <TableCell>
+                        {r.status === 'late' ? (
+                          <Badge className="bg-red-100 text-red-700 border-0 text-xs">Late {r.late_display ? `(${r.late_display})` : ''}</Badge>
+                        ) : r.status === 'on_time' ? (
+                          <Badge className="bg-emerald-100 text-emerald-700 border-0 text-xs">On Time</Badge>
+                        ) : r.status === 'early' ? (
+                          <Badge className="bg-sky-100 text-sky-700 border-0 text-xs">Early</Badge>
+                        ) : <span className="text-slate-400 text-xs">-</span>}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

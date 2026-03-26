@@ -173,6 +173,9 @@ const OverviewTab = () => {
     { label: "Facilities", value: stats?.total_facilities || 0, icon: Building2, color: "text-purple-400", bg: "bg-purple-500/10" },
     { label: "Today's Logins", value: stats?.today_logins || 0, icon: Activity, color: "text-teal-400", bg: "bg-teal-500/10" },
     { label: "Currently On Duty", value: stats?.currently_on_duty || 0, icon: Clock, color: "text-green-400", bg: "bg-green-500/10" },
+    { label: "Late Today", value: stats?.today_late || 0, icon: AlertTriangle, color: "text-red-400", bg: "bg-red-500/10" },
+    { label: "On Time Today", value: stats?.today_on_time || 0, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+    { label: "Early Today", value: stats?.today_early || 0, icon: CalendarDays, color: "text-sky-400", bg: "bg-sky-500/10" },
   ];
 
   return (
@@ -635,7 +638,7 @@ const ReportsTab = () => {
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const res = await authFetch(`${API}/provinces`);
+        const res = await authFetch(`${API}/data/provinces`);
         if (res.ok) { const d = await res.json(); setProvinces(d.provinces || []); }
       } catch (e) { console.error(e); }
     };
@@ -647,7 +650,7 @@ const ReportsTab = () => {
     if (!provinceFilter) { setDistrictsList([]); setDistrictFilter(""); setFacilitiesList([]); setFacilityFilter(""); return; }
     const fetchDistricts = async () => {
       try {
-        const res = await authFetch(`${API}/districts/${encodeURIComponent(provinceFilter)}`);
+        const res = await authFetch(`${API}/data/districts/${encodeURIComponent(provinceFilter)}`);
         if (res.ok) { const d = await res.json(); setDistrictsList(d.districts || []); }
       } catch (e) { console.error(e); }
     };
@@ -662,7 +665,7 @@ const ReportsTab = () => {
     if (!districtFilter) { setFacilitiesList([]); setFacilityFilter(""); return; }
     const fetchFacilities = async () => {
       try {
-        const res = await authFetch(`${API}/facilities/${encodeURIComponent(districtFilter)}`);
+        const res = await authFetch(`${API}/data/facilities/${encodeURIComponent(districtFilter)}`);
         if (res.ok) { const d = await res.json(); setFacilitiesList(d.facilities || []); }
       } catch (e) { console.error(e); }
     };
