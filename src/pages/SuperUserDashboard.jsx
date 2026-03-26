@@ -15,7 +15,7 @@ import {
   ArrowLeft, Users, Activity, Download, Search, Shield, Building2,
   Edit, Trash2, KeyRound, UserPlus, Clock, Settings, BarChart3,
   ChevronRight, AlertTriangle, CheckCircle2, XCircle, RefreshCw, Plus,
-  Landmark, Network, ChevronDown, User2
+  Landmark, Network, ChevronDown, User2, Phone, Mail, X, CalendarDays, ExternalLink
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
@@ -334,9 +334,9 @@ const UsersTab = ({ currentUser }) => {
 // ============ FACILITIES TAB ============
 const FacilitiesTab = () => {
   const [facilities, setFacilities] = useState([]);
-  const [newFacility, setNewFacility] = useState({ name: "", district: "", province: "" });
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState({});
+  const [provinces, setProvinces] = useState([]);  // [{id, name}]
+  const [allDistricts, setAllDistricts] = useState([]); // [{id, name, province_id}]
+  const [newFac, setNewFac] = useState({ name: "", province_id: "", district_id: "" });
   const [adding, setAdding] = useState(false);
   const [facilitySearch, setFacilitySearch] = useState("");
   const [provinceFilter, setProvinceFilter] = useState("all");
@@ -344,62 +344,67 @@ const FacilitiesTab = () => {
 
   const fetchFacilities = useCallback(async () => {
     try {
-      const res = await authFetch(`${API}/superuser/facilities`, { });
+      const res = await authFetch(`${API}/superuser/facilities`);
       if (res.ok) { const data = await res.json(); setFacilities(data.facilities || []); }
     } catch (e) { console.error(e); }
   }, []);
 
   useEffect(() => {
     fetchFacilities();
-    const fetchLocations = async () => {
-      try {
-        const [pRes, dRes] = await Promise.all([
-          authFetch(`${API}/superuser/provinces`, { }),
-          authFetch(`${API}/superuser/districts`, { })
-        ]);
-        if (pRes.ok) { const d = await pRes.json(); setProvinces(d.provinces || []); }
-        if (dRes.ok) { const d = await dRes.json(); setDistricts(d.districts || {}); }
-      } catch (e) { console.error(e); }
-    };
-    fetchLocations();
+    // Fetch provinces and districts from org-tree geography
+    authFetch(`${API}/superuser/org-tree`)
+      .then(r => r.ok ? r.json() : { tree: [] })
+      .then(d => {
+        const provs = (d.tree || []).map(p => ({ id: p.id, name: p.name }));
+        const dists = (d.tree || []).flatMap(p =>
+          (p.districts || []).map(dist => ({ id: dist.id, name: dist.name, province_id: p.id }))
+        );
+        setProvinces(provs);
+        setAllDistricts(dists);
+      })
+      .catch(() => {});
   }, [fetchFacilities]);
 
   const handleAddFacility = async () => {
-    if (!newFacility.name || !newFacility.district || !newFacility.province) {
-      toast.error("All fields are required"); return;
+    if (!newFac.name || !newFac.district_id) {
+      toast.error("Facility name and district are required"); return;
     }
     setAdding(true);
     try {
       const res = await authFetch(`${API}/superuser/facilities`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newFacility)
+        body: JSON.stringify({ name: newFac.name, district_id: newFac.district_id })
       });
-      if (res.ok) { toast.success("Facility added"); setNewFacility({ name: "", district: "", province: "" }); fetchFacilities(); }
+      if (res.ok) { toast.success("Facility added"); setNewFac({ name: "", province_id: "", district_id: "" }); fetchFacilities(); }
       else { const e = await res.json(); toast.error(e.detail); }
     } catch { toast.error("Failed to add facility"); }
     finally { setAdding(false); }
   };
 
-  const handleDeleteFacility = async (facilityId) => {
+  const handleDeleteFacility = async (id) => {
     try {
-      const res = await authFetch(`${API}/superuser/facilities/${facilityId}`, { method: "DELETE" });
+      const res = await authFetch(`${API}/superuser/facilities/${id}`, { method: "DELETE" });
       if (res.ok) { toast.success("Facility deleted"); fetchFacilities(); }
       else { const e = await res.json(); toast.error(e.detail); }
     } catch { toast.error("Failed to delete facility"); }
   };
 
-  const selectedProvinceDistricts = districts[newFacility.province] || [];
+  const filteredDistricts = newFac.province_id
+    ? allDistricts.filter(d => String(d.province_id) === String(newFac.province_id))
+    : allDistricts;
 
-  // Filter facilities based on search + province/district filters
   const filteredFacilities = facilities.filter((f) => {
-    const matchesSearch = !facilitySearch || f.name.toLowerCase().includes(facilitySearch.toLowerCase()) || f.district?.toLowerCase().includes(facilitySearch.toLowerCase());
-    const matchesProvince = provinceFilter === "all" || f.province === provinceFilter;
-    const matchesDistrict = districtFilter === "all" || f.district === districtFilter;
+    const matchesSearch = !facilitySearch ||
+      f.name.toLowerCase().includes(facilitySearch.toLowerCase()) ||
+      f.district?.toLowerCase().includes(facilitySearch.toLowerCase());
+    const matchesProvince = provinceFilter === "all" || f.province === provinces.find(p => String(p.id) === provinceFilter)?.name;
+    const matchesDistrict = districtFilter === "all" || f.district === allDistricts.find(d => String(d.id) === districtFilter)?.name;
     return matchesSearch && matchesProvince && matchesDistrict;
   });
 
-  // Get unique districts from facilities for the filter dropdown
-  const facilityDistrictsList = [...new Set(facilities.filter(f => provinceFilter === "all" || f.province === provinceFilter).map(f => f.district).filter(Boolean))].sort();
+  const districtFilterList = provinceFilter === "all"
+    ? allDistricts
+    : allDistricts.filter(d => String(d.province_id) === provinceFilter);
 
   return (
     <div className="space-y-6" data-testid="su-facilities">
@@ -407,29 +412,34 @@ const FacilitiesTab = () => {
       <Card className="bg-white border-slate-200">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-['Manrope'] text-slate-800 flex items-center gap-2">
-            <Plus className="w-4 h-4 text-amber-400" /> Add New Facility
+            <Plus className="w-4 h-4 text-amber-500" /> Add New Facility
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <Select value={newFacility.province} onValueChange={(v) => setNewFacility(p => ({ ...p, province: v, district: "" }))}>
-              <SelectTrigger className="bg-slate-100 border-slate-200 text-slate-900" data-testid="su-fac-province">
-                <SelectValue placeholder="Province" />
+            <Select value={newFac.province_id} onValueChange={(v) => setNewFac(p => ({ ...p, province_id: v, district_id: "" }))}>
+              <SelectTrigger className="bg-slate-100 border-slate-200 text-slate-900">
+                <SelectValue placeholder="Province (optional)" />
               </SelectTrigger>
               <SelectContent>
-                {provinces.map((p) => <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>)}
+                {provinces.map((p) => <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select value={newFacility.district} onValueChange={(v) => setNewFacility(p => ({ ...p, district: v }))}>
-              <SelectTrigger className="bg-slate-100 border-slate-200 text-slate-900" data-testid="su-fac-district">
-                <SelectValue placeholder="District" />
+            <Select value={newFac.district_id} onValueChange={(v) => setNewFac(p => ({ ...p, district_id: v }))}>
+              <SelectTrigger className="bg-slate-100 border-slate-200 text-slate-900">
+                <SelectValue placeholder="District *" />
               </SelectTrigger>
               <SelectContent>
-                {selectedProvinceDistricts.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                {filteredDistricts.map((d) => <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Input placeholder="Facility name" value={newFacility.name} onChange={(e) => setNewFacility(p => ({ ...p, name: e.target.value }))} className="bg-slate-100 border-slate-200 text-slate-900" data-testid="su-fac-name" />
-            <Button onClick={handleAddFacility} disabled={adding} className="bg-amber-600 hover:bg-amber-700 text-white" data-testid="su-add-facility-btn">
+            <Input
+              placeholder="Facility name *"
+              value={newFac.name}
+              onChange={(e) => setNewFac(p => ({ ...p, name: e.target.value }))}
+              className="bg-slate-100 border-slate-200 text-slate-900"
+            />
+            <Button onClick={handleAddFacility} disabled={adding} className="bg-amber-600 hover:bg-amber-700 text-white">
               <Plus className="w-4 h-4 mr-2" />{adding ? "Adding..." : "Add"}
             </Button>
           </div>
@@ -439,60 +449,85 @@ const FacilitiesTab = () => {
       {/* Search & Filter */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-          <Input placeholder="Search facilities by name or district..." value={facilitySearch} onChange={(e) => setFacilitySearch(e.target.value)} className="pl-9 bg-white border-slate-200 text-slate-900" data-testid="su-facility-search" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            placeholder="Search by name or district…"
+            value={facilitySearch}
+            onChange={(e) => setFacilitySearch(e.target.value)}
+            className="pl-9 bg-white border-slate-200 text-slate-900"
+          />
         </div>
         <Select value={provinceFilter} onValueChange={(v) => { setProvinceFilter(v); setDistrictFilter("all"); }}>
-          <SelectTrigger className="w-48 bg-white border-slate-200 text-slate-900" data-testid="su-fac-filter-province">
-            <SelectValue placeholder="Filter province" />
+          <SelectTrigger className="w-44 bg-white border-slate-200 text-slate-900">
+            <SelectValue placeholder="Province" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Provinces</SelectItem>
-            {provinces.map((p) => <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>)}
+            {provinces.map((p) => <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={districtFilter} onValueChange={setDistrictFilter}>
-          <SelectTrigger className="w-48 bg-white border-slate-200 text-slate-900" data-testid="su-fac-filter-district">
-            <SelectValue placeholder="Filter district" />
+          <SelectTrigger className="w-44 bg-white border-slate-200 text-slate-900">
+            <SelectValue placeholder="District" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Districts</SelectItem>
-            {facilityDistrictsList.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+            {districtFilterList.map((d) => <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
-      {/* Facilities List */}
+      {/* Facilities Table */}
       <Card className="bg-white border-slate-200">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-['Manrope'] text-slate-900">{filteredFacilities.length} of {facilities.length} Facilities</CardTitle>
+          <CardTitle className="text-base font-['Manrope'] text-slate-900">
+            {filteredFacilities.length} of {facilities.length} Facilities
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="max-h-[500px]">
+          <ScrollArea className="max-h-[520px]">
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-200 hover:bg-transparent">
                   <TableHead className="text-slate-500">Name</TableHead>
                   <TableHead className="text-slate-500">District</TableHead>
                   <TableHead className="text-slate-500">Province</TableHead>
+                  <TableHead className="text-slate-500">Ministry</TableHead>
+                  <TableHead className="text-slate-500 text-center">Staff</TableHead>
                   <TableHead className="text-slate-500 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredFacilities.map((f) => (
-                  <TableRow key={f.facility_id} className="border-slate-200 hover:bg-slate-50/80">
+                  <TableRow key={f.id} className="border-slate-200 hover:bg-slate-50">
                     <TableCell className="text-slate-900 font-medium">{f.name}</TableCell>
-                    <TableCell className="text-slate-500">{f.district}</TableCell>
-                    <TableCell className="text-slate-500">{f.province}</TableCell>
+                    <TableCell className="text-slate-500 text-sm">{f.district || "—"}</TableCell>
+                    <TableCell className="text-slate-500 text-sm">{f.province || "—"}</TableCell>
+                    <TableCell className="text-slate-500 text-sm">{f.ministry || "—"}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge className={f.staff_count > 0 ? "bg-teal-100 text-teal-700 border-0" : "bg-slate-100 text-slate-500 border-0"}>
+                        <Users className="w-3 h-3 mr-1" />{f.staff_count}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteFacility(f.facility_id)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10" data-testid={`su-del-fac-${f.facility_id}`}>
+                      <Button
+                        variant="ghost" size="sm"
+                        onClick={() => handleDeleteFacility(f.id)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        title={f.staff_count > 0 ? "Cannot delete: staff assigned" : "Delete facility"}
+                        disabled={f.staff_count > 0}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </TableCell>
                   </TableRow>
                 ))}
                 {filteredFacilities.length === 0 && (
-                  <TableRow><TableCell colSpan={4} className="text-center py-12 text-slate-500">{facilities.length === 0 ? "No facilities. Add one above." : "No facilities match your search."}</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12 text-slate-400">
+                      {facilities.length === 0 ? "Loading facilities…" : "No facilities match your search."}
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </Table>
@@ -1203,12 +1238,108 @@ const MinistriesTab = () => {
 };
 
 // ============ ORG TREE TAB ============
+// ── Staff Profile Panel (shared by both org tree components) ──────────────────
+const StaffProfilePanel = ({ user, onClose }) => {
+  if (!user) return null;
+  const initials = user.name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "?";
+  const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "—";
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+      <div
+        className="w-full max-w-sm bg-white shadow-2xl border-l border-slate-200 h-full overflow-y-auto flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <h3 className="font-semibold text-slate-900 font-['Manrope']">Staff Profile</h3>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        {/* Avatar + name */}
+        <div className="flex flex-col items-center gap-3 px-5 py-6 bg-slate-50 border-b border-slate-100">
+          <div className="w-16 h-16 rounded-full bg-teal-500/20 flex items-center justify-center">
+            <span className="text-2xl font-bold text-teal-600 font-['Manrope']">{initials}</span>
+          </div>
+          <div className="text-center">
+            <p className="font-semibold text-slate-900 text-lg">{user.name}</p>
+            <p className="text-sm text-slate-500">{user.position || "—"}</p>
+            <Badge className={`mt-1 text-xs capitalize ${
+              user.role === "admin" ? "bg-purple-100 text-purple-700 border-0" :
+              user.role === "superuser" ? "bg-amber-100 text-amber-700 border-0" :
+              "bg-teal-100 text-teal-700 border-0"
+            }`}>{user.role || "staff"}</Badge>
+          </div>
+        </div>
+        {/* Details */}
+        <div className="flex-1 px-5 py-4 space-y-4">
+          {user.email && (
+            <div className="flex items-start gap-3">
+              <Mail className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400 uppercase tracking-wide">Email</p>
+                <p className="text-sm text-slate-700 break-all">{user.email}</p>
+              </div>
+            </div>
+          )}
+          {user.phone && (
+            <div className="flex items-start gap-3">
+              <Phone className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400 uppercase tracking-wide">Phone</p>
+                <p className="text-sm text-slate-700">{user.phone}</p>
+              </div>
+            </div>
+          )}
+          {user.facility && (
+            <div className="flex items-start gap-3">
+              <Building2 className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400 uppercase tracking-wide">Facility</p>
+                <p className="text-sm text-slate-700">{user.facility}</p>
+              </div>
+            </div>
+          )}
+          {user.assigned_shift && (
+            <div className="flex items-start gap-3">
+              <Clock className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-slate-400 uppercase tracking-wide">Assigned Shift</p>
+                <p className="text-sm text-slate-700 capitalize">{user.assigned_shift.replace(/_/g, " ")}</p>
+              </div>
+            </div>
+          )}
+          <div className="flex items-start gap-3">
+            <CalendarDays className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-xs text-slate-400 uppercase tracking-wide">Joined</p>
+              <p className="text-sm text-slate-700">{joinDate}</p>
+            </div>
+          </div>
+        </div>
+        {/* Footer action */}
+        <div className="px-5 py-4 border-t border-slate-100">
+          <a
+            href={`/superuser?user=${user.user_id}`}
+            className="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-teal-500/10 text-teal-700 hover:bg-teal-500/20 text-sm font-medium transition-colors"
+          >
+            <ExternalLink className="w-4 h-4" />
+            View Full Profile
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const OrgTreeTab = () => {
   const [tree, setTree] = useState([]);
   const [ministries, setMinistries] = useState([]);
   const [ministryFilter, setMinistryFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState({});
+  const [search, setSearch] = useState("");
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     authFetch(`${API}/superuser/ministries`)
@@ -1227,40 +1358,101 @@ const OrgTreeTab = () => {
 
   const toggle = (key) => setExpanded(p => ({ ...p, [key]: !p[key] }));
 
+  // ── Search filtering ──────────────────────────────────────────────────────
+  const q = search.toLowerCase().trim();
+  const filteredTree = q === "" ? tree : tree
+    .map(prov => ({
+      ...prov,
+      districts: prov.districts
+        .map(dist => ({
+          ...dist,
+          org_units: dist.org_units
+            .map(unit => ({
+              ...unit,
+              users: unit.users.filter(u =>
+                u.name?.toLowerCase().includes(q) ||
+                u.position?.toLowerCase().includes(q) ||
+                u.email?.toLowerCase().includes(q)
+              )
+            }))
+            .filter(unit => unit.users.length > 0 ||
+              unit.name?.toLowerCase().includes(q))
+        }))
+        .filter(dist => dist.org_units.length > 0 ||
+          dist.name?.toLowerCase().includes(q))
+    }))
+    .filter(prov => prov.districts.length > 0 ||
+      prov.name?.toLowerCase().includes(q));
+
+  // Auto-expand all when searching
+  useEffect(() => {
+    if (q) {
+      const keys = {};
+      filteredTree.forEach(prov => {
+        keys[`prov-${prov.id}`] = true;
+        prov.districts.forEach(dist => {
+          keys[`dist-${dist.id}`] = true;
+          dist.org_units.forEach(unit => { keys[`unit-${unit.id}`] = true; });
+        });
+      });
+      setExpanded(keys);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q]);
+
   const totalUsers = tree.reduce((s, p) => s + p.user_count, 0);
 
   return (
     <div className="space-y-4" data-testid="su-org-tree">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      {/* Header + controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-slate-900 font-['Manrope']">Organisation Structure</h2>
           <p className="text-sm text-slate-500">{totalUsers} staff assigned across {tree.length} provinces</p>
         </div>
-        <Select value={ministryFilter || "_all"} onValueChange={(v) => setMinistryFilter(v === "_all" ? "" : v)}>
-          <SelectTrigger className="w-56 bg-slate-100 border-slate-200 text-slate-900">
-            <SelectValue placeholder="All Ministries" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="_all">All Ministries</SelectItem>
-            {ministries.filter(m => m.is_active).map(m => (
-              <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Search name, role, position…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-9 w-56 bg-white border-slate-200 text-slate-900 text-sm"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+          {/* Ministry filter */}
+          <Select value={ministryFilter || "_all"} onValueChange={(v) => setMinistryFilter(v === "_all" ? "" : v)}>
+            <SelectTrigger className="w-52 bg-slate-100 border-slate-200 text-slate-900">
+              <SelectValue placeholder="All Ministries" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_all">All Ministries</SelectItem>
+              {ministries.filter(m => m.is_active).map(m => (
+                <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {loading ? (
         <div className="text-center py-12 text-slate-500">Loading organisation tree...</div>
-      ) : tree.length === 0 ? (
+      ) : filteredTree.length === 0 ? (
         <Card className="bg-white border-slate-200">
           <CardContent className="py-12 text-center text-slate-500">
-            <Network className="w-12 h-12 mx-auto mb-3 text-slate-700" />
-            <p>No organisation data found. Seed geography data or assign staff to facilities.</p>
+            <Network className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+            <p>{q ? `No results for "${search}"` : "No organisation data found. Seed geography data or assign staff to facilities."}</p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-2">
-          {tree.map((prov) => (
+          {filteredTree.map((prov) => (
             <Card key={prov.id} className="bg-white border-slate-200">
               {/* Province Row */}
               <button
@@ -1268,69 +1460,78 @@ const OrgTreeTab = () => {
                 onClick={() => toggle(`prov-${prov.id}`)}
               >
                 <div className="flex items-center gap-3">
-                  {expanded[`prov-${prov.id}`] ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
+                  {expanded[`prov-${prov.id}`] ? <ChevronDown className="w-4 h-4 text-amber-500" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
                   <span className="font-semibold text-slate-900">{prov.name}</span>
-                  <Badge className="bg-slate-200/50 text-slate-500 border-0 text-xs">{prov.districts.length} districts</Badge>
+                  <Badge className="bg-slate-100 text-slate-500 border-0 text-xs">{prov.districts.length} districts</Badge>
                 </div>
-                <Badge className={prov.user_count > 0 ? "bg-teal-500/20 text-teal-400 border-0" : "bg-slate-200/50 text-slate-500 border-0"}>
+                <Badge className={prov.user_count > 0 ? "bg-teal-100 text-teal-700 border-0" : "bg-slate-100 text-slate-500 border-0"}>
                   <User2 className="w-3 h-3 mr-1" />{prov.user_count} staff
                 </Badge>
               </button>
 
               {/* Districts */}
               {expanded[`prov-${prov.id}`] && (
-                <div className="border-t border-slate-200">
+                <div className="border-t border-slate-100">
                   {prov.districts.map((dist) => (
                     <div key={dist.id}>
                       <button
-                        className="w-full flex items-center justify-between px-8 py-2.5 hover:bg-slate-50/50 transition-colors"
+                        className="w-full flex items-center justify-between px-8 py-2.5 hover:bg-slate-50 transition-colors"
                         onClick={() => toggle(`dist-${dist.id}`)}
                       >
                         <div className="flex items-center gap-3">
-                          {expanded[`dist-${dist.id}`] ? <ChevronDown className="w-3.5 h-3.5 text-blue-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-600" />}
-                          <span className="text-slate-200 text-sm">{dist.name}</span>
+                          {expanded[`dist-${dist.id}`] ? <ChevronDown className="w-3.5 h-3.5 text-blue-500" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
+                          <span className="text-slate-700 text-sm">{dist.name}</span>
                           <Badge className="bg-slate-100 text-slate-500 border-0 text-xs">{dist.org_units.length} facilities</Badge>
                         </div>
-                        <Badge className={dist.user_count > 0 ? "bg-blue-500/20 text-blue-400 border-0 text-xs" : "bg-slate-100 text-slate-600 border-0 text-xs"}>
+                        <Badge className={dist.user_count > 0 ? "bg-blue-100 text-blue-700 border-0 text-xs" : "bg-slate-100 text-slate-500 border-0 text-xs"}>
                           <User2 className="w-3 h-3 mr-1" />{dist.user_count}
                         </Badge>
                       </button>
 
                       {/* Org Units / Facilities */}
                       {expanded[`dist-${dist.id}`] && (
-                        <div className="border-t border-slate-200/50">
+                        <div className="border-t border-slate-50">
                           {dist.org_units.length === 0 ? (
-                            <p className="px-16 py-2 text-xs text-slate-600">No facilities</p>
+                            <p className="px-16 py-2 text-xs text-slate-400">No facilities</p>
                           ) : dist.org_units.map((unit) => (
                             <div key={unit.id}>
                               <button
-                                className="w-full flex items-center justify-between px-14 py-2 hover:bg-slate-100/20 transition-colors"
+                                className="w-full flex items-center justify-between px-14 py-2 hover:bg-slate-50 transition-colors"
                                 onClick={() => toggle(`unit-${unit.id}`)}
                               >
                                 <div className="flex items-center gap-3">
-                                  {expanded[`unit-${unit.id}`] ? <ChevronDown className="w-3 h-3 text-teal-400" /> : <ChevronRight className="w-3 h-3 text-slate-700" />}
-                                  <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                                  {expanded[`unit-${unit.id}`] ? <ChevronDown className="w-3 h-3 text-teal-500" /> : <ChevronRight className="w-3 h-3 text-slate-400" />}
+                                  <Building2 className="w-3.5 h-3.5 text-slate-400" />
                                   <span className="text-slate-600 text-sm">{unit.name}</span>
                                 </div>
-                                <Badge className={unit.users.length > 0 ? "bg-teal-500/20 text-teal-400 border-0 text-xs" : "bg-slate-100 text-slate-600 border-0 text-xs"}>
+                                <Badge className={unit.users.length > 0 ? "bg-teal-100 text-teal-700 border-0 text-xs" : "bg-slate-100 text-slate-500 border-0 text-xs"}>
                                   <User2 className="w-3 h-3 mr-1" />{unit.users.length}
                                 </Badge>
                               </button>
 
                               {/* Users in this facility */}
                               {expanded[`unit-${unit.id}`] && (
-                                <div className="px-20 py-1 space-y-1 border-t border-slate-200/30">
+                                <div className="px-20 py-1 space-y-0.5 border-t border-slate-50">
                                   {unit.users.length === 0 ? (
-                                    <p className="text-xs text-slate-600 py-1">No staff assigned</p>
+                                    <p className="text-xs text-slate-400 py-1">No staff assigned</p>
                                   ) : unit.users.map((u) => (
-                                    <div key={u.user_id} className="flex items-center justify-between py-1">
+                                    <button
+                                      key={u.user_id}
+                                      className="w-full flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-teal-50 transition-colors text-left group"
+                                      onClick={() => setSelectedUser(u)}
+                                    >
                                       <div className="flex items-center gap-2">
-                                        <User2 className="w-3.5 h-3.5 text-slate-500" />
-                                        <span className="text-sm text-slate-600">{u.name}</span>
-                                        <span className="text-xs text-slate-500">{u.position}</span>
+                                        <div className="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center shrink-0">
+                                          <span className="text-xs font-semibold text-teal-700">{u.name?.[0]?.toUpperCase() || "?"}</span>
+                                        </div>
+                                        <span className="text-sm text-slate-700 group-hover:text-teal-700">{u.name}</span>
+                                        <span className="text-xs text-slate-400">{u.position}</span>
                                       </div>
-                                      <Badge className="bg-slate-100 text-slate-500 border-0 text-xs capitalize">{u.assigned_shift?.replace("_", " ") || "—"}</Badge>
-                                    </div>
+                                      <div className="flex items-center gap-2">
+                                        <Badge className="bg-slate-100 text-slate-500 border-0 text-xs capitalize">{u.assigned_shift?.replace(/_/g, " ") || "—"}</Badge>
+                                        <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-teal-500" />
+                                      </div>
+                                    </button>
                                   ))}
                                 </div>
                               )}
@@ -1346,6 +1547,9 @@ const OrgTreeTab = () => {
           ))}
         </div>
       )}
+
+      {/* Staff Profile Panel */}
+      {selectedUser && <StaffProfilePanel user={selectedUser} onClose={() => setSelectedUser(null)} />}
     </div>
   );
 };

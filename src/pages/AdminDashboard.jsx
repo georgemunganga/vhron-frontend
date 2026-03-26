@@ -36,7 +36,10 @@ import {
   Network,
   ChevronDown,
   ChevronRight,
-  User2
+  User2,
+  Phone,
+  CalendarDays,
+  ExternalLink
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
@@ -888,6 +891,8 @@ const OrgTreeAdminTab = () => {
   const [tree, setTree] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState({});
+  const [search, setSearch] = useState("");
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     authFetch(`${API}/admin/org-tree`)
@@ -898,6 +903,53 @@ const OrgTreeAdminTab = () => {
 
   const toggle = (key) => setExpanded(p => ({ ...p, [key]: !p[key] }));
   const totalUsers = tree.reduce((s, p) => s + (p.user_count || 0), 0);
+
+  // Flatten all users for search
+  const allUsers = tree.flatMap(p =>
+    (p.districts || []).flatMap(d =>
+      (d.org_units || []).flatMap(u =>
+        (u.users || []).map(usr => ({
+          ...usr,
+          province: p.name,
+          district: d.name,
+          facility: u.name,
+        }))
+      )
+    )
+  );
+
+  const q = search.toLowerCase().trim();
+  const searchResults = q.length > 1
+    ? allUsers.filter(u =>
+        u.name?.toLowerCase().includes(q) ||
+        u.position?.toLowerCase().includes(q) ||
+        u.facility?.toLowerCase().includes(q) ||
+        u.district?.toLowerCase().includes(q)
+      )
+    : [];
+
+  // Auto-expand nodes that contain search matches
+  useEffect(() => {
+    if (q.length > 1) {
+      const newExp = {};
+      tree.forEach(p => {
+        (p.districts || []).forEach(d => {
+          (d.org_units || []).forEach(u => {
+            const hasMatch = (u.users || []).some(usr =>
+              usr.name?.toLowerCase().includes(q) ||
+              usr.position?.toLowerCase().includes(q)
+            );
+            if (hasMatch) {
+              newExp[`prov-${p.id}`] = true;
+              newExp[`dist-${d.id}`] = true;
+              newExp[`unit-${u.id}`] = true;
+            }
+          });
+        });
+      });
+      setExpanded(prev => ({ ...prev, ...newExp }));
+    }
+  }, [q, tree]);
 
   if (loading) return <div className="text-center py-12 text-slate-500">Loading organisation tree...</div>;
 
@@ -913,10 +965,65 @@ const OrgTreeAdminTab = () => {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold text-slate-800">Your Organisation Scope</h2>
-        <p className="text-sm text-slate-500">{totalUsers} staff across {tree.length} province{tree.length !== 1 ? "s" : ""} in your jurisdiction</p>
+      {/* Header + Search */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-800">Your Organisation Scope</h2>
+          <p className="text-sm text-slate-500">{totalUsers} staff across {tree.length} province{tree.length !== 1 ? "s" : ""} in your jurisdiction</p>
+        </div>
+        <div className="relative sm:ml-auto w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search staff or roles…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Search Results */}
+      {q.length > 1 && (
+        <Card className="border-teal-200 bg-teal-50/40">
+          <CardHeader className="pb-2 pt-3">
+            <CardTitle className="text-sm text-teal-700">{searchResults.length} result{searchResults.length !== 1 ? "s" : ""} for "{search}"</CardTitle>
+          </CardHeader>
+          <CardContent className="pb-3">
+            {searchResults.length === 0 ? (
+              <p className="text-sm text-slate-400">No staff or roles match your search.</p>
+            ) : (
+              <div className="space-y-1">
+                {searchResults.map(u => (
+                  <button
+                    key={u.user_id}
+                    onClick={() => setSelectedUser(u)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-teal-100 transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {u.name?.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-slate-800">{u.name}</p>
+                        <p className="text-xs text-slate-500">{u.position} · {u.facility}</p>
+                      </div>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tree */}
       <div className="space-y-2">
         {tree.map((prov) => (
           <Card key={prov.id} className="border-slate-200 shadow-sm">
@@ -977,14 +1084,23 @@ const OrgTreeAdminTab = () => {
                                 {(unit.users || []).length === 0 ? (
                                   <p className="text-xs text-slate-400 py-1">No staff assigned</p>
                                 ) : (unit.users || []).map((u) => (
-                                  <div key={u.user_id} className="flex items-center justify-between py-1">
+                                  <button
+                                    key={u.user_id}
+                                    onClick={() => setSelectedUser({ ...u, facility: unit.name, district: dist.name, province: prov.name })}
+                                    className="w-full flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-teal-50 transition-colors text-left group"
+                                  >
                                     <div className="flex items-center gap-2">
-                                      <User2 className="w-3.5 h-3.5 text-slate-400" />
+                                      <div className="w-6 h-6 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                        {u.name?.charAt(0).toUpperCase()}
+                                      </div>
                                       <span className="text-sm text-slate-700">{u.name}</span>
                                       <span className="text-xs text-slate-400">{u.position}</span>
                                     </div>
-                                    <span className="text-xs text-slate-400 capitalize">{u.assigned_shift?.replace("_", " ") || "—"}</span>
-                                  </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-slate-400 capitalize">{u.assigned_shift?.replace("_", " ") || "—"}</span>
+                                      <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-teal-500" />
+                                    </div>
+                                  </button>
                                 ))}
                               </div>
                             )}
@@ -999,6 +1115,77 @@ const OrgTreeAdminTab = () => {
           </Card>
         ))}
       </div>
+
+      {/* Staff Profile Panel */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/30" onClick={() => setSelectedUser(null)}>
+          <div
+            className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md p-6 space-y-4"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center text-white text-lg font-bold">
+                  {selectedUser.name?.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900 text-base">{selectedUser.name}</h3>
+                  <p className="text-sm text-teal-600">{selectedUser.position}</p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedUser(null)} className="text-slate-400 hover:text-slate-600 p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Details */}
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="bg-slate-50 rounded-lg p-3">
+                <p className="text-xs text-slate-400 mb-0.5">Facility</p>
+                <p className="font-medium text-slate-800">{selectedUser.facility || "—"}</p>
+              </div>
+              <div className="bg-slate-50 rounded-lg p-3">
+                <p className="text-xs text-slate-400 mb-0.5">District</p>
+                <p className="font-medium text-slate-800">{selectedUser.district || "—"}</p>
+              </div>
+              <div className="bg-slate-50 rounded-lg p-3">
+                <p className="text-xs text-slate-400 mb-0.5">Province</p>
+                <p className="font-medium text-slate-800">{selectedUser.province || "—"}</p>
+              </div>
+              <div className="bg-slate-50 rounded-lg p-3">
+                <p className="text-xs text-slate-400 mb-0.5">Shift</p>
+                <p className="font-medium text-slate-800 capitalize">{selectedUser.assigned_shift?.replace("_", " ") || "—"}</p>
+              </div>
+            </div>
+
+            <div className="space-y-2 text-sm">
+              {selectedUser.phone && (
+                <div className="flex items-center gap-2 text-slate-600">
+                  <Phone className="w-4 h-4 text-slate-400" />
+                  <span>{selectedUser.phone}</span>
+                </div>
+              )}
+              {selectedUser.email && (
+                <div className="flex items-center gap-2 text-slate-600">
+                  <Mail className="w-4 h-4 text-slate-400" />
+                  <span>{selectedUser.email}</span>
+                </div>
+              )}
+              {selectedUser.created_at && (
+                <div className="flex items-center gap-2 text-slate-600">
+                  <CalendarDays className="w-4 h-4 text-slate-400" />
+                  <span>Joined {new Date(selectedUser.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-slate-100">
+              <p className="text-xs text-slate-400 text-center">Employee ID: {selectedUser.user_id}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
