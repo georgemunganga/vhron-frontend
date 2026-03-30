@@ -184,40 +184,67 @@ const Dashboard = () => {
   }, [user, fetchStatus]);
 
   // Get current location
-  const getCurrentLocation = () => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error("Geolocation is not supported"));
-        return;
-      }
-
+  // ── Geolocation: 3-tier strategy ────────────────────────────────────────
+  // Tier 1: High-accuracy GPS (best for mobile outdoors)
+  // Tier 2: Low-accuracy network/WiFi positioning (works on all devices)
+  // Tier 3: IP-based geolocation (last resort, city-level accuracy)
+  const getLocationTier = (highAccuracy) =>
+    new Promise((resolve, reject) => {
+      if (!navigator.geolocation) { reject(new Error('no_api')); return; }
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
-        },
-        (error) => {
-          reject(error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
-        }
+        (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude, accuracy: pos.coords.accuracy }),
+        (err) => reject(err),
+        { enableHighAccuracy: highAccuracy, timeout: highAccuracy ? 20000 : 10000, maximumAge: highAccuracy ? 0 : 60000 }
       );
     });
+
+  const getLocationViaIP = async () => {
+    // Free IP geolocation — no API key needed, returns city-level coords
+    const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) throw new Error('ip_geo_failed');
+    const d = await res.json();
+    if (!d.latitude || !d.longitude) throw new Error('ip_geo_no_coords');
+    return { latitude: d.latitude, longitude: d.longitude, accuracy: null, source: 'ip' };
   };
 
-  // Request location on mount
+  const getCurrentLocation = async () => {
+    // Tier 1: GPS
+    try {
+      const loc = await getLocationTier(true);
+      return { ...loc, source: 'gps' };
+    } catch (e1) {
+      console.warn('GPS failed, trying network positioning:', e1.message);
+    }
+    // Tier 2: Network/WiFi
+    try {
+      const loc = await getLocationTier(false);
+      return { ...loc, source: 'network' };
+    } catch (e2) {
+      console.warn('Network positioning failed, trying IP geolocation:', e2.message);
+    }
+    // Tier 3: IP geolocation
+    try {
+      const loc = await getLocationViaIP();
+      return loc;
+    } catch (e3) {
+      console.warn('IP geolocation failed:', e3.message);
+    }
+    throw new Error('All location methods failed');
+  };
+
+  // Request location on mount — try silently, show status
   useEffect(() => {
+    setLocationError(null);
     getCurrentLocation()
-      .then(setCurrentLocation)
+      .then((loc) => {
+        setCurrentLocation(loc);
+        setLocationError(null);
+      })
       .catch((error) => {
-        console.error("Location error:", error);
+        console.error('Location error:', error);
         setLocationError(error.message);
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Check pending sync count
@@ -598,16 +625,31 @@ const Dashboard = () => {
         </Card>
 
         {/* Location Status */}
-        <div className="flex items-center gap-2 text-sm text-slate-500 px-2">
-          <MapPin className="w-4 h-4" />
+        <div className="flex items-center gap-2 text-sm text-slate-500 px-2 flex-wrap">
+          <MapPin className="w-4 h-4 shrink-0" />
           {locationError ? (
-            <span className="text-amber-600">Location access denied. Enable for accurate tracking.</span>
+            <>
+              <span className="text-amber-600 text-xs">Location unavailable — coordinates will be approximate.</span>
+              <button
+                className="text-xs text-teal-600 underline"
+                onClick={() => {
+                  setLocationError(null);
+                  setCurrentLocation(null);
+                  getCurrentLocation()
+                    .then((loc) => { setCurrentLocation(loc); setLocationError(null); })
+                    .catch((e) => setLocationError(e.message));
+                }}
+              >Retry</button>
+            </>
           ) : currentLocation ? (
             <span className="font-mono text-xs">
               {currentLocation.latitude.toFixed(6)}, {currentLocation.longitude.toFixed(6)}
+              {currentLocation.source === 'ip' && <span className="text-amber-500 ml-1">(approx.)</span>}
+              {currentLocation.source === 'network' && <span className="text-blue-500 ml-1">(network)</span>}
+              {currentLocation.source === 'gps' && <span className="text-emerald-500 ml-1">(GPS)</span>}
             </span>
           ) : (
-            <span>Getting location...</span>
+            <span className="text-xs">Detecting location…</span>
           )}
         </div>
 
