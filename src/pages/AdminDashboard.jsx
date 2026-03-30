@@ -901,7 +901,7 @@ const AdminDashboard = () => {
 const AdminReportsTab = () => {
   const [stats, setStats] = useState(null);
   const [report, setReport] = useState(null);
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(""); // empty = no date filter, show all records
   const [facilityFilter, setFacilityFilter] = useState("");
   const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -931,19 +931,28 @@ const AdminReportsTab = () => {
 
   useEffect(() => { fetchReport(); }, [fetchReport]);
 
-  const filteredRecords = (report?.attendance || []).filter(r => {
+  // Admin attendance-report returns { attendance: [...] }
+  const allRecords = report?.attendance || report?.records || [];
+  const filteredRecords = allRecords.filter(r => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return r.user_name?.toLowerCase().includes(q) || r.facility?.toLowerCase().includes(q) || r.position?.toLowerCase().includes(q);
   });
 
+  // Summary counts from the loaded records
+  const reportSummary = {
+    late: allRecords.filter(r => r.status === 'late').length,
+    on_time: allRecords.filter(r => r.status === 'on_time').length,
+    early: allRecords.filter(r => r.status === 'early').length,
+  };
+
   const statCards = [
-    { label: "Today's Logins", value: stats?.today_logins || 0, icon: Activity, color: "text-teal-600", bg: "bg-teal-50" },
-    { label: "Currently On Duty", value: stats?.currently_on_duty || 0, icon: Clock, color: "text-green-600", bg: "bg-green-50" },
-    { label: "Late Today", value: stats?.today_late || 0, icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50" },
-    { label: "On Time Today", value: stats?.today_on_time || 0, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { label: "Early Today", value: stats?.today_early || 0, icon: CalendarDays, color: "text-sky-600", bg: "bg-sky-50" },
-    { label: "Total Records", value: stats?.total_attendance || 0, icon: BarChart3, color: "text-purple-600", bg: "bg-purple-50" },
+    { label: "Today's Logins", value: stats?.today_logins ?? 0, icon: Activity, color: "text-teal-600", bg: "bg-teal-50" },
+    { label: "Currently On Duty", value: stats?.currently_on_duty ?? 0, icon: Clock, color: "text-green-600", bg: "bg-green-50" },
+    { label: "Late Today", value: stats?.today_late ?? 0, icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50" },
+    { label: "On Time Today", value: stats?.today_on_time ?? 0, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
+    { label: "Early Today", value: stats?.today_early ?? 0, icon: CalendarDays, color: "text-sky-600", bg: "bg-sky-50" },
+    { label: "Total Records (All Time)", value: stats?.total_attendance ?? 0, icon: BarChart3, color: "text-purple-600", bg: "bg-purple-50" },
   ];
 
   return (
@@ -966,6 +975,33 @@ const AdminReportsTab = () => {
           </Card>
         ))}
       </div>
+
+      {/* Report summary from loaded records */}
+      {allRecords.length > 0 && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-lg bg-red-50 border border-red-200 p-3 flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
+            <div>
+              <p className="text-xs text-red-500">Late (in view)</p>
+              <p className="text-xl font-bold text-red-600">{reportSummary.late}</p>
+            </div>
+          </div>
+          <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-3 flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+            <div>
+              <p className="text-xs text-emerald-500">On Time (in view)</p>
+              <p className="text-xl font-bold text-emerald-600">{reportSummary.on_time}</p>
+            </div>
+          </div>
+          <div className="rounded-lg bg-sky-50 border border-sky-200 p-3 flex items-center gap-3">
+            <CalendarDays className="w-5 h-5 text-sky-500 shrink-0" />
+            <div>
+              <p className="text-xs text-sky-500">Early (in view)</p>
+              <p className="text-xl font-bold text-sky-600">{reportSummary.early}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <Card className="border-slate-200 shadow-sm">

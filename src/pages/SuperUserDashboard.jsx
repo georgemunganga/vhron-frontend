@@ -166,22 +166,19 @@ const OverviewTab = () => {
     fetchStats();
   }, []);
 
-  const cards = [
+  const topCards = [
     { label: "Total Users", value: stats?.total_users || 0, icon: Users, color: "text-blue-400", bg: "bg-blue-500/10" },
     { label: "Admins", value: stats?.total_admins || 0, icon: Shield, color: "text-emerald-400", bg: "bg-emerald-500/10" },
     { label: "Super Users", value: stats?.total_superusers || 0, icon: Shield, color: "text-amber-400", bg: "bg-amber-500/10" },
     { label: "Facilities", value: stats?.total_facilities || 0, icon: Building2, color: "text-purple-400", bg: "bg-purple-500/10" },
     { label: "Today's Logins", value: stats?.today_logins || 0, icon: Activity, color: "text-teal-400", bg: "bg-teal-500/10" },
     { label: "Currently On Duty", value: stats?.currently_on_duty || 0, icon: Clock, color: "text-green-400", bg: "bg-green-500/10" },
-    { label: "Late Today", value: stats?.today_late || 0, icon: AlertTriangle, color: "text-red-400", bg: "bg-red-500/10" },
-    { label: "On Time Today", value: stats?.today_on_time || 0, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-    { label: "Early Today", value: stats?.today_early || 0, icon: CalendarDays, color: "text-sky-400", bg: "bg-sky-500/10" },
   ];
 
   return (
     <div className="space-y-6" data-testid="su-overview">
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {cards.map((c) => (
+        {topCards.map((c) => (
           <Card key={c.label} className="bg-white border-slate-200">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
@@ -196,6 +193,86 @@ const OverviewTab = () => {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Today's punctuality breakdown */}
+      <div>
+        <p className="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">Today's Punctuality</p>
+        <div className="grid grid-cols-3 gap-4">
+          <Card className="bg-red-50 border-red-200">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-red-600">Late Today</p>
+                  <p className="text-3xl font-bold font-['Manrope'] text-red-600">{stats?.today_late ?? 0}</p>
+                </div>
+                <AlertTriangle className="w-8 h-8 text-red-400" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-emerald-50 border-emerald-200">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-emerald-600">On Time Today</p>
+                  <p className="text-3xl font-bold font-['Manrope'] text-emerald-600">{stats?.today_on_time ?? 0}</p>
+                </div>
+                <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-sky-50 border-sky-200">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-sky-600">Early Today</p>
+                  <p className="text-3xl font-bold font-['Manrope'] text-sky-600">{stats?.today_early ?? 0}</p>
+                </div>
+                <CalendarDays className="w-8 h-8 text-sky-400" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* All-time punctuality breakdown */}
+      <div>
+        <p className="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">All-Time Punctuality (Historical)</p>
+        <div className="grid grid-cols-3 gap-4">
+          <Card className="bg-white border-red-200">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-red-500">Total Late</p>
+                  <p className="text-3xl font-bold font-['Manrope'] text-red-500">{stats?.all_late ?? 0}</p>
+                </div>
+                <AlertTriangle className="w-8 h-8 text-red-300" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border-emerald-200">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-emerald-500">Total On Time</p>
+                  <p className="text-3xl font-bold font-['Manrope'] text-emerald-500">{stats?.all_on_time ?? 0}</p>
+                </div>
+                <CheckCircle2 className="w-8 h-8 text-emerald-300" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border-sky-200">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-sky-500">Total Early</p>
+                  <p className="text-3xl font-bold font-['Manrope'] text-sky-500">{stats?.all_early ?? 0}</p>
+                </div>
+                <CalendarDays className="w-8 h-8 text-sky-300" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
@@ -622,7 +699,7 @@ const ShiftsTab = () => {
 // ============ REPORTS TAB ============
 const ReportsTab = () => {
   const [report, setReport] = useState(null);
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(""); // empty = no date filter, show all records
   const [provinceFilter, setProvinceFilter] = useState("");
   const [districtFilter, setDistrictFilter] = useState("");
   const [facilityFilter, setFacilityFilter] = useState("");
@@ -720,7 +797,7 @@ const ReportsTab = () => {
     setDistrictFilter("");
     setFacilityFilter("");
     setSearchQuery("");
-    setDate(new Date().toISOString().split("T")[0]);
+    setDate(""); // clear date filter to show all records
   };
 
   // Client-side search filter on loaded records
