@@ -149,7 +149,7 @@ const AdminDashboard = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setAttendance(data.records || []);
+        setAttendance(data.attendance || data.records || []);
       }
     } catch (error) {
       console.error("Error fetching attendance:", error);
