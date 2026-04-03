@@ -41,7 +41,8 @@ import {
   CalendarDays,
   ExternalLink,
   CheckCircle2,
-  BarChart3
+  BarChart3,
+  ClipboardList
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
@@ -74,6 +75,23 @@ const AdminDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [notifCount, setNotifCount] = useState(0);
   const [selectedStaffMap, setSelectedStaffMap] = useState(null);
+  const [taskModal, setTaskModal] = useState({ open: false, loading: false, data: null, attendanceId: null });
+
+  // Fetch tasks for a given attendance record
+  const fetchTasks = useCallback(async (attendanceId) => {
+    setTaskModal({ open: true, loading: true, data: null, attendanceId });
+    try {
+      const res = await authFetch(`${API}/admin/tasks/${attendanceId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setTaskModal({ open: true, loading: false, data, attendanceId });
+      } else {
+        setTaskModal({ open: true, loading: false, data: { has_tasks: false, tasks: [] }, attendanceId });
+      }
+    } catch {
+      setTaskModal({ open: true, loading: false, data: { has_tasks: false, tasks: [] }, attendanceId });
+    }
+  }, []);
 
   // Fetch initial data
   useEffect(() => {
@@ -781,6 +799,7 @@ const AdminDashboard = () => {
                       <TableHead>Action</TableHead>
                       <TableHead>Time</TableHead>
                       <TableHead>GPS Coordinates</TableHead>
+                      <TableHead>Tasks</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -815,11 +834,24 @@ const AdminDashboard = () => {
                               : "-"
                             }
                           </TableCell>
+                          <TableCell>
+                            {record.action === "logout" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-teal-700 border-teal-200 hover:bg-teal-50 text-xs h-7 px-2"
+                                onClick={() => fetchTasks(record.attendance_id)}
+                              >
+                                <ClipboardList className="w-3 h-3 mr-1" />
+                                View Tasks
+                              </Button>
+                            )}
+                          </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-12 text-slate-500">
+                        <TableCell colSpan={8} className="text-center py-12 text-slate-500">
                           No attendance records found
                         </TableCell>
                       </TableRow>
@@ -893,6 +925,9 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Task View Modal */}
+      <AdminTaskModal taskModal={taskModal} setTaskModal={setTaskModal} />
     </div>
   );
 };
@@ -1584,5 +1619,51 @@ const EditUserForm = ({ user, positions, facilities, onSave }) => {
     </div>
   );
 };
+
+// ─── Task View Modal ─────────────────────────────────────────────────────────
+function AdminTaskModal({ taskModal, setTaskModal }) {
+  return (
+    <Dialog open={taskModal.open} onOpenChange={(open) => setTaskModal((prev) => ({ ...prev, open }))}>
+      <DialogContent className="max-w-md w-full">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-slate-800">
+            <ClipboardList className="w-5 h-5 text-teal-600" />
+            Tasks Completed During Shift
+          </DialogTitle>
+          {taskModal.data?.user_name && (
+            <p className="text-sm text-slate-500">
+              {taskModal.data.user_name} &mdash; {taskModal.data.facility}
+            </p>
+          )}
+          {taskModal.data?.submitted_at && (
+            <p className="text-xs text-slate-400">
+              Submitted: {new Date(taskModal.data.submitted_at).toLocaleString()}
+            </p>
+          )}
+        </DialogHeader>
+
+        {taskModal.loading ? (
+          <div className="flex justify-center py-8">
+            <div className="w-8 h-8 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : taskModal.data?.has_tasks ? (
+          <div className="mt-2 space-y-2 max-h-72 overflow-y-auto pr-1">
+            {(Array.isArray(taskModal.data.tasks) ? taskModal.data.tasks : []).map((task, i) => (
+              <div key={i} className="flex items-start gap-2 bg-slate-50 rounded-lg px-3 py-2">
+                <span className="text-teal-600 font-mono text-xs mt-0.5 shrink-0">{task.order || i + 1}.</span>
+                <span className="text-sm text-slate-700 flex-1 break-words">{task.text || task}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-slate-400">
+            <ClipboardList className="w-10 h-10 mx-auto mb-2 opacity-30" />
+            <p className="text-sm">No tasks were submitted for this shift.</p>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default AdminDashboard;

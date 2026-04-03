@@ -15,7 +15,7 @@ import {
   ArrowLeft, Users, Activity, Download, Search, Shield, Building2,
   Edit, Trash2, KeyRound, UserPlus, Clock, Settings, BarChart3,
   ChevronRight, AlertTriangle, CheckCircle2, XCircle, RefreshCw, Plus,
-  Landmark, Network, ChevronDown, User2, Phone, Mail, X, CalendarDays, ExternalLink
+  Landmark, Network, ChevronDown, User2, Phone, Mail, X, CalendarDays, ExternalLink, ClipboardList
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
@@ -700,6 +700,7 @@ const ShiftsTab = () => {
 const ReportsTab = () => {
   const [report, setReport] = useState(null);
   const [date, setDate] = useState(""); // empty = no date filter, show all records
+  const [taskModal, setTaskModal] = useState({ open: false, loading: false, data: null });
   const [provinceFilter, setProvinceFilter] = useState("");
   const [districtFilter, setDistrictFilter] = useState("");
   const [facilityFilter, setFacilityFilter] = useState("");
@@ -765,6 +766,21 @@ const ReportsTab = () => {
   }, [date, provinceFilter, districtFilter, facilityFilter]);
 
   useEffect(() => { fetchReport(); }, [fetchReport]);
+
+  const fetchTasks = useCallback(async (attendanceId) => {
+    setTaskModal({ open: true, loading: true, data: null });
+    try {
+      const res = await authFetch(`${API}/superuser/tasks/${attendanceId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setTaskModal({ open: true, loading: false, data });
+      } else {
+        setTaskModal({ open: true, loading: false, data: { has_tasks: false, tasks: [] } });
+      }
+    } catch {
+      setTaskModal({ open: true, loading: false, data: { has_tasks: false, tasks: [] } });
+    }
+  }, []);
 
   const handleExport = async (format) => {
     try {
@@ -950,11 +966,12 @@ const ReportsTab = () => {
                   <TableHead className="text-slate-500">Action</TableHead>
                   <TableHead className="text-slate-500">Time</TableHead>
                   <TableHead className="text-slate-500">Status</TableHead>
+                  <TableHead className="text-slate-500">Tasks</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
                 ) : filteredRecords.length ? (
                   filteredRecords.map((r, i) => (
                     <TableRow key={i} className={`border-slate-200 ${r.status === "late" ? "bg-red-950/30" : r.status === "early" ? "bg-emerald-950/30" : ""}`}>
@@ -971,16 +988,65 @@ const ReportsTab = () => {
                       <TableCell>
                         <StatusBadge status={r.status} minutesLate={r.minutes_late} lateDisplay={r.late_display} />
                       </TableCell>
+                      <TableCell>
+                        {r.action === "logout" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-amber-400 border-amber-500/30 hover:bg-amber-500/10 text-xs h-7 px-2"
+                            onClick={() => fetchTasks(r.attendance_id)}
+                          >
+                            <ClipboardList className="w-3 h-3 mr-1" />
+                            Tasks
+                          </Button>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
-                  <TableRow><TableCell colSpan={5} className="text-center py-12 text-slate-500">No records for selected filters</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center py-12 text-slate-500">No records for selected filters</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
           </ScrollArea>
         </CardContent>
       </Card>
+      {/* Task View Modal */}
+      <Dialog open={taskModal.open} onOpenChange={(open) => setTaskModal((prev) => ({ ...prev, open }))}>
+        <DialogContent className="max-w-md w-full">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-800">
+              <ClipboardList className="w-5 h-5 text-amber-500" />
+              Tasks Completed During Shift
+            </DialogTitle>
+            {taskModal.data?.user_name && (
+              <p className="text-sm text-slate-500">{taskModal.data.user_name} &mdash; {taskModal.data.facility}</p>
+            )}
+            {taskModal.data?.submitted_at && (
+              <p className="text-xs text-slate-400">Submitted: {new Date(taskModal.data.submitted_at).toLocaleString()}</p>
+            )}
+          </DialogHeader>
+          {taskModal.loading ? (
+            <div className="flex justify-center py-8">
+              <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : taskModal.data?.has_tasks ? (
+            <div className="mt-2 space-y-2 max-h-72 overflow-y-auto pr-1">
+              {(Array.isArray(taskModal.data.tasks) ? taskModal.data.tasks : []).map((task, i) => (
+                <div key={i} className="flex items-start gap-2 bg-slate-50 rounded-lg px-3 py-2">
+                  <span className="text-amber-500 font-mono text-xs mt-0.5 shrink-0">{task.order || i + 1}.</span>
+                  <span className="text-sm text-slate-700 flex-1 break-words">{task.text || task}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-slate-400">
+              <ClipboardList className="w-10 h-10 mx-auto mb-2 opacity-30" />
+              <p className="text-sm">No tasks were submitted for this shift.</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -1279,7 +1345,7 @@ const MinistriesTab = () => {
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
               ) : ministries.length ? (
                 ministries.map((m) => (
                   <TableRow key={m.id} className="border-slate-200 hover:bg-slate-50/80">

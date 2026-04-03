@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -25,7 +27,10 @@ import {
   Info,
   FileText,
   Trash2,
-  ChevronDown
+  ChevronDown,
+  Plus,
+  CheckCircle2,
+  ClipboardList
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import localforage from "localforage";
@@ -53,6 +58,13 @@ const Dashboard = () => {
   const [availableShifts, setAvailableShifts] = useState([]);
   const [selectedShift, setSelectedShift] = useState("");
   const [assignedShift, setAssignedShift] = useState(null);
+
+  // Task modal state
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [taskInput, setTaskInput] = useState("");
+  const [taskList, setTaskList] = useState([]);
+  const [taskSubmitting, setTaskSubmitting] = useState(false);
+  const taskInputRef = useRef(null);
 
   // Fetch attendance status
   const fetchStatus = useCallback(async () => {
@@ -764,7 +776,12 @@ const Dashboard = () => {
 
           {/* End Shift Button */}
           <button
-            onClick={() => handleAttendance("logout")}
+            onClick={() => {
+              if (!isOnDuty) return;
+              setTaskList([]);
+              setTaskInput("");
+              setShowTaskModal(true);
+            }}
             disabled={actionLoading || !isOnDuty}
             className={`action-button-logout h-32 md:h-40 flex flex-col items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed ${!isOnDuty ? 'opacity-50' : ''}`}
             data-testid="end-shift-btn"
@@ -797,6 +814,167 @@ const Dashboard = () => {
           </Card>
         )}
       </main>
+
+      {/* ─── Task Modal ─────────────────────────────────────────────────────── */}
+      <Dialog open={showTaskModal} onOpenChange={(open) => { if (!taskSubmitting) setShowTaskModal(open); }}>
+        <DialogContent className="max-w-md w-full">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-800">
+              <ClipboardList className="w-5 h-5 text-teal-600" />
+              What did you accomplish today?
+            </DialogTitle>
+            <p className="text-sm text-slate-500 mt-1">
+              Please log at least one task before ending your shift. This helps track accountability.
+            </p>
+          </DialogHeader>
+
+          {/* Task input row */}
+          <div className="flex gap-2 mt-2">
+            <Input
+              ref={taskInputRef}
+              value={taskInput}
+              onChange={(e) => setTaskInput(e.target.value.slice(0, 200))}
+              placeholder="e.g. Conducted morning ward rounds"
+              className="flex-1 text-sm"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && taskInput.trim()) {
+                  e.preventDefault();
+                  if (taskList.length >= 20) { toast.warning("Maximum 20 tasks"); return; }
+                  setTaskList((prev) => [...prev, taskInput.trim()]);
+                  setTaskInput("");
+                  setTimeout(() => taskInputRef.current?.focus(), 50);
+                }
+              }}
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              className="shrink-0 border-teal-600 text-teal-600 hover:bg-teal-50"
+              disabled={!taskInput.trim() || taskList.length >= 20}
+              onClick={() => {
+                if (!taskInput.trim()) return;
+                if (taskList.length >= 20) { toast.warning("Maximum 20 tasks"); return; }
+                setTaskList((prev) => [...prev, taskInput.trim()]);
+                setTaskInput("");
+                setTimeout(() => taskInputRef.current?.focus(), 50);
+              }}
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+          <p className="text-xs text-slate-400">Press Enter or click + to add. Max 20 tasks, 200 chars each.</p>
+
+          {/* Task list */}
+          {taskList.length > 0 && (
+            <div className="mt-2 space-y-1.5 max-h-52 overflow-y-auto pr-1">
+              {taskList.map((task, i) => (
+                <div key={i} className="flex items-start gap-2 bg-slate-50 rounded-lg px-3 py-2">
+                  <span className="text-teal-600 font-mono text-xs mt-0.5 shrink-0">{i + 1}.</span>
+                  <span className="text-sm text-slate-700 flex-1 break-words">{task}</span>
+                  <button
+                    className="text-slate-400 hover:text-red-500 shrink-0 mt-0.5"
+                    onClick={() => setTaskList((prev) => prev.filter((_, j) => j !== i))}
+                    title="Remove task"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {taskList.length === 0 && (
+            <div className="text-center py-4 text-slate-400 text-sm">
+              No tasks added yet. Add at least one before ending shift.
+            </div>
+          )}
+
+          <DialogFooter className="mt-4 flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              disabled={taskSubmitting}
+              onClick={() => setShowTaskModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+              disabled={taskList.length === 0 || taskSubmitting}
+              onClick={async () => {
+                setTaskSubmitting(true);
+                try {
+                  // Step 1: Submit logout attendance record
+                  let coords = currentLocation;
+                  try { coords = await getCurrentLocation(); setCurrentLocation(coords); } catch {}
+
+                  const record = {
+                    latitude: coords?.latitude || null,
+                    longitude: coords?.longitude || null,
+                    area_of_allocation: selectedArea,
+                    offline_id: `offline_${Date.now()}`
+                  };
+
+                  if (isOnline) {
+                    const attRes = await authFetch(`${API}/attendance`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(record)
+                    });
+
+                    if (!attRes.ok) {
+                      const err = await attRes.json();
+                      toast.error(err.detail || "Failed to record attendance");
+                      return;
+                    }
+
+                    const attData = await attRes.json();
+
+                    // Step 2: Submit tasks linked to the logout attendance_id
+                    try {
+                      await authFetch(`${API}/attendance/tasks`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ attendance_id: attData.attendance_id, tasks: taskList })
+                      });
+                    } catch (taskErr) {
+                      console.warn("Tasks submission failed (non-blocking):", taskErr);
+                    }
+
+                    toast.success("Shift ended and tasks recorded!");
+                    setSelectedArea("");
+                    setSelectedShift("");
+                    setShowTaskModal(false);
+                    fetchStatus();
+                  } else {
+                    // Offline: save with tasks
+                    const offlineRecords = await offlineStore.getItem("pendingRecords") || [];
+                    offlineRecords.push({ ...record, tasks: taskList });
+                    await offlineStore.setItem("pendingRecords", offlineRecords);
+                    setPendingSync(offlineRecords.length);
+                    toast.info("Saved offline. Will sync when online.");
+                    setStatus({ is_on_duty: false, last_action: "logout", last_timestamp: new Date().toISOString() });
+                    setSelectedArea("");
+                    setSelectedShift("");
+                    setShowTaskModal(false);
+                  }
+                } catch (error) {
+                  toast.error("An error occurred. Please try again.");
+                  console.error("End shift error:", error);
+                } finally {
+                  setTaskSubmitting(false);
+                }
+              }}
+            >
+              {taskSubmitting ? (
+                <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Ending Shift…</span>
+              ) : (
+                <span className="flex items-center gap-2"><LogOut className="w-4 h-4" /> End Shift</span>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
