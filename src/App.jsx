@@ -2,6 +2,7 @@ import React, { Component, Suspense, lazy, useEffect, useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
+import Logo from "@/components/Logo";
 
 // ─── Marketing / website pages (eager) ───────────────────────────────────────
 import Landing from "@/pages/Landing";
@@ -22,9 +23,6 @@ const SuperUserDashboard = lazy(() => import("@/pages/SuperUserDashboard"));
 
 // ─── PWA /app shell and pages (all lazy) ─────────────────────────────────────
 const AppLayout = lazy(() => import("@/app/AppLayout"));
-const AppLogin = lazy(() => import("@/app/AppLogin"));
-const AppStaffLogin = lazy(() => import("@/app/AppStaffLogin"));
-const AppRegister = lazy(() => import("@/app/AppRegister"));
 const OfflinePage = lazy(() => import("@/app/OfflinePage"));
 
 // /app/* pages re-use the existing page components (wrapped in AppLayout)
@@ -56,19 +54,22 @@ export { API, BACKEND_URL, authFetch, setStoredToken, clearStoredToken };
 export { getStoredToken } from "@/lib/api";
 
 // ─── Loaders ──────────────────────────────────────────────────────────────────
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-slate-900">
-    <div className="flex flex-col items-center gap-3">
-      <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-      <p className="text-slate-400 text-sm">Loading…</p>
+const SplashLoader = ({ fullScreen = true }) => (
+  <div className={`${fullScreen ? "min-h-screen" : "min-h-[60vh]"} relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-[var(--vchron-teal-dark)] via-[var(--vchron-teal)] to-[var(--vchron-teal-light)]`}>
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.18),_transparent_38%)]" />
+    <div className="relative z-10 flex items-center justify-center px-6">
+      <Logo variant="light" size="xl" className="drop-shadow-[0_18px_40px_rgba(0,0,0,0.28)]" />
+    </div>
+    <div className="absolute bottom-12 left-1/2 z-10 -translate-x-1/2">
+      <div className="h-11 w-11 rounded-full border-[3px] border-white/35 border-t-white animate-spin" />
     </div>
   </div>
 );
 
+const PageLoader = () => <SplashLoader fullScreen />;
+
 const AppPageLoader = () => (
-  <div className="flex items-center justify-center min-h-[60vh]">
-    <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-  </div>
+  <SplashLoader fullScreen={false} />
 );
 
 // ─── Error Boundary ───────────────────────────────────────────────────────────
@@ -82,10 +83,10 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 p-8">
-          <div className="max-w-md w-full bg-slate-800 rounded-xl shadow-lg p-8 text-center">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-8">
+          <div className="max-w-md w-full bg-white border border-slate-200 rounded-xl shadow-lg p-8 text-center">
             <h1 className="text-2xl font-bold text-red-400 mb-4">Something went wrong</h1>
-            <p className="text-slate-400 mb-6 text-sm">{this.state.error?.message || "An unexpected error occurred."}</p>
+            <p className="text-slate-600 mb-6 text-sm">{this.state.error?.message || "An unexpected error occurred."}</p>
             <button onClick={() => { this.setState({ hasError: false, error: null }); window.location.href = '/app/login'; }}
               className="bg-teal-700 text-white px-6 py-2 rounded-lg hover:bg-teal-600 transition-colors">
               Go to Login
@@ -189,9 +190,9 @@ function AppRouter() {
 
         {/* ── PWA /app routes ── */}
         {/* Auth pages (no shell) */}
-        <Route path="/app/login" element={<Suspense fallback={<PageLoader />}><AppLogin /></Suspense>} />
-        <Route path="/app/staff-login" element={<Suspense fallback={<PageLoader />}><AppStaffLogin /></Suspense>} />
-        <Route path="/app/register" element={<Suspense fallback={<PageLoader />}><AppRegister /></Suspense>} />
+        <Route path="/app/login" element={<Login />} />
+        <Route path="/app/staff-login" element={<StaffLogin />} />
+        <Route path="/app/register" element={<Register />} />
         <Route path="/app/offline" element={<Suspense fallback={<PageLoader />}><OfflinePage /></Suspense>} />
 
         {/* App shell (with bottom nav + header) */}

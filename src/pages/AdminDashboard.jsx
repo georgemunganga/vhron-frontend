@@ -1177,7 +1177,7 @@ const AdminReportsTab = () => {
             </div>
           ) : filteredRecords.length === 0 ? (
             <div className="text-center py-12 text-slate-400">
-              <Activity className="w-12 h-12 mx-auto mb-3 text-slate-200" />
+              <Activity className="w-12 h-12 mx-auto mb-3 text-slate-300" />
               <p>No attendance records found</p>
             </div>
           ) : (

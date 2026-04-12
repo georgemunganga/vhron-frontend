@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Mail, Phone, ArrowLeft, ShieldCheck } from "lucide-react";
-import { API, BACKEND_URL } from "@/lib/api";
+import { API, BACKEND_URL, authFetch, clearStoredToken, setStoredToken } from "@/lib/api";
 import Logo from "@/components/Logo";
 
 /**
@@ -19,6 +19,47 @@ import Logo from "@/components/Logo";
  */
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAppAuth = useMemo(() => location.pathname.startsWith("/app/"), [location.pathname]);
+  const registerRoute = isAppAuth ? "/app/register" : "/register";
+  const staffLoginRoute = isAppAuth ? "/app/staff-login" : "/staff-login";
+  const dashboardRoute = isAppAuth ? "/app/dashboard" : "/dashboard";
+  const adminRoute = isAppAuth ? "/app/admin" : "/admin";
+  const superuserRoute = isAppAuth ? "/app/superuser" : "/superuser";
+  const homeRoute = isAppAuth ? "/install" : "/";
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const checkSession = async () => {
+      try {
+        const res = await authFetch(`${API}/auth/me`);
+        if (!res.ok) {
+          clearStoredToken();
+          return;
+        }
+
+        const data = await res.json();
+        const user = data?.user ?? data;
+        if (cancelled || !user?.user_id) return;
+
+        if (user.role === "superuser") {
+          navigate(superuserRoute, { replace: true });
+        } else if (user.role === "admin") {
+          navigate(adminRoute, { replace: true });
+        } else {
+          navigate(dashboardRoute, { replace: true });
+        }
+      } catch {
+        clearStoredToken();
+      }
+    };
+
+    checkSession();
+    return () => {
+      cancelled = true;
+    };
+  }, [adminRoute, dashboardRoute, navigate, superuserRoute]);
 
   // "request" = entering identifier, "verify" = entering OTP
   const [step, setStep] = useState("request");
@@ -103,12 +144,12 @@ const Login = () => {
       });
       const data = await res.json();
       if (res.ok) {
-        localStorage.setItem("vchron_token", data.access_token);
+        setStoredToken(data.access_token);
         toast.success(`Welcome back, ${data.user.name?.split(" ")[0]}!`);
         if (!data.user.setup_complete) {
-          navigate("/register", { state: { step: 3, token: data.access_token } });
+          navigate(registerRoute, { state: { step: 3, token: data.access_token } });
         } else {
-          navigate("/dashboard");
+          navigate(dashboardRoute);
         }
       } else {
         toast.error(data.detail || "Invalid code. Please try again.");
@@ -169,7 +210,7 @@ const Login = () => {
         <Button
           variant="ghost"
           className="text-slate-600"
-          onClick={() => step === "verify" ? setStep("request") : navigate("/")}
+          onClick={() => step === "verify" ? setStep("request") : navigate(homeRoute)}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           {step === "verify" ? "Back" : "Home"}
@@ -267,14 +308,14 @@ const Login = () => {
 
                 <p className="text-center text-sm text-slate-500">
                   Don't have an account?{" "}
-                  <Link to="/register" className="text-teal-600 hover:text-teal-700 font-medium">
+                  <Link to={registerRoute} className="text-teal-600 hover:text-teal-700 font-medium">
                     Create account
                   </Link>
                 </p>
 
                 <p className="text-center text-xs text-slate-400">
                   Admin or Superuser?{" "}
-                  <Link to="/staff-login" className="text-slate-500 hover:text-slate-700 underline">
+                  <Link to={staffLoginRoute} className="text-slate-500 hover:text-slate-700 underline">
                     Staff login
                   </Link>
                 </p>

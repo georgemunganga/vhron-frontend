@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Mail, Lock, ArrowLeft, ShieldAlert, Eye, EyeOff } from "lucide-react";
-import { API } from "@/lib/api";
+import { API, authFetch, clearStoredToken, setStoredToken } from "@/lib/api";
 import Logo from "@/components/Logo";
 
 /**
@@ -19,9 +19,47 @@ import Logo from "@/components/Logo";
  */
 const StaffLogin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAppAuth = useMemo(() => location.pathname.startsWith("/app/"), [location.pathname]);
+  const loginRoute = isAppAuth ? "/app/login" : "/login";
+  const adminRoute = isAppAuth ? "/app/admin" : "/admin";
+  const superuserRoute = isAppAuth ? "/app/superuser" : "/superuser";
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const checkSession = async () => {
+      try {
+        const res = await authFetch(`${API}/auth/me`);
+        if (!res.ok) {
+          clearStoredToken();
+          return;
+        }
+
+        const data = await res.json();
+        const user = data?.user ?? data;
+        if (cancelled || !user?.user_id) return;
+
+        if (user.role === "superuser") {
+          navigate(superuserRoute, { replace: true });
+        } else if (user.role === "admin") {
+          navigate(adminRoute, { replace: true });
+        } else {
+          navigate(loginRoute, { replace: true });
+        }
+      } catch {
+        clearStoredToken();
+      }
+    };
+
+    checkSession();
+    return () => {
+      cancelled = true;
+    };
+  }, [adminRoute, loginRoute, navigate, superuserRoute]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -43,24 +81,24 @@ const StaffLogin = () => {
       const data = await res.json();
 
       if (res.ok) {
-        localStorage.setItem("vchron_token", data.access_token);
+        setStoredToken(data.access_token);
         toast.success(`Welcome, ${data.user.name?.split(" ")[0]}!`);
 
         const role = data.user.role;
         if (role === "superuser") {
-          navigate("/superuser");
+          navigate(superuserRoute);
         } else if (role === "admin") {
-          navigate("/admin");
+          navigate(adminRoute);
         } else {
           // Should not happen — backend blocks non-staff, but handle gracefully
           toast.error("This login is for staff only.");
-          localStorage.removeItem("vchron_token");
+          clearStoredToken();
         }
       } else {
         // If backend says "use employee login", redirect them
         if (res.status === 403) {
           toast.error("This login is for staff only. Please use the employee login.");
-          navigate("/login");
+          navigate(loginRoute);
         } else {
           toast.error(data.detail || "Invalid email or password");
         }
@@ -79,7 +117,7 @@ const StaffLogin = () => {
         <Button
           variant="ghost"
           className="text-slate-400 hover:text-slate-900 hover:bg-slate-100"
-          onClick={() => navigate("/login")}
+          onClick={() => navigate(loginRoute)}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Employee Login
@@ -91,12 +129,12 @@ const StaffLogin = () => {
         <Card className="w-full max-w-md bg-slate-100 border-slate-200 shadow-2xl">
           <CardHeader className="text-center pb-2">
             <div className="flex justify-center mb-4">
-              <Logo variant="light" size="lg" />
+              <Logo variant="dark" size="lg" />
             </div>
 
             {/* Staff badge */}
             <div className="flex justify-center mb-3">
-              <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-medium px-3 py-1.5 rounded-full">
+              <div className="flex items-center gap-2 bg-amber-100 border border-amber-200 text-amber-800 text-xs font-medium px-3 py-1.5 rounded-full">
                 <ShieldAlert className="w-3.5 h-3.5" />
                 Staff Access Only
               </div>
@@ -174,7 +212,7 @@ const StaffLogin = () => {
 
             <p className="text-center text-xs text-slate-500 pt-2">
               Not a staff member?{" "}
-              <Link to="/login" className="text-teal-400 hover:text-teal-300">
+              <Link to={loginRoute} className="text-teal-600 hover:text-teal-700">
                 Employee login
               </Link>
             </p>

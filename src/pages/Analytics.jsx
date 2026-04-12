@@ -165,8 +165,8 @@ const Analytics = () => {
             <Logo variant="light" size="sm" />
           </div>
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-amber-400" />
-            <span className="text-sm font-semibold text-amber-400">Analytics</span>
+            <BarChart3 className="w-5 h-5 text-amber-700" />
+            <span className="text-sm font-semibold text-amber-700">Analytics</span>
           </div>
           <Button
             variant="ghost"
@@ -197,7 +197,7 @@ const Analytics = () => {
                   onClick={() => setPeriod(opt.value)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     period === opt.value
-                      ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                      ? "bg-amber-100 text-amber-800 border border-amber-200"
                       : "bg-slate-100 text-slate-400 border border-slate-200 hover:text-slate-900"
                   }`}
                 >
@@ -268,7 +268,7 @@ const Analytics = () => {
             {(province || district || facility) && (
               <button
                 onClick={() => { setProvince(""); setDistrict(""); setFacility(""); }}
-                className="text-xs text-amber-400 hover:text-amber-300 underline"
+                className="text-xs text-amber-700 hover:text-amber-800 underline"
               >
                 Clear geographic filters
               </button>

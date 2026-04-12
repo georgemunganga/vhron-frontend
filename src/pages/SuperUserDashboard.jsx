@@ -70,7 +70,7 @@ const SuperUserDashboard = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <Logo variant="light" size="sm" />
+              <Logo variant="dark" size="sm" />
               <span className="text-xs text-slate-500 hidden sm:block">{currentUser?.email}</span>
             </div>
           </div>
@@ -96,13 +96,13 @@ const SuperUserDashboard = () => {
             <Button
               variant="ghost"
               size="sm"
-              className="text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 text-xs"
+              className="text-amber-700 hover:text-amber-800 hover:bg-amber-100 text-xs"
               onClick={() => navigate('/audit-trail')}
             >
               <Shield className="w-3.5 h-3.5 mr-1" />
               <span className="hidden sm:inline">Audit Trail</span>
             </Button>
-            <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">SUPERUSER</Badge>
+            <Badge className="bg-amber-100 text-amber-800 border-amber-200">SUPERUSER</Badge>
           </div>
         </div>
       </header>
@@ -110,31 +110,31 @@ const SuperUserDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white border border-slate-200 p-1 grid grid-cols-7 w-full max-w-4xl">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400" data-testid="su-tab-overview">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800" data-testid="su-tab-overview">
               <BarChart3 className="w-4 h-4 mr-1" />
               <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="users" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400" data-testid="su-tab-users">
+            <TabsTrigger value="users" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800" data-testid="su-tab-users">
               <Users className="w-4 h-4 mr-1" />
               <span className="hidden sm:inline">Users</span>
             </TabsTrigger>
-            <TabsTrigger value="facilities" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400" data-testid="su-tab-facilities">
+            <TabsTrigger value="facilities" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800" data-testid="su-tab-facilities">
               <Building2 className="w-4 h-4 mr-1" />
               <span className="hidden sm:inline">Facilities</span>
             </TabsTrigger>
-            <TabsTrigger value="shifts" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400" data-testid="su-tab-shifts">
+            <TabsTrigger value="shifts" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800" data-testid="su-tab-shifts">
               <Clock className="w-4 h-4 mr-1" />
               <span className="hidden sm:inline">Shifts</span>
             </TabsTrigger>
-            <TabsTrigger value="reports" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400" data-testid="su-tab-reports">
+            <TabsTrigger value="reports" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800" data-testid="su-tab-reports">
               <Activity className="w-4 h-4 mr-1" />
               <span className="hidden sm:inline">Reports</span>
             </TabsTrigger>
-            <TabsTrigger value="ministries" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400" data-testid="su-tab-ministries">
+            <TabsTrigger value="ministries" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800" data-testid="su-tab-ministries">
               <Landmark className="w-4 h-4 mr-1" />
               <span className="hidden sm:inline">Ministries</span>
             </TabsTrigger>
-            <TabsTrigger value="org-tree" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400" data-testid="su-tab-org-tree">
+            <TabsTrigger value="org-tree" className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800" data-testid="su-tab-org-tree">
               <Network className="w-4 h-4 mr-1" />
               <span className="hidden sm:inline">Org Tree</span>
             </TabsTrigger>
@@ -168,12 +168,12 @@ const OverviewTab = () => {
   }, []);
 
   const topCards = [
-    { label: "Total Users", value: stats?.total_users || 0, icon: Users, color: "text-blue-400", bg: "bg-blue-500/10" },
-    { label: "Admins", value: stats?.total_admins || 0, icon: Shield, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-    { label: "Super Users", value: stats?.total_superusers || 0, icon: Shield, color: "text-amber-400", bg: "bg-amber-500/10" },
-    { label: "Facilities", value: stats?.total_facilities || 0, icon: Building2, color: "text-purple-400", bg: "bg-purple-500/10" },
-    { label: "Today's Logins", value: stats?.today_logins || 0, icon: Activity, color: "text-teal-400", bg: "bg-teal-500/10" },
-    { label: "Currently On Duty", value: stats?.currently_on_duty || 0, icon: Clock, color: "text-green-400", bg: "bg-green-500/10" },
+    { label: "Total Users", value: stats?.total_users || 0, icon: Users, color: "text-blue-700", bg: "bg-blue-100" },
+    { label: "Admins", value: stats?.total_admins || 0, icon: Shield, color: "text-emerald-700", bg: "bg-emerald-100" },
+    { label: "Super Users", value: stats?.total_superusers || 0, icon: Shield, color: "text-amber-800", bg: "bg-amber-100" },
+    { label: "Facilities", value: stats?.total_facilities || 0, icon: Building2, color: "text-purple-700", bg: "bg-purple-100" },
+    { label: "Today's Logins", value: stats?.today_logins || 0, icon: Activity, color: "text-teal-700", bg: "bg-teal-100" },
+    { label: "Currently On Duty", value: stats?.currently_on_duty || 0, icon: Clock, color: "text-green-700", bg: "bg-green-100" },
   ];
 
   return (
@@ -284,9 +284,9 @@ const OverviewTab = () => {
 
 // ============ SUPERUSER LOCATION BREAKDOWN ============
 const SU_LOCATION_CONFIG = {
-  'Facility': { bg: 'bg-teal-900/30', border: 'border-teal-700', text: 'text-teal-300', badge: 'bg-teal-800 text-teal-200', Icon: Hospital },
-  'Outreach': { bg: 'bg-blue-900/30', border: 'border-blue-700', text: 'text-blue-300', badge: 'bg-blue-800 text-blue-200', Icon: Truck },
-  'Workshop or Meeting': { bg: 'bg-amber-900/30', border: 'border-amber-700', text: 'text-amber-300', badge: 'bg-amber-800 text-amber-200', Icon: Presentation },
+  'Facility': { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700', badge: 'bg-teal-100 text-teal-800', Icon: Hospital },
+  'Outreach': { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-800', Icon: Truck },
+  'Workshop or Meeting': { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-800', Icon: Presentation },
 };
 
 const SuperUserLocationBreakdown = ({ locationBreakdown }) => {
@@ -297,8 +297,8 @@ const SuperUserLocationBreakdown = ({ locationBreakdown }) => {
   return (
     <div className="mt-6">
       <div className="flex items-center gap-2 mb-3">
-        <Activity className="w-5 h-5 text-amber-400" />
-        <h3 className="text-base font-semibold text-slate-200 font-['Manrope']">Live Location Breakdown</h3>
+        <Activity className="w-5 h-5 text-amber-700" />
+        <h3 className="text-base font-semibold text-slate-800 font-['Manrope']">Live Location Breakdown</h3>
         {!hasAny && <span className="text-xs text-slate-500 ml-1">— no staff currently on duty</span>}
       </div>
 
@@ -310,7 +310,7 @@ const SuperUserLocationBreakdown = ({ locationBreakdown }) => {
             <button
               key={lt}
               onClick={() => setExpandedType(expandedType === lt ? null : lt)}
-              className={`p-4 rounded-xl border ${cfg.bg} ${cfg.border} text-left transition-all hover:opacity-90 ${expandedType === lt ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-slate-900' : ''}`}
+              className={`p-4 rounded-xl border ${cfg.bg} ${cfg.border} text-left transition-all hover:opacity-90 ${expandedType === lt ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-white' : ''}`}
             >
               <div className="flex items-center justify-between mb-1">
                 {cfg.Icon && <cfg.Icon className={`w-5 h-5 ${cfg.text}`} />}
@@ -328,14 +328,14 @@ const SuperUserLocationBreakdown = ({ locationBreakdown }) => {
 
       {/* Expanded staff list */}
       {expandedType && locationBreakdown[expandedType]?.staff?.length > 0 && (
-        <div className="border border-slate-700 rounded-xl overflow-hidden">
-          <div className={`px-4 py-2 ${SU_LOCATION_CONFIG[expandedType]?.bg || 'bg-slate-800'} border-b border-slate-700`}>
-            <p className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+        <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+          <div className={`px-4 py-2 ${SU_LOCATION_CONFIG[expandedType]?.bg || 'bg-slate-50'} border-b border-slate-200`}>
+            <p className="text-sm font-semibold text-slate-800 flex items-center gap-2">
               {SU_LOCATION_CONFIG[expandedType]?.Icon && React.createElement(SU_LOCATION_CONFIG[expandedType].Icon, { className: `w-4 h-4 ${SU_LOCATION_CONFIG[expandedType]?.text}` })}
               {expandedType} — {locationBreakdown[expandedType].count} staff currently on duty
             </p>
           </div>
-          <div className="divide-y divide-slate-800">
+          <div className="divide-y divide-slate-100">
             {locationBreakdown[expandedType].staff.map((s, i) => {
               const loginTime = new Date(s.timestamp);
               const now = new Date();
@@ -343,9 +343,9 @@ const SuperUserLocationBreakdown = ({ locationBreakdown }) => {
               const h = Math.floor(diffMs / 3600000);
               const m = Math.floor((diffMs % 3600000) / 60000);
               return (
-                <div key={i} className="flex items-center justify-between px-4 py-3 hover:bg-slate-800/50">
+                <div key={i} className="flex items-center justify-between px-4 py-3 hover:bg-slate-50">
                   <div>
-                    <p className="text-sm font-medium text-slate-200">{s.user_name}</p>
+                    <p className="text-sm font-medium text-slate-800">{s.user_name}</p>
                     <p className="text-xs text-slate-400">{s.position} · {s.facility}</p>
                   </div>
                   <div className="text-right">
@@ -748,7 +748,7 @@ const ShiftsTab = () => {
       <Card className="bg-white border-slate-200">
         <CardHeader>
           <CardTitle className="text-base font-['Manrope'] text-slate-800 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-amber-400" /> Shift Time Configuration
+            <Clock className="w-5 h-5 text-amber-700" /> Shift Time Configuration
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -931,10 +931,10 @@ const ReportsTab = () => {
       <Card className="bg-white border-slate-200">
         <CardContent className="p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Activity className="w-4 h-4 text-amber-400" />
+            <Activity className="w-4 h-4 text-amber-700" />
             <span className="text-sm font-medium text-slate-600">Filter by Location</span>
             {activeFilterCount > 0 && (
-              <Badge className="bg-amber-500/20 text-amber-400 border-0 text-xs">{activeFilterCount} active</Badge>
+              <Badge className="bg-amber-100 text-amber-800 border-0 text-xs">{activeFilterCount} active</Badge>
             )}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -1016,22 +1016,22 @@ const ReportsTab = () => {
             <p className="text-xs text-slate-500">Total Logins</p>
           </CardContent>
         </Card>
-        <Card className="bg-emerald-950 border-emerald-900">
+        <Card className="bg-emerald-50 border-emerald-200">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-emerald-400">{filteredSummary.early}</p>
-            <p className="text-xs text-emerald-500">Early</p>
+            <p className="text-2xl font-bold text-emerald-700">{filteredSummary.early}</p>
+            <p className="text-xs text-emerald-600">Early</p>
           </CardContent>
         </Card>
-        <Card className="bg-blue-950 border-blue-900">
+        <Card className="bg-blue-50 border-blue-200">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-blue-400">{filteredSummary.on_time}</p>
-            <p className="text-xs text-blue-500">On Time</p>
+            <p className="text-2xl font-bold text-blue-700">{filteredSummary.on_time}</p>
+            <p className="text-xs text-blue-600">On Time</p>
           </CardContent>
         </Card>
-        <Card className="bg-red-950 border-red-900">
+        <Card className="bg-red-50 border-red-200">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-red-400">{filteredSummary.late}</p>
-            <p className="text-xs text-red-500">Late</p>
+            <p className="text-2xl font-bold text-red-700">{filteredSummary.late}</p>
+            <p className="text-xs text-red-600">Late</p>
           </CardContent>
         </Card>
       </div>
@@ -1061,11 +1061,11 @@ const ReportsTab = () => {
                   <TableRow><TableCell colSpan={6} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
                 ) : filteredRecords.length ? (
                   filteredRecords.map((r, i) => (
-                    <TableRow key={i} className={`border-slate-200 ${r.status === "late" ? "bg-red-950/30" : r.status === "early" ? "bg-emerald-950/30" : ""}`}>
+                    <TableRow key={i} className={`border-slate-200 ${r.status === "late" ? "bg-red-50" : r.status === "early" ? "bg-emerald-50" : ""}`}>
                       <TableCell className="text-slate-900 font-medium">{r.user_name}</TableCell>
                       <TableCell className="text-slate-500 text-sm">{r.facility}</TableCell>
                       <TableCell>
-                        <Badge className={r.action === "login" ? "bg-emerald-500/20 text-emerald-400 border-0" : "bg-red-500/20 text-red-400 border-0"}>
+                        <Badge className={r.action === "login" ? "bg-emerald-100 text-emerald-800 border-0" : "bg-red-100 text-red-700 border-0"}>
                           {r.action.toUpperCase()}
                         </Badge>
                       </TableCell>
@@ -1080,7 +1080,7 @@ const ReportsTab = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-amber-400 border-amber-500/30 hover:bg-amber-500/10 text-xs h-7 px-2"
+                            className="text-amber-700 border-amber-200 hover:bg-amber-50 text-xs h-7 px-2"
                             onClick={() => fetchTasks(r.attendance_id)}
                           >
                             <ClipboardList className="w-3 h-3 mr-1" />
@@ -1141,17 +1141,17 @@ const ReportsTab = () => {
 // ============ SMALL COMPONENTS ============
 const RoleBadge = ({ role }) => {
   const styles = {
-    superuser: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    admin: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    user: "bg-slate-200/50 text-slate-500 border-slate-600"
+    superuser: "bg-amber-100 text-amber-800 border-amber-200",
+    admin: "bg-blue-100 text-blue-800 border-blue-200",
+    user: "bg-slate-100 text-slate-600 border-slate-200"
   };
   return <Badge className={styles[role] || styles.user}>{role}</Badge>;
 };
 
 const StatusBadge = ({ status, minutesLate, lateDisplay }) => {
-  if (status === "early") return <span className="flex items-center gap-1 text-emerald-400 text-sm"><CheckCircle2 className="w-3.5 h-3.5" />Early</span>;
-  if (status === "on_time") return <span className="flex items-center gap-1 text-blue-400 text-sm"><CheckCircle2 className="w-3.5 h-3.5" />On Time</span>;
-  if (status === "late") return <span className="flex items-center gap-1 text-red-400 text-sm"><AlertTriangle className="w-3.5 h-3.5" />Late{lateDisplay ? ` (${lateDisplay})` : minutesLate ? ` (${minutesLate}m)` : ""}</span>;
+  if (status === "early") return <span className="flex items-center gap-1 text-emerald-700 text-sm"><CheckCircle2 className="w-3.5 h-3.5" />Early</span>;
+  if (status === "on_time") return <span className="flex items-center gap-1 text-blue-700 text-sm"><CheckCircle2 className="w-3.5 h-3.5" />On Time</span>;
+  if (status === "late") return <span className="flex items-center gap-1 text-red-600 text-sm"><AlertTriangle className="w-3.5 h-3.5" />Late{lateDisplay ? ` (${lateDisplay})` : minutesLate ? ` (${minutesLate}m)` : ""}</span>;
   if (status === "logout") return <span className="text-slate-500 text-sm">Logout</span>;
   return <span className="text-slate-600 text-sm">-</span>;
 };
@@ -1182,7 +1182,7 @@ const RoleChangeDialog = ({ user, onRoleChange }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10" data-testid={`su-role-btn-${user.user_id}`}>
+        <Button variant="ghost" size="sm" className="text-blue-700 hover:text-blue-800 hover:bg-blue-50" data-testid={`su-role-btn-${user.user_id}`}>
           <Shield className="w-4 h-4" />
         </Button>
       </DialogTrigger>
@@ -1251,7 +1251,7 @@ const ResetPasswordDialog = ({ user, onReset }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-amber-400 hover:text-amber-300 hover:bg-amber-500/10" data-testid={`su-resetpwd-btn-${user.user_id}`}>
+        <Button variant="ghost" size="sm" className="text-amber-700 hover:text-amber-800 hover:bg-amber-50" data-testid={`su-resetpwd-btn-${user.user_id}`}>
           <KeyRound className="w-4 h-4" />
         </Button>
       </DialogTrigger>
@@ -1389,8 +1389,8 @@ const MinistriesTab = () => {
 
       {/* Create / Edit Form */}
       {showForm && (
-        <Card className="bg-slate-100 border-amber-500/30">
-          <CardHeader><CardTitle className="text-base text-amber-400">{editTarget ? "Edit Ministry" : "New Ministry"}</CardTitle></CardHeader>
+        <Card className="bg-slate-50 border-amber-200">
+          <CardHeader><CardTitle className="text-base text-amber-800">{editTarget ? "Edit Ministry" : "New Ministry"}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-1">
@@ -1439,17 +1439,17 @@ const MinistriesTab = () => {
                     <TableCell className="font-medium text-slate-900">{m.name}</TableCell>
                     <TableCell className="text-slate-500 text-sm">{m.unit_term}</TableCell>
                     <TableCell>
-                      <Badge className={m.is_active ? "bg-emerald-500/20 text-emerald-400 border-0" : "bg-slate-200/50 text-slate-500 border-0"}>
+                      <Badge className={m.is_active ? "bg-emerald-100 text-emerald-800 border-0" : "bg-slate-100 text-slate-600 border-0"}>
                         {m.is_active ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-slate-500 text-sm">{m.created_at ? new Date(m.created_at).toLocaleDateString() : "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => openEdit(m)} className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10" data-testid={`su-edit-ministry-${m.id}`}>
+                        <Button variant="ghost" size="sm" onClick={() => openEdit(m)} className="text-blue-700 hover:text-blue-800 hover:bg-blue-50" data-testid={`su-edit-ministry-${m.id}`}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleToggle(m)} className={m.is_active ? "text-amber-400 hover:bg-amber-500/10" : "text-emerald-400 hover:bg-emerald-500/10"} data-testid={`su-toggle-ministry-${m.id}`}>
+                        <Button variant="ghost" size="sm" onClick={() => handleToggle(m)} className={m.is_active ? "text-amber-700 hover:bg-amber-50" : "text-emerald-700 hover:bg-emerald-50"} data-testid={`su-toggle-ministry-${m.id}`}>
                           {m.is_active ? <XCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => handleDelete(m)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10" data-testid={`su-delete-ministry-${m.id}`}>

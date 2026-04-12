@@ -5,7 +5,8 @@ import {
   WifiOff, Download, Home, Info, FileCheck, Trash2, Settings,
   BarChart, ClipboardList, Users
 } from 'lucide-react'
-import { authFetch, API } from '../lib/api'
+import { authFetch, API, clearStoredToken } from '../lib/api'
+import Logo from '../components/Logo'
 
 // ─── Haptic helper ────────────────────────────────────────────────────────────
 function haptic(style = 'light') {
@@ -59,7 +60,7 @@ function BottomNav({ role }) {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900 border-t border-slate-700"
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 border-t border-slate-200 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur"
          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="flex items-stretch max-w-lg mx-auto">
         {workerTabs.map(({ label, icon: Icon, route }) => {
@@ -69,10 +70,10 @@ function BottomNav({ role }) {
               key={route}
               onClick={() => { haptic('light'); navigate(route) }}
               className={`relative flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors min-h-[56px]
-                ${active ? 'text-teal-400' : 'text-slate-500 active:text-slate-300'}`}
+                ${active ? 'text-teal-700' : 'text-slate-500 active:text-slate-700'}`}
             >
               {active && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-teal-400 rounded-full" />
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-teal-600 rounded-full" />
               )}
               <Icon className="w-5 h-5" strokeWidth={active ? 2.5 : 1.8} />
               <span className={`text-[10px] font-medium`}>{label}</span>
@@ -123,36 +124,36 @@ function Drawer({ open, onClose, user, role, onLogout }) {
         onClick={onClose}
       />
       {/* Drawer panel */}
-      <div className={`fixed top-0 right-0 bottom-0 z-50 w-72 bg-slate-900 shadow-2xl transform transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'}`}
+      <div className={`fixed top-0 right-0 bottom-0 z-50 w-72 bg-white shadow-2xl transform transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'}`}
            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700"
+        <div className="flex items-center justify-between p-4 border-b border-slate-200"
              style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-teal-700 flex items-center justify-center text-white font-bold text-lg">
               {user?.name?.[0]?.toUpperCase() || 'U'}
             </div>
             <div>
-              <p className="text-white font-semibold text-sm leading-tight">{user?.name || 'User'}</p>
-              <p className="text-slate-400 text-xs capitalize">{role || 'worker'}</p>
+              <p className="text-slate-900 font-semibold text-sm leading-tight">{user?.name || 'User'}</p>
+              <p className="text-slate-500 text-xs capitalize">{role || 'worker'}</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-900 p-1">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Admin section (if applicable) */}
         {adminItems.length > 0 && (
-          <div className="py-2 border-b border-slate-800">
+          <div className="py-2 border-b border-slate-200">
             <p className="px-4 py-1 text-xs text-slate-500 uppercase tracking-widest">Administration</p>
             {adminItems.map(({ label, icon: Icon, route }) => (
               <button
                 key={route}
                 onClick={() => go(route)}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
               >
-                <Icon className="w-4 h-4 text-slate-400" />
+                <Icon className="w-4 h-4 text-slate-500" />
                 <span className="flex-1 text-left">{label}</span>
                 <ChevronRight className="w-4 h-4 opacity-40" />
               </button>
@@ -167,9 +168,9 @@ function Drawer({ open, onClose, user, role, onLogout }) {
               key={route}
               onClick={() => go(route)}
               className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors
-                ${danger ? 'text-red-400 hover:bg-red-900/20' : 'text-slate-300 hover:bg-slate-800'}`}
+                ${danger ? 'text-red-600 hover:bg-red-50' : 'text-slate-700 hover:bg-slate-50'}`}
             >
-              <Icon className={`w-4 h-4 ${danger ? 'text-red-400' : 'text-slate-400'}`} />
+              <Icon className={`w-4 h-4 ${danger ? 'text-red-600' : 'text-slate-500'}`} />
               <span className="flex-1 text-left">{label}</span>
               <ChevronRight className="w-4 h-4 opacity-40" />
             </button>
@@ -177,10 +178,10 @@ function Drawer({ open, onClose, user, role, onLogout }) {
         </div>
 
         {/* Logout */}
-        <div className="p-4 border-t border-slate-700">
+        <div className="p-4 border-t border-slate-200">
           <button
             onClick={() => { haptic('medium'); onLogout() }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-900/20 rounded-xl transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
@@ -234,13 +235,13 @@ function OfflineBanner() {
 function AppPageSkeleton() {
   return (
     <div className="p-4 space-y-4 animate-pulse">
-      <div className="h-32 rounded-2xl bg-slate-800" />
-      <div className="h-20 rounded-2xl bg-slate-800" />
+      <div className="h-32 rounded-2xl bg-white border border-slate-200" />
+      <div className="h-20 rounded-2xl bg-white border border-slate-200" />
       <div className="grid grid-cols-2 gap-3">
-        <div className="h-24 rounded-2xl bg-slate-800" />
-        <div className="h-24 rounded-2xl bg-slate-800" />
+        <div className="h-24 rounded-2xl bg-white border border-slate-200" />
+        <div className="h-24 rounded-2xl bg-white border border-slate-200" />
       </div>
-      <div className="h-40 rounded-2xl bg-slate-800" />
+      <div className="h-40 rounded-2xl bg-white border border-slate-200" />
     </div>
   )
 }
@@ -265,30 +266,54 @@ export default function AppLayout() {
 
   // Load user from auth/me — restore session
   useEffect(() => {
-    authFetch(`${API}/auth/me`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data?.user) {
-          setUser(data.user)
-          setRole(data.user.role?.toLowerCase())
-          setPageReady(true)
-        } else {
-          navigate('/app/login', { replace: true })
+    let cancelled = false
+
+    const restoreSession = async () => {
+      try {
+        const response = await authFetch(`${API}/auth/me`)
+        if (!response.ok) {
+          clearStoredToken()
+          if (!cancelled) navigate('/app/login', { replace: true })
+          return
         }
-      })
-      .catch(() => navigate('/app/login', { replace: true }))
+
+        const data = await response.json()
+        const resolvedUser = data?.user ?? data
+
+        if (!resolvedUser?.user_id) {
+          clearStoredToken()
+          if (!cancelled) navigate('/app/login', { replace: true })
+          return
+        }
+
+        if (cancelled) return
+        setUser(resolvedUser)
+        setRole(resolvedUser.role?.toLowerCase())
+        setPageReady(true)
+      } catch {
+        clearStoredToken()
+        if (!cancelled) navigate('/app/login', { replace: true })
+      }
+    }
+
+    restoreSession()
+    return () => { cancelled = true }
   }, [navigate])
 
   // Reset page-ready on route change (show skeleton briefly for smooth transitions)
   useEffect(() => {
+    if (!user) return
     setPageReady(false)
     const t = setTimeout(() => setPageReady(true), 120)
     return () => clearTimeout(t)
-  }, [location.pathname])
+  }, [location.pathname, user])
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     haptic('heavy')
-    localStorage.removeItem('vchron_token')
+    try {
+      await authFetch(`${API}/auth/logout`, { method: 'POST' })
+    } catch {}
+    clearStoredToken()
     navigate('/app/login', { replace: true })
   }
 
@@ -327,21 +352,20 @@ export default function AppLayout() {
   if (!user) {
     // Splash / loading screen
     return (
-      <div className="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center gap-4">
-        <div className="relative">
-          <img src="/logo192.png" alt="VChron" className="w-20 h-20 rounded-2xl shadow-2xl" />
-          <span className="absolute inset-0 rounded-2xl animate-ping bg-teal-400/20" />
+      <div className="fixed inset-0 overflow-hidden bg-gradient-to-br from-[var(--vchron-teal-dark)] via-[var(--vchron-teal)] to-[var(--vchron-teal-light)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.18),_transparent_38%)]" />
+        <div className="relative z-10 flex h-full items-center justify-center px-6">
+          <Logo variant="light" size="xl" className="drop-shadow-[0_18px_40px_rgba(0,0,0,0.28)]" />
         </div>
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-white font-semibold text-lg">VChron</p>
-          <p className="text-teal-400 text-xs font-medium tracking-widest uppercase">Loading…</p>
+        <div className="absolute bottom-12 left-1/2 z-10 -translate-x-1/2">
+          <div className="h-11 w-11 rounded-full border-[3px] border-white/35 border-t-white animate-spin" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       {/* Offline banner */}
       <OfflineBanner />
 
@@ -352,17 +376,17 @@ export default function AppLayout() {
 
       {/* Top header */}
       <header
-        className="fixed left-0 right-0 z-20 bg-slate-900/95 backdrop-blur border-b border-slate-700/60"
+        className="fixed left-0 right-0 z-20 bg-white/95 backdrop-blur border-b border-slate-200"
         style={{ top: showInstallBanner ? '48px' : 0 }}
       >
         <div className="flex items-center justify-between px-4 h-[60px] max-w-lg mx-auto">
           <div className="flex items-center gap-2">
             <img src="/logo192.png" alt="VChron" className="w-7 h-7 rounded-lg object-contain" />
-            <span className="text-white font-semibold text-sm">{pageTitle}</span>
+            <span className="text-slate-900 font-semibold text-sm">{pageTitle}</span>
           </div>
           <button
             onClick={() => { haptic('light'); setDrawerOpen(true) }}
-            className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors active:scale-95"
+            className="w-9 h-9 flex items-center justify-center text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors active:scale-95"
           >
             <Menu className="w-5 h-5" />
           </button>

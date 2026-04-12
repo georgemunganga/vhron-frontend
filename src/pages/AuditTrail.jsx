@@ -139,8 +139,8 @@ const AuditTrail = () => {
             <Logo variant="light" size="sm" />
           </div>
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-amber-400" />
-            <span className="text-sm font-semibold text-amber-400">Audit Trail</span>
+            <Shield className="w-5 h-5 text-amber-700" />
+            <span className="text-sm font-semibold text-amber-700">Audit Trail</span>
             <Badge className="bg-amber-900/40 text-amber-300 border-amber-700 text-xs ml-1">
               Superuser Only
             </Badge>

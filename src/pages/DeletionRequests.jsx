@@ -20,7 +20,7 @@ import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
 
 const STATUS_TABS = [
-  { value: "pending",  label: "Pending",  color: "text-amber-400",  bg: "bg-amber-500/10 border-amber-500/30" },
+  { value: "pending",  label: "Pending",  color: "text-amber-800",  bg: "bg-amber-100 border-amber-200" },
   { value: "approved", label: "Approved", color: "text-red-400",    bg: "bg-red-500/10 border-red-500/30" },
   { value: "rejected", label: "Rejected", color: "text-slate-400",  bg: "bg-slate-500/10 border-slate-500/30" },
   { value: "all",      label: "All",      color: "text-slate-600",  bg: "bg-slate-200/30 border-slate-600/30" },
@@ -345,7 +345,7 @@ const DeletionRequests = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-slate-200 text-slate-400 hover:text-white hover:bg-slate-100 text-xs"
+                          className="border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100 text-xs"
                           onClick={() => setRejectTarget(req)}
                         >
                           <XCircle className="w-3.5 h-3.5 mr-1" />

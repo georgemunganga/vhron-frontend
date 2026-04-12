@@ -299,8 +299,8 @@ const AdminScoping = () => {
             <Logo variant="light" size="sm" />
           </div>
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-amber-400" />
-            <span className="text-sm font-semibold text-amber-400">Admin Scoping</span>
+            <Shield className="w-5 h-5 text-amber-700" />
+            <span className="text-sm font-semibold text-amber-700">Admin Scoping</span>
           </div>
           <Button
             variant="ghost"
@@ -319,7 +319,7 @@ const AdminScoping = () => {
           <CardContent className="pt-4 pb-4 px-5">
             <div className="flex items-start gap-3">
               <div className="p-2 bg-amber-900/30 rounded-lg mt-0.5">
-                <Globe className="w-5 h-5 text-amber-400" />
+                <Globe className="w-5 h-5 text-amber-700" />
               </div>
               <div>
                 <h2 className="text-sm font-semibold text-slate-900">Ministry & Geographic Scope Assignment</h2>
@@ -365,7 +365,7 @@ const AdminScoping = () => {
                     <div className="flex items-start gap-3 min-w-0">
                       {/* Avatar */}
                       <div className="w-9 h-9 rounded-full bg-amber-900/40 border border-amber-700/40 flex items-center justify-center flex-shrink-0">
-                        <span className="text-sm font-bold text-amber-400">
+                        <span className="text-sm font-bold text-amber-700">
                           {admin.name?.charAt(0)?.toUpperCase()}
                         </span>
                       </div>
@@ -406,7 +406,7 @@ const AdminScoping = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-slate-200 text-slate-600 hover:text-white hover:bg-slate-100 flex-shrink-0"
+                      className="border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex-shrink-0"
                       onClick={() => setEditAdmin(admin)}
                     >
                       <Edit2 className="w-3.5 h-3.5 mr-1.5" />
