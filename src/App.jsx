@@ -42,6 +42,7 @@ const AppAnalytics = lazy(() => import("@/pages/Analytics"));
 const AppAdminScoping = lazy(() => import("@/pages/AdminScoping"));
 const AppDeletionRequests = lazy(() => import("@/pages/DeletionRequests"));
 const AppMyReports = lazy(() => import("@/pages/MyReports"));
+const InstallPage = lazy(() => import("@/pages/Install"));
 
 import {
   API,
@@ -182,6 +183,9 @@ function AppRouter() {
             <Suspense fallback={<PageLoader />}><SuperUserDashboard /></Suspense>
           </ProtectedRoute>
         } />
+
+        {/* ── Install page (public, no auth required) ── */}
+        <Route path="/install" element={<Suspense fallback={<PageLoader />}><InstallPage /></Suspense>} />
 
         {/* ── PWA /app routes ── */}
         {/* Auth pages (no shell) */}

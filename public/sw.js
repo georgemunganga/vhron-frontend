@@ -1,63 +1,55 @@
-/* VChron Service Worker v3 — PWA with offline support */
-const CACHE_VERSION = 'vchron-v3';
+/* VChron Service Worker v4 — PWA with offline support, sync queue, push notifications */
+const CACHE_VERSION = 'vchron-v4';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const OFFLINE_URL = '/app/offline';
+const SYNC_TAG = 'sync-attendance';
 
-// Assets to pre-cache on install
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/logo72.png',
+  '/logo96.png',
+  '/logo128.png',
+  '/logo144.png',
+  '/logo152.png',
   '/logo192.png',
+  '/logo384.png',
   '/logo512.png',
+  '/install',
   '/app/offline',
 ];
 
-// ─── Install ──────────────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS).catch((err) => {
-        console.warn('[SW] Pre-cache partial failure:', err);
-      });
-    })
+    caches.open(STATIC_CACHE).then((cache) =>
+      cache.addAll(PRECACHE_ASSETS).catch((err) =>
+        console.warn('[SW] Pre-cache partial failure:', err)
+      )
+    )
   );
   self.skipWaiting();
 });
 
-// ─── Activate ─────────────────────────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys
-          .filter((k) => k !== STATIC_CACHE && k !== DYNAMIC_CACHE)
-          .map((k) => caches.delete(k))
+        keys.filter((k) => k !== STATIC_CACHE && k !== DYNAMIC_CACHE).map((k) => caches.delete(k))
       )
     )
   );
   self.clients.claim();
 });
 
-// ─── Fetch ────────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // 1. Never intercept API calls — always network
-  if (
-    url.hostname === 'api.vcron.cloud' ||
-    url.pathname.startsWith('/api/')
-  ) return;
+  if (url.hostname === 'api.vcron.cloud' || url.pathname.startsWith('/api/')) return;
+  if (request.method !== 'GET' || !request.url.startsWith('http')) return;
 
-  // 2. Skip non-GET, non-http(s), and browser-extension requests
-  if (
-    request.method !== 'GET' ||
-    !request.url.startsWith('http')
-  ) return;
-
-  // 3. HTML navigation requests — network first, offline fallback
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -69,23 +61,14 @@ self.addEventListener('fetch', (event) => {
         .catch(async () => {
           const cached = await caches.match(request);
           if (cached) return cached;
-          // Serve /index.html for all app routes (SPA fallback)
           const indexCached = await caches.match('/index.html');
-          return indexCached || new Response('<h1>Offline</h1>', {
-            headers: { 'Content-Type': 'text/html' },
-          });
+          return indexCached || caches.match(OFFLINE_URL) || new Response('<h1>Offline</h1>', { headers: { 'Content-Type': 'text/html' } });
         })
     );
     return;
   }
 
-  // 4. JS/CSS/font assets — cache first (they're content-hashed by Vite)
-  if (
-    url.pathname.startsWith('/assets/') ||
-    request.destination === 'script' ||
-    request.destination === 'style' ||
-    request.destination === 'font'
-  ) {
+  if (url.pathname.startsWith('/assets/') || request.destination === 'script' || request.destination === 'style' || request.destination === 'font') {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) return cached;
@@ -99,7 +82,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 5. Images — cache first, network fallback
   if (request.destination === 'image') {
     event.respondWith(
       caches.match(request).then((cached) => {
@@ -114,7 +96,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 6. Everything else — network first, cache fallback
   event.respondWith(
     fetch(request)
       .then((res) => {
@@ -126,36 +107,45 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// ─── Background Sync ──────────────────────────────────────────────────────────
 self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-attendance') {
+  if (event.tag === SYNC_TAG) {
     event.waitUntil(
-      self.clients.matchAll().then((clients) => {
-        clients.forEach((client) =>
-          client.postMessage({ type: 'SYNC_ATTENDANCE' })
-        );
+      self.clients.matchAll({ includeUncontrolled: true, type: 'window' }).then((clients) => {
+        clients.forEach((client) => client.postMessage({ type: 'SYNC_ATTENDANCE' }));
       })
     );
   }
 });
 
-// ─── Push Notifications ───────────────────────────────────────────────────────
 self.addEventListener('push', (event) => {
   const data = event.data?.json() || {};
   event.waitUntil(
     self.registration.showNotification(data.title || 'VChron', {
-      body: data.body || 'You have a new notification',
+      body: data.body || 'You have a new notification from VChron',
       icon: '/logo192.png',
-      badge: '/logo192.png',
+      badge: '/logo96.png',
       tag: data.tag || 'vchron-notif',
       data: { url: data.url || '/app/dashboard' },
+      vibrate: [100, 50, 100],
+      requireInteraction: data.requireInteraction || false,
     })
   );
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const targetUrl = event.notification.data?.url || '/app/dashboard';
   event.waitUntil(
-    self.clients.openWindow(event.notification.data?.url || '/app/dashboard')
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if (client.url.includes(targetUrl) && 'focus' in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
+    })
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data?.type === 'REGISTER_SYNC') self.registration.sync?.register(SYNC_TAG).catch(() => {});
 });

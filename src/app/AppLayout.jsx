@@ -1,7 +1,19 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation, Outlet } from 'react-router-dom'
-import { Home, Clock, User, Menu, X, LogOut, Shield, ChevronRight, Bell, Wifi, WifiOff, Download } from 'lucide-react'
+import {
+  Clock, BarChart2, FileText, Menu, X, LogOut, Shield, ChevronRight,
+  WifiOff, Download, Home, Info, FileCheck, Trash2, Settings,
+  BarChart, ClipboardList, Users
+} from 'lucide-react'
 import { authFetch, API } from '../lib/api'
+
+// ─── Haptic helper ────────────────────────────────────────────────────────────
+function haptic(style = 'light') {
+  if (navigator.vibrate) {
+    const patterns = { light: [10], medium: [20], heavy: [40] }
+    navigator.vibrate(patterns[style] || [10])
+  }
+}
 
 // ─── Install Prompt Hook ──────────────────────────────────────────────────────
 function useInstallPrompt() {
@@ -9,11 +21,16 @@ function useInstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false)
 
   useEffect(() => {
+    if (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true
+    ) {
+      setIsInstalled(true)
+      return
+    }
     const handler = (e) => { e.preventDefault(); setPrompt(e) }
     window.addEventListener('beforeinstallprompt', handler)
     window.addEventListener('appinstalled', () => setIsInstalled(true))
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) setIsInstalled(true)
     return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
@@ -28,37 +45,37 @@ function useInstallPrompt() {
   return { prompt, isInstalled, install }
 }
 
-// ─── Bottom Nav ───────────────────────────────────────────────────────────────
+// ─── Bottom Nav (worker-only: Shift Status, History, My Reports) ──────────────
 function BottomNav({ role }) {
   const navigate = useNavigate()
   const location = useLocation()
   const path = location.pathname
 
-  const tabs = [
-    { label: 'Home', icon: Home, route: '/app/dashboard' },
-    { label: 'History', icon: Clock, route: '/app/history' },
-    { label: 'Profile', icon: User, route: '/app/profile' },
+  // Worker tabs — always shown
+  const workerTabs = [
+    { label: 'Shift Status', icon: Home,      route: '/app/dashboard' },
+    { label: 'History',      icon: Clock,     route: '/app/history' },
+    { label: 'My Reports',   icon: FileText,  route: '/app/my-reports' },
   ]
 
-  if (role === 'admin' || role === 'superuser') {
-    tabs.splice(2, 0, { label: 'Admin', icon: Shield, route: role === 'superuser' ? '/app/superuser' : '/app/admin' })
-  }
-
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900 border-t border-slate-700 safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900 border-t border-slate-700"
+         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="flex items-stretch max-w-lg mx-auto">
-        {tabs.map(({ label, icon: Icon, route }) => {
+        {workerTabs.map(({ label, icon: Icon, route }) => {
           const active = path === route || path.startsWith(route + '/')
           return (
             <button
               key={route}
-              onClick={() => navigate(route)}
-              className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors min-h-[56px]
-                ${active ? 'text-teal-400' : 'text-slate-500 hover:text-slate-300'}`}
+              onClick={() => { haptic('light'); navigate(route) }}
+              className={`relative flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors min-h-[56px]
+                ${active ? 'text-teal-400' : 'text-slate-500 active:text-slate-300'}`}
             >
-              <Icon className={`w-5 h-5 ${active ? 'text-teal-400' : ''}`} strokeWidth={active ? 2.5 : 1.8} />
-              <span className={`text-[10px] font-medium ${active ? 'text-teal-400' : ''}`}>{label}</span>
-              {active && <span className="absolute bottom-0 w-8 h-0.5 bg-teal-400 rounded-full" />}
+              {active && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-teal-400 rounded-full" />
+              )}
+              <Icon className="w-5 h-5" strokeWidth={active ? 2.5 : 1.8} />
+              <span className={`text-[10px] font-medium`}>{label}</span>
             </button>
           )
         })}
@@ -71,45 +88,53 @@ function BottomNav({ role }) {
 function Drawer({ open, onClose, user, role, onLogout }) {
   const navigate = useNavigate()
 
-  const items = [
-    { label: 'My Reports', route: '/app/my-reports' },
-    { label: 'About VChron', route: '/app/about' },
-    { label: 'Privacy Policy', route: '/app/privacy-policy' },
-    { label: 'Terms & Conditions', route: '/app/terms' },
-    { label: 'Request Account Deletion', route: '/app/request-deletion', danger: true },
+  // Worker items — always shown
+  const workerItems = [
+    { label: 'About VChron',           icon: Info,         route: '/app/about' },
+    { label: 'Privacy Policy',         icon: FileCheck,    route: '/app/privacy-policy' },
+    { label: 'Terms & Conditions',     icon: ClipboardList,route: '/app/terms' },
+    { label: 'Request Account Deletion', icon: Trash2,     route: '/app/request-deletion', danger: true },
   ]
 
+  // Admin-only items (only visible to admin/superuser in the drawer)
+  const adminItems = []
   if (role === 'superuser') {
-    items.unshift(
-      { label: 'Analytics', route: '/app/analytics' },
-      { label: 'Admin Scoping', route: '/app/admin-scoping' },
-      { label: 'Audit Trail', route: '/app/audit-trail' },
+    adminItems.push(
+      { label: 'Superuser Panel',  icon: Shield,      route: '/app/superuser' },
+      { label: 'Analytics',        icon: BarChart,    route: '/app/analytics' },
+      { label: 'Admin Scoping',    icon: Settings,    route: '/app/admin-scoping' },
+      { label: 'Audit Trail',      icon: ClipboardList, route: '/app/audit-trail' },
     )
   }
   if (role === 'admin') {
-    items.unshift(
-      { label: 'Deletion Requests', route: '/app/deletion-requests' },
+    adminItems.push(
+      { label: 'Admin Panel',        icon: Shield,    route: '/app/admin' },
+      { label: 'Deletion Requests',  icon: Trash2,    route: '/app/deletion-requests' },
     )
   }
+
+  const go = (route) => { haptic('light'); navigate(route); onClose() }
 
   return (
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-black/60 transition-opacity ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-50 bg-black/60 transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
       {/* Drawer panel */}
-      <div className={`fixed top-0 right-0 bottom-0 z-50 w-72 bg-slate-900 shadow-2xl transform transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed top-0 right-0 bottom-0 z-50 w-72 bg-slate-900 shadow-2xl transform transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'}`}
+           style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+        <div className="flex items-center justify-between p-4 border-b border-slate-700"
+             style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-teal-700 flex items-center justify-center text-white font-bold text-lg">
               {user?.name?.[0]?.toUpperCase() || 'U'}
             </div>
             <div>
               <p className="text-white font-semibold text-sm leading-tight">{user?.name || 'User'}</p>
-              <p className="text-slate-400 text-xs">{user?.email || ''}</p>
+              <p className="text-slate-400 text-xs capitalize">{role || 'worker'}</p>
             </div>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white p-1">
@@ -117,17 +142,36 @@ function Drawer({ open, onClose, user, role, onLogout }) {
           </button>
         </div>
 
-        {/* Nav items */}
+        {/* Admin section (if applicable) */}
+        {adminItems.length > 0 && (
+          <div className="py-2 border-b border-slate-800">
+            <p className="px-4 py-1 text-xs text-slate-500 uppercase tracking-widest">Administration</p>
+            {adminItems.map(({ label, icon: Icon, route }) => (
+              <button
+                key={route}
+                onClick={() => go(route)}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors"
+              >
+                <Icon className="w-4 h-4 text-slate-400" />
+                <span className="flex-1 text-left">{label}</span>
+                <ChevronRight className="w-4 h-4 opacity-40" />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Worker nav items */}
         <div className="flex-1 overflow-y-auto py-2">
-          {items.map(({ label, route, danger }) => (
+          {workerItems.map(({ label, icon: Icon, route, danger }) => (
             <button
               key={route}
-              onClick={() => { navigate(route); onClose() }}
-              className={`w-full flex items-center justify-between px-4 py-3 text-sm transition-colors
+              onClick={() => go(route)}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors
                 ${danger ? 'text-red-400 hover:bg-red-900/20' : 'text-slate-300 hover:bg-slate-800'}`}
             >
-              <span>{label}</span>
-              <ChevronRight className="w-4 h-4 opacity-50" />
+              <Icon className={`w-4 h-4 ${danger ? 'text-red-400' : 'text-slate-400'}`} />
+              <span className="flex-1 text-left">{label}</span>
+              <ChevronRight className="w-4 h-4 opacity-40" />
             </button>
           ))}
         </div>
@@ -135,7 +179,7 @@ function Drawer({ open, onClose, user, role, onLogout }) {
         {/* Logout */}
         <div className="p-4 border-t border-slate-700">
           <button
-            onClick={onLogout}
+            onClick={() => { haptic('medium'); onLogout() }}
             className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-900/20 rounded-xl transition-colors"
           >
             <LogOut className="w-4 h-4" />
@@ -150,7 +194,8 @@ function Drawer({ open, onClose, user, role, onLogout }) {
 // ─── Install Banner ───────────────────────────────────────────────────────────
 function InstallBanner({ onInstall, onDismiss }) {
   return (
-    <div className="fixed top-0 left-0 right-0 z-30 bg-teal-700 text-white px-4 py-3 flex items-center gap-3 shadow-lg">
+    <div className="fixed top-0 left-0 right-0 z-30 bg-teal-700 text-white px-4 py-3 flex items-center gap-3 shadow-lg"
+         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
       <Download className="w-5 h-5 flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold leading-tight">Install VChron</p>
@@ -185,6 +230,21 @@ function OfflineBanner() {
   )
 }
 
+// ─── Skeleton Loader ──────────────────────────────────────────────────────────
+function AppPageSkeleton() {
+  return (
+    <div className="p-4 space-y-4 animate-pulse">
+      <div className="h-32 rounded-2xl bg-slate-800" />
+      <div className="h-20 rounded-2xl bg-slate-800" />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="h-24 rounded-2xl bg-slate-800" />
+        <div className="h-24 rounded-2xl bg-slate-800" />
+      </div>
+      <div className="h-40 rounded-2xl bg-slate-800" />
+    </div>
+  )
+}
+
 // ─── Main AppLayout ───────────────────────────────────────────────────────────
 export default function AppLayout() {
   const navigate = useNavigate()
@@ -193,6 +253,7 @@ export default function AppLayout() {
   const [role, setRole] = useState(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [showInstallBanner, setShowInstallBanner] = useState(false)
+  const [pageReady, setPageReady] = useState(false)
   const { prompt, isInstalled, install } = useInstallPrompt()
 
   // Show install banner if prompt is available and not dismissed
@@ -202,7 +263,7 @@ export default function AppLayout() {
     }
   }, [prompt, isInstalled])
 
-  // Load user from auth/me
+  // Load user from auth/me — restore session
   useEffect(() => {
     authFetch(`${API}/auth/me`)
       .then((r) => r.json())
@@ -210,6 +271,7 @@ export default function AppLayout() {
         if (data?.user) {
           setUser(data.user)
           setRole(data.user.role?.toLowerCase())
+          setPageReady(true)
         } else {
           navigate('/app/login', { replace: true })
         }
@@ -217,7 +279,15 @@ export default function AppLayout() {
       .catch(() => navigate('/app/login', { replace: true }))
   }, [navigate])
 
+  // Reset page-ready on route change (show skeleton briefly for smooth transitions)
+  useEffect(() => {
+    setPageReady(false)
+    const t = setTimeout(() => setPageReady(true), 120)
+    return () => clearTimeout(t)
+  }, [location.pathname])
+
   const handleLogout = () => {
+    haptic('heavy')
     localStorage.removeItem('vchron_token')
     navigate('/app/login', { replace: true })
   }
@@ -234,30 +304,38 @@ export default function AppLayout() {
 
   // Page title from route
   const titles = {
-    '/app/dashboard': 'Dashboard',
-    '/app/history': 'Attendance History',
-    '/app/profile': 'My Profile',
-    '/app/admin': 'Admin Panel',
-    '/app/superuser': 'Superuser Panel',
-    '/app/about': 'About VChron',
-    '/app/privacy-policy': 'Privacy Policy',
-    '/app/terms': 'Terms & Conditions',
-    '/app/request-deletion': 'Delete Account',
-    '/app/analytics': 'Analytics',
-    '/app/admin-scoping': 'Admin Scoping',
-    '/app/audit-trail': 'Audit Trail',
+    '/app/dashboard':         'Shift Status',
+    '/app/history':           'Attendance History',
+    '/app/my-reports':        'My Reports',
+    '/app/admin':             'Admin Panel',
+    '/app/superuser':         'Superuser Panel',
+    '/app/about':             'About VChron',
+    '/app/privacy-policy':    'Privacy Policy',
+    '/app/terms':             'Terms & Conditions',
+    '/app/request-deletion':  'Delete Account',
+    '/app/analytics':         'Analytics',
+    '/app/admin-scoping':     'Admin Scoping',
+    '/app/audit-trail':       'Audit Trail',
     '/app/deletion-requests': 'Deletion Requests',
-    '/app/my-reports': 'My Reports',
   }
   const pageTitle = titles[location.pathname] || 'VChron'
-  const topOffset = showInstallBanner ? 'pt-[108px]' : 'pt-[60px]'
+
+  // Banner height offset
+  const bannerOffset = showInstallBanner ? 48 : 0
+  const topOffset = `pt-[${60 + bannerOffset}px]`
 
   if (!user) {
     // Splash / loading screen
     return (
-      <div className="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center">
-        <img src="/logo192.png" alt="VChron" className="w-20 h-20 rounded-2xl mb-4 animate-pulse" />
-        <p className="text-teal-400 text-sm font-medium tracking-widest uppercase">Loading…</p>
+      <div className="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center gap-4">
+        <div className="relative">
+          <img src="/logo192.png" alt="VChron" className="w-20 h-20 rounded-2xl shadow-2xl" />
+          <span className="absolute inset-0 rounded-2xl animate-ping bg-teal-400/20" />
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <p className="text-white font-semibold text-lg">VChron</p>
+          <p className="text-teal-400 text-xs font-medium tracking-widest uppercase">Loading…</p>
+        </div>
       </div>
     )
   }
@@ -273,29 +351,40 @@ export default function AppLayout() {
       )}
 
       {/* Top header */}
-      <header className={`fixed top-0 left-0 right-0 z-20 bg-slate-900 border-b border-slate-700 ${showInstallBanner ? 'mt-[48px]' : ''}`}>
+      <header
+        className="fixed left-0 right-0 z-20 bg-slate-900/95 backdrop-blur border-b border-slate-700/60"
+        style={{ top: showInstallBanner ? '48px' : 0 }}
+      >
         <div className="flex items-center justify-between px-4 h-[60px] max-w-lg mx-auto">
           <div className="flex items-center gap-2">
             <img src="/logo192.png" alt="VChron" className="w-7 h-7 rounded-lg object-contain" />
             <span className="text-white font-semibold text-sm">{pageTitle}</span>
           </div>
           <button
-            onClick={() => setDrawerOpen(true)}
-            className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            onClick={() => { haptic('light'); setDrawerOpen(true) }}
+            className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors active:scale-95"
           >
             <Menu className="w-5 h-5" />
           </button>
         </div>
       </header>
 
-      {/* Page content */}
-      <main className={`flex-1 ${topOffset} pb-[72px] overflow-y-auto`}>
-        <div className="max-w-lg mx-auto w-full min-h-full">
-          <Outlet context={{ user, role }} />
+      {/* Page content with smooth transition */}
+      <main
+        className="flex-1 overflow-y-auto pb-[72px]"
+        style={{ paddingTop: showInstallBanner ? '108px' : '60px' }}
+      >
+        <div
+          className={`max-w-lg mx-auto w-full min-h-full transition-opacity duration-150 ${pageReady ? 'opacity-100' : 'opacity-0'}`}
+        >
+          {pageReady
+            ? <Outlet context={{ user, role }} />
+            : <AppPageSkeleton />
+          }
         </div>
       </main>
 
-      {/* Bottom nav */}
+      {/* Bottom nav — worker-only */}
       <BottomNav role={role} />
 
       {/* Drawer */}
