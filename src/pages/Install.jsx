@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useMemo } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Download, CheckCircle2, Smartphone, Wifi, Clock, Shield,
   ArrowRight, ExternalLink, Home
@@ -73,13 +73,27 @@ function IOSInstructions() {
 
 export default function Install() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { prompt, isInstalled, install } = useInstallPrompt()
   const [installing, setInstalling] = useState(false)
   const [justInstalled, setJustInstalled] = useState(false)
+  const isAppRoute = useMemo(() => location.pathname.startsWith('/app/'), [location.pathname])
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
   const showIOSGuide = isIOS && isSafari && !isInstalled
+  const loginRoute = isAppRoute ? '/app/login' : '/login'
+  const privacyRoute = isAppRoute ? '/app/privacy-policy' : '/privacy-policy'
+
+  useEffect(() => {
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true
+
+    if (isStandalone && location.pathname === '/install') {
+      navigate('/app/install', { replace: true })
+    }
+  }, [location.pathname, navigate])
 
   const handleInstall = async () => {
     setInstalling(true)
@@ -124,7 +138,7 @@ export default function Install() {
               Open from your home screen
             </div>
             <button
-              onClick={() => navigate('/app/login')}
+              onClick={() => navigate(loginRoute)}
               className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
             >
               Or continue in this browser
@@ -140,7 +154,7 @@ export default function Install() {
               <p className="text-sm text-gray-500 mt-1">You're running the installed app right now.</p>
             </div>
             <button
-              onClick={() => navigate('/app/login')}
+              onClick={() => navigate(loginRoute)}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold transition-colors shadow"
             >
               Open App <ArrowRight className="w-4 h-4" />
@@ -177,7 +191,7 @@ export default function Install() {
               )}
             </button>
             <button
-              onClick={() => navigate('/app/login')}
+              onClick={() => navigate(loginRoute)}
               className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
             >
               Continue in browser instead
@@ -198,7 +212,7 @@ export default function Install() {
             </div>
             <IOSInstructions />
             <button
-              onClick={() => navigate('/app/login')}
+              onClick={() => navigate(loginRoute)}
               className="text-sm text-gray-400 hover:text-gray-600 transition-colors mt-2"
             >
               Continue in browser instead
@@ -218,7 +232,7 @@ export default function Install() {
               </p>
             </div>
             <button
-              onClick={() => navigate('/app/login')}
+              onClick={() => navigate(loginRoute)}
               className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-base transition-colors shadow-md"
             >
               Open in browser <ArrowRight className="w-4 h-4" />
@@ -246,7 +260,7 @@ export default function Install() {
       {/* Footer */}
       <p className="text-xs text-gray-400 mt-10 text-center">
         VChron by GreenWebb Technologies ·{' '}
-        <a href="/app/privacy-policy" className="underline hover:text-gray-600">Privacy Policy</a>
+        <a href={privacyRoute} className="underline hover:text-gray-600">Privacy Policy</a>
       </p>
     </div>
   )

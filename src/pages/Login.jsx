@@ -26,7 +26,7 @@ const Login = () => {
   const dashboardRoute = isAppAuth ? "/app/dashboard" : "/dashboard";
   const adminRoute = isAppAuth ? "/app/admin" : "/admin";
   const superuserRoute = isAppAuth ? "/app/superuser" : "/superuser";
-  const homeRoute = isAppAuth ? "/install" : "/";
+  const homeRoute = isAppAuth ? "/app/install" : "/";
 
   useEffect(() => {
     let cancelled = false;
