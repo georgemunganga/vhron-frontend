@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Download, CheckCircle2, Smartphone, Wifi, Clock, Shield, ArrowRight, ExternalLink } from 'lucide-react'
+import {
+  Download, CheckCircle2, Smartphone, Wifi, Clock, Shield,
+  ArrowRight, ExternalLink, Home
+} from 'lucide-react'
 
 function useInstallPrompt() {
   const [prompt, setPrompt] = useState(null)
   const [isInstalled, setIsInstalled] = useState(false)
 
   useEffect(() => {
+    // Already running as installed PWA
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true
@@ -14,14 +18,20 @@ function useInstallPrompt() {
       setIsInstalled(true)
       return
     }
-    const handler = (e) => { e.preventDefault(); setPrompt(e) }
+    const handler = (e) => {
+      e.preventDefault()
+      setPrompt(e)
+    }
     window.addEventListener('beforeinstallprompt', handler)
     window.addEventListener('appinstalled', () => setIsInstalled(true))
-    return () => window.removeEventListener('beforeinstallprompt', handler)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler)
+    }
   }, [])
 
   const install = async () => {
     if (!prompt) return false
+    // This shows the browser's native "Add to Home Screen" dialog
     prompt.prompt()
     const { outcome } = await prompt.userChoice
     if (outcome === 'accepted') setIsInstalled(true)
@@ -66,17 +76,19 @@ export default function Install() {
   const { prompt, isInstalled, install } = useInstallPrompt()
   const [installing, setInstalling] = useState(false)
   const [justInstalled, setJustInstalled] = useState(false)
+
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
   const showIOSGuide = isIOS && isSafari && !isInstalled
 
   const handleInstall = async () => {
     setInstalling(true)
-    const ok = await install()
+    // Triggers the browser's native "Add to Home Screen" dialog
+    const accepted = await install()
     setInstalling(false)
-    if (ok) {
+    if (accepted) {
       setJustInstalled(true)
-      setTimeout(() => navigate('/app/dashboard'), 2000)
+      // Do NOT navigate — user should open the app from their home screen
     }
   }
 
@@ -97,18 +109,38 @@ export default function Install() {
       {/* Install card */}
       <div className="w-full max-w-sm">
 
-        {isInstalled || justInstalled ? (
-          /* Already installed */
-          <div className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-teal-50 border border-teal-200 shadow-sm">
+        {justInstalled ? (
+          /* Just accepted the install prompt — tell them to open from home screen */
+          <div className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-teal-50 border border-teal-200 shadow-sm text-center">
             <CheckCircle2 className="w-12 h-12 text-teal-600" />
-            <div className="text-center">
-              <p className="text-lg font-semibold text-teal-800">VChron is installed!</p>
-              <p className="text-sm text-gray-500 mt-1">
-                {justInstalled ? 'Opening the app…' : 'You can open it from your home screen.'}
+            <div>
+              <p className="text-lg font-semibold text-teal-800">VChron is being installed!</p>
+              <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+                Look for the <strong>VChron icon</strong> on your home screen and tap it to open the app.
               </p>
             </div>
+            <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white border border-teal-200 text-sm text-teal-700 font-medium w-full justify-center">
+              <Home className="w-4 h-4" />
+              Open from your home screen
+            </div>
             <button
-              onClick={() => navigate('/app/dashboard')}
+              onClick={() => navigate('/app/login')}
+              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              Or continue in this browser
+            </button>
+          </div>
+
+        ) : isInstalled ? (
+          /* Already running as installed PWA */
+          <div className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-teal-50 border border-teal-200 shadow-sm text-center">
+            <CheckCircle2 className="w-12 h-12 text-teal-600" />
+            <div>
+              <p className="text-lg font-semibold text-teal-800">VChron is already installed</p>
+              <p className="text-sm text-gray-500 mt-1">You're running the installed app right now.</p>
+            </div>
+            <button
+              onClick={() => navigate('/app/login')}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold transition-colors shadow"
             >
               Open App <ArrowRight className="w-4 h-4" />
@@ -116,7 +148,7 @@ export default function Install() {
           </div>
 
         ) : prompt ? (
-          /* Android / Chrome — native install prompt available */
+          /* Android / Chrome — native install prompt is ready */
           <div className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-white border border-gray-200 shadow-sm">
             <div className="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center">
               <Download className="w-7 h-7 text-teal-600" />
@@ -135,7 +167,7 @@ export default function Install() {
               {installing ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Installing…
+                  Waiting for browser…
                 </span>
               ) : (
                 <>
@@ -174,22 +206,22 @@ export default function Install() {
           </div>
 
         ) : (
-          /* Fallback — browser doesn't support install prompt */
+          /* Fallback — browser doesn't support install prompt (desktop, Firefox, etc.) */
           <div className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-white border border-gray-200 shadow-sm">
             <div className="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center">
               <ExternalLink className="w-7 h-7 text-teal-600" />
             </div>
             <div className="text-center">
-              <p className="text-lg font-semibold text-gray-900">Open VChron</p>
+              <p className="text-lg font-semibold text-gray-900">Install VChron</p>
               <p className="text-sm text-gray-500 mt-1">
-                To install, open this page in Chrome (Android) or Safari (iOS) and use "Add to Home Screen".
+                To install, open this page in <strong>Chrome</strong> (Android) or <strong>Safari</strong> (iPhone/iPad) and use <strong>"Add to Home Screen"</strong>.
               </p>
             </div>
             <button
               onClick={() => navigate('/app/login')}
               className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-base transition-colors shadow-md"
             >
-              Open App <ArrowRight className="w-4 h-4" />
+              Open in browser <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         )}
