@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,10 @@ import Logo from "@/components/Logo";
 
 const History = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAppShell = useMemo(() => location.pathname.startsWith("/app/"), [location.pathname]);
+  const loginRoute = isAppShell ? "/app/login" : "/login";
+  const dashboardRoute = isAppShell ? "/app/dashboard" : "/dashboard";
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -32,7 +36,7 @@ const History = () => {
           setRecords(data.records || []);
           setTotal(data.total || 0);
         } else if (response.status === 401) {
-          navigate("/login");
+          navigate(loginRoute);
         }
       } catch (error) {
         console.error("Error fetching history:", error);
@@ -42,7 +46,7 @@ const History = () => {
     };
 
     fetchHistory();
-  }, [navigate]);
+  }, [loginRoute, navigate]);
 
   // Group records by date
   const groupedRecords = records.reduce((groups, record) => {
@@ -69,27 +73,28 @@ const History = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate("/dashboard")}
-            data-testid="back-btn"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <Logo variant="dark" size="sm" />
-            <span className="text-xs text-slate-500">{total} total records</span>
+    <div className={isAppShell ? "bg-slate-50" : "min-h-screen bg-slate-50"}>
+      {!isAppShell && (
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate(dashboardRoute)}
+              data-testid="back-btn"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div className="flex items-center gap-3">
+              <Logo variant="dark" size="sm" />
+              <span className="text-xs text-slate-500">{total} total records</span>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className={`${isAppShell ? "max-w-lg" : "max-w-4xl"} mx-auto px-4 py-6`}>
         {records.length === 0 ? (
           <Card className="border-slate-200">
             <CardContent className="p-12 text-center">
@@ -100,7 +105,7 @@ const History = () => {
               </p>
               <Button 
                 className="mt-6 bg-teal-700 hover:bg-teal-800"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate(dashboardRoute)}
               >
                 Go to Dashboard
               </Button>

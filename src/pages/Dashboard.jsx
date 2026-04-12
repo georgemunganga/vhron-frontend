@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -44,6 +44,16 @@ const offlineStore = localforage.createInstance({
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isAppShell = useMemo(() => location.pathname.startsWith("/app/"), [location.pathname]);
+  const loginRoute = isAppShell ? "/app/login" : "/login";
+  const historyRoute = isAppShell ? "/app/history" : "/history";
+  const myReportsRoute = isAppShell ? "/app/my-reports" : "/my-reports";
+  const adminRoute = isAppShell ? "/app/admin" : "/admin";
+  const superuserRoute = isAppShell ? "/app/superuser" : "/superuser";
+  const aboutRoute = isAppShell ? "/app/about" : "/about";
+  const privacyRoute = isAppShell ? "/app/privacy-policy" : "/privacy-policy";
+  const termsRoute = isAppShell ? "/app/terms" : "/terms";
+  const requestDeletionRoute = isAppShell ? "/app/request-deletion" : "/request-deletion";
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -176,18 +186,18 @@ const Dashboard = () => {
           }
           setUser(userData);
         } else {
-          navigate("/login");
+          navigate(loginRoute);
         }
       } catch (error) {
         console.error("Error fetching user:", error);
-        navigate("/login");
+        navigate(loginRoute);
       } finally {
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, [navigate]);
+  }, [loginRoute, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -363,7 +373,7 @@ const Dashboard = () => {
       console.error("Logout error:", error);
     }
     localStorage.removeItem("vchron_token");
-    navigate("/login");
+    navigate(loginRoute);
   };
 
   if (loading) {
@@ -377,7 +387,7 @@ const Dashboard = () => {
   const isOnDuty = status?.is_on_duty === true;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className={isAppShell ? "bg-slate-50" : "min-h-screen bg-slate-50"}>
       {/* Offline Banner */}
       {!isOnline && (
         <div className="offline-banner px-4 py-2 flex items-center justify-center gap-2 text-sm">
@@ -392,7 +402,8 @@ const Dashboard = () => {
       )}
 
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      {!isAppShell && (
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center">
             <Logo variant="dark" size="sm" />
@@ -413,17 +424,17 @@ const Dashboard = () => {
               </button>
               {/* Dropdown */}
               <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-lg border border-slate-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                <button onClick={() => navigate('/about')} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                <button onClick={() => navigate(aboutRoute)} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
                   <Info className="w-4 h-4 text-teal-600" /> About VChron
                 </button>
-                <button onClick={() => navigate('/privacy-policy')} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                <button onClick={() => navigate(privacyRoute)} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
                   <FileText className="w-4 h-4 text-teal-600" /> Privacy Policy
                 </button>
-                <button onClick={() => navigate('/terms')} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                <button onClick={() => navigate(termsRoute)} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
                   <FileText className="w-4 h-4 text-teal-600" /> Terms &amp; Conditions
                 </button>
                 <div className="border-t border-slate-100 my-1" />
-                <button onClick={() => navigate('/request-deletion')} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                <button onClick={() => navigate(requestDeletionRoute)} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
                   <Trash2 className="w-4 h-4" /> Request Account Deletion
                 </button>
               </div>
@@ -437,7 +448,7 @@ const Dashboard = () => {
             <Button 
               variant="ghost" 
               className="text-slate-600"
-              onClick={() => navigate("/history")}
+              onClick={() => navigate(historyRoute)}
               data-testid="history-nav-btn"
             >
               <History className="w-4 h-4 mr-2" />
@@ -446,7 +457,7 @@ const Dashboard = () => {
             <Button 
               variant="ghost" 
               className="text-slate-600"
-              onClick={() => navigate("/my-reports")}
+              onClick={() => navigate(myReportsRoute)}
               data-testid="my-reports-nav-btn"
             >
               <FileText className="w-4 h-4 mr-2" />
@@ -456,7 +467,7 @@ const Dashboard = () => {
               <Button 
                 variant="ghost" 
                 className="text-slate-600"
-                onClick={() => navigate("/admin")}
+                onClick={() => navigate(adminRoute)}
                 data-testid="admin-nav-btn"
               >
                 <Settings className="w-4 h-4 mr-2" />
@@ -468,7 +479,7 @@ const Dashboard = () => {
                 <Button 
                   variant="ghost" 
                   className="text-slate-600"
-                  onClick={() => navigate("/admin")}
+                  onClick={() => navigate(adminRoute)}
                   data-testid="admin-nav-btn"
                 >
                   <Settings className="w-4 h-4 mr-2" />
@@ -477,7 +488,7 @@ const Dashboard = () => {
                 <Button 
                   variant="ghost" 
                   className="text-amber-700"
-                  onClick={() => navigate("/superuser")}
+                  onClick={() => navigate(superuserRoute)}
                   data-testid="superuser-nav-btn"
                 >
                   <Shield className="w-4 h-4 mr-2" />
@@ -513,7 +524,7 @@ const Dashboard = () => {
             <Button 
               variant="ghost" 
               className="w-full justify-start text-slate-600"
-              onClick={() => { navigate("/history"); setMobileMenuOpen(false); }}
+              onClick={() => { navigate(historyRoute); setMobileMenuOpen(false); }}
             >
               <History className="w-4 h-4 mr-2" />
               History
@@ -521,7 +532,7 @@ const Dashboard = () => {
             <Button 
               variant="ghost" 
               className="w-full justify-start text-slate-600"
-              onClick={() => { navigate("/my-reports"); setMobileMenuOpen(false); }}
+              onClick={() => { navigate(myReportsRoute); setMobileMenuOpen(false); }}
             >
               <FileText className="w-4 h-4 mr-2" />
               My Reports
@@ -530,7 +541,7 @@ const Dashboard = () => {
               <Button 
                 variant="ghost" 
                 className="w-full justify-start text-slate-600"
-                onClick={() => { navigate("/admin"); setMobileMenuOpen(false); }}
+                onClick={() => { navigate(adminRoute); setMobileMenuOpen(false); }}
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Admin Dashboard
@@ -541,7 +552,7 @@ const Dashboard = () => {
                 <Button 
                   variant="ghost" 
                   className="w-full justify-start text-slate-600"
-                  onClick={() => { navigate("/admin"); setMobileMenuOpen(false); }}
+                  onClick={() => { navigate(adminRoute); setMobileMenuOpen(false); }}
                 >
                   <Settings className="w-4 h-4 mr-2" />
                   Admin Dashboard
@@ -549,7 +560,7 @@ const Dashboard = () => {
                 <Button 
                   variant="ghost" 
                   className="w-full justify-start text-amber-700"
-                  onClick={() => { navigate("/superuser"); setMobileMenuOpen(false); }}
+                  onClick={() => { navigate(superuserRoute); setMobileMenuOpen(false); }}
                 >
                   <Shield className="w-4 h-4 mr-2" />
                   Super User Panel
@@ -560,19 +571,19 @@ const Dashboard = () => {
             <div className="border-t border-slate-100 pt-2 mt-1 space-y-1">
               <p className="text-xs font-semibold text-slate-400 px-2 pb-1">Account</p>
               <Button variant="ghost" className="w-full justify-start text-slate-600"
-                onClick={() => { navigate('/about'); setMobileMenuOpen(false); }}>
+                onClick={() => { navigate(aboutRoute); setMobileMenuOpen(false); }}>
                 <Info className="w-4 h-4 mr-2 text-teal-600" /> About VChron
               </Button>
               <Button variant="ghost" className="w-full justify-start text-slate-600"
-                onClick={() => { navigate('/privacy-policy'); setMobileMenuOpen(false); }}>
+                onClick={() => { navigate(privacyRoute); setMobileMenuOpen(false); }}>
                 <FileText className="w-4 h-4 mr-2 text-teal-600" /> Privacy Policy
               </Button>
               <Button variant="ghost" className="w-full justify-start text-slate-600"
-                onClick={() => { navigate('/terms'); setMobileMenuOpen(false); }}>
+                onClick={() => { navigate(termsRoute); setMobileMenuOpen(false); }}>
                 <FileText className="w-4 h-4 mr-2 text-teal-600" /> Terms &amp; Conditions
               </Button>
               <Button variant="ghost" className="w-full justify-start text-red-600"
-                onClick={() => { navigate('/request-deletion'); setMobileMenuOpen(false); }}>
+                onClick={() => { navigate(requestDeletionRoute); setMobileMenuOpen(false); }}>
                 <Trash2 className="w-4 h-4 mr-2" /> Request Account Deletion
               </Button>
             </div>
@@ -588,10 +599,11 @@ const Dashboard = () => {
             </div>
           </div>
         )}
-      </header>
+        </header>
+      )}
 
       {/* Main Content */}
-      <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+      <main className={`${isAppShell ? "max-w-lg" : "max-w-2xl"} mx-auto px-4 py-6 md:py-8 space-y-6`}>
         {/* User Info Card */}
         <Card className="border-slate-200 shadow-sm">
           <CardContent className="p-6">
