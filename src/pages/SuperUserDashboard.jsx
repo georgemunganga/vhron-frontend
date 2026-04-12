@@ -274,6 +274,91 @@ const OverviewTab = () => {
           </Card>
         </div>
       </div>
+
+      {/* Live Location Type Breakdown */}
+      <SuperUserLocationBreakdown locationBreakdown={stats?.location_breakdown} />
+    </div>
+  );
+};
+
+// ============ SUPERUSER LOCATION BREAKDOWN ============
+const SU_LOCATION_CONFIG = {
+  'Facility': { bg: 'bg-teal-900/30', border: 'border-teal-700', text: 'text-teal-300', badge: 'bg-teal-800 text-teal-200', icon: '🏥' },
+  'Outreach': { bg: 'bg-blue-900/30', border: 'border-blue-700', text: 'text-blue-300', badge: 'bg-blue-800 text-blue-200', icon: '🚐' },
+  'Workshop or Meeting': { bg: 'bg-amber-900/30', border: 'border-amber-700', text: 'text-amber-300', badge: 'bg-amber-800 text-amber-200', icon: '📋' },
+};
+
+const SuperUserLocationBreakdown = ({ locationBreakdown }) => {
+  const [expandedType, setExpandedType] = useState(null);
+  if (!locationBreakdown) return null;
+  const hasAny = Object.values(locationBreakdown).some(v => v.count > 0);
+
+  return (
+    <div className="mt-6">
+      <div className="flex items-center gap-2 mb-3">
+        <Activity className="w-5 h-5 text-amber-400" />
+        <h3 className="text-base font-semibold text-slate-200 font-['Manrope']">Live Location Breakdown</h3>
+        {!hasAny && <span className="text-xs text-slate-500 ml-1">— no staff currently on duty</span>}
+      </div>
+
+      {/* Summary cards */}
+      <div className="grid grid-cols-3 gap-3 mb-3">
+        {Object.entries(locationBreakdown).map(([lt, data]) => {
+          const cfg = SU_LOCATION_CONFIG[lt] || SU_LOCATION_CONFIG['Facility'];
+          return (
+            <button
+              key={lt}
+              onClick={() => setExpandedType(expandedType === lt ? null : lt)}
+              className={`p-4 rounded-xl border ${cfg.bg} ${cfg.border} text-left transition-all hover:opacity-90 ${expandedType === lt ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-slate-900' : ''}`}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xl">{cfg.icon}</span>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${cfg.badge}`}>{data.count} on duty</span>
+              </div>
+              <p className={`text-2xl font-bold font-['Manrope'] ${cfg.text}`}>{data.count}</p>
+              <p className={`text-xs ${cfg.text} font-medium mt-0.5`}>{lt}</p>
+              {data.count > 0 && (
+                <p className="text-xs text-slate-500 mt-1">{expandedType === lt ? 'Collapse ▲' : 'View staff ▼'}</p>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Expanded staff list */}
+      {expandedType && locationBreakdown[expandedType]?.staff?.length > 0 && (
+        <div className="border border-slate-700 rounded-xl overflow-hidden">
+          <div className={`px-4 py-2 ${SU_LOCATION_CONFIG[expandedType]?.bg || 'bg-slate-800'} border-b border-slate-700`}>
+            <p className="text-sm font-semibold text-slate-200">
+              {SU_LOCATION_CONFIG[expandedType]?.icon} {expandedType} — {locationBreakdown[expandedType].count} staff currently on duty
+            </p>
+          </div>
+          <div className="divide-y divide-slate-800">
+            {locationBreakdown[expandedType].staff.map((s, i) => {
+              const loginTime = new Date(s.timestamp);
+              const now = new Date();
+              const diffMs = now - loginTime;
+              const h = Math.floor(diffMs / 3600000);
+              const m = Math.floor((diffMs % 3600000) / 60000);
+              return (
+                <div key={i} className="flex items-center justify-between px-4 py-3 hover:bg-slate-800/50">
+                  <div>
+                    <p className="text-sm font-medium text-slate-200">{s.user_name}</p>
+                    <p className="text-xs text-slate-400">{s.position} · {s.facility}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-slate-400 font-mono">{loginTime.toLocaleTimeString()}</p>
+                    <p className="text-xs text-slate-500">{h > 0 ? `${h}h ` : ''}{m}m on duty</p>
+                    {s.status === 'late' && <span className="text-xs px-2 py-0.5 rounded-full bg-red-900 text-red-300">Late</span>}
+                    {s.status === 'on_time' && <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-900 text-emerald-300">On Time</span>}
+                    {s.status === 'early' && <span className="text-xs px-2 py-0.5 rounded-full bg-sky-900 text-sky-300">Early</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

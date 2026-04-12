@@ -636,6 +636,9 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Location Type Breakdown */}
+            <AdminLocationBreakdown locationBreakdown={realtimeData?.location_breakdown} />
           </TabsContent>
 
           {/* Users Tab */}
@@ -929,6 +932,91 @@ const AdminDashboard = () => {
       {/* Task View Modal */}
       <AdminTaskModal taskModal={taskModal} setTaskModal={setTaskModal} />
     </div>
+  );
+};
+
+// ============ LOCATION TYPE BREAKDOWN COMPONENT ============
+const LOCATION_CONFIG = {
+  'Facility': { color: 'teal', bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700', badge: 'bg-teal-100 text-teal-700', icon: '🏥' },
+  'Outreach': { color: 'blue', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-700', icon: '🚐' },
+  'Workshop or Meeting': { color: 'amber', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700', icon: '📋' },
+};
+
+const AdminLocationBreakdown = ({ locationBreakdown }) => {
+  const [expandedType, setExpandedType] = useState(null);
+  if (!locationBreakdown) return null;
+  const hasAny = Object.values(locationBreakdown).some(v => v.count > 0);
+
+  return (
+    <Card className="border-slate-200 shadow-sm">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-['Manrope'] flex items-center gap-2">
+          <Activity className="w-5 h-5 text-teal-600" />
+          Live Location Breakdown
+          {!hasAny && <span className="text-sm font-normal text-slate-400 ml-2">— no staff currently on duty</span>}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {/* Summary count cards */}
+        <div className="grid grid-cols-3 gap-3">
+          {Object.entries(locationBreakdown).map(([lt, data]) => {
+            const cfg = LOCATION_CONFIG[lt] || LOCATION_CONFIG['Facility'];
+            return (
+              <button
+                key={lt}
+                onClick={() => setExpandedType(expandedType === lt ? null : lt)}
+                className={`p-4 rounded-xl border ${cfg.bg} ${cfg.border} text-left transition-all hover:shadow-md ${expandedType === lt ? 'ring-2 ring-offset-1 ring-teal-400' : ''}`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xl">{cfg.icon}</span>
+                  <Badge className={`${cfg.badge} border-0 text-xs`}>{data.count} on duty</Badge>
+                </div>
+                <p className={`text-2xl font-bold font-['Manrope'] ${cfg.text}`}>{data.count}</p>
+                <p className={`text-xs ${cfg.text} font-medium mt-0.5`}>{lt}</p>
+                {data.count > 0 && (
+                  <p className="text-xs text-slate-400 mt-1">{expandedType === lt ? 'Click to collapse ▲' : 'Click to see staff ▼'}</p>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Expanded staff list */}
+        {expandedType && locationBreakdown[expandedType]?.staff?.length > 0 && (
+          <div className="border border-slate-200 rounded-xl overflow-hidden">
+            <div className={`px-4 py-2 ${LOCATION_CONFIG[expandedType]?.bg || 'bg-slate-50'} border-b border-slate-200`}>
+              <p className="text-sm font-semibold text-slate-700">
+                {LOCATION_CONFIG[expandedType]?.icon} {expandedType} — {locationBreakdown[expandedType].count} staff currently on duty
+              </p>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {locationBreakdown[expandedType].staff.map((s, i) => {
+                const loginTime = new Date(s.timestamp);
+                const now = new Date();
+                const diffMs = now - loginTime;
+                const h = Math.floor(diffMs / 3600000);
+                const m = Math.floor((diffMs % 3600000) / 60000);
+                return (
+                  <div key={i} className="flex items-center justify-between px-4 py-3 hover:bg-slate-50">
+                    <div>
+                      <p className="text-sm font-medium text-slate-800">{s.user_name}</p>
+                      <p className="text-xs text-slate-500">{s.position} · {s.facility}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-slate-500 font-mono">{loginTime.toLocaleTimeString()}</p>
+                      <p className="text-xs text-slate-400">{h > 0 ? `${h}h ` : ''}{m}m on duty</p>
+                      {s.status === 'late' && <Badge className="bg-red-100 text-red-700 border-0 text-xs">Late</Badge>}
+                      {s.status === 'on_time' && <Badge className="bg-emerald-100 text-emerald-700 border-0 text-xs">On Time</Badge>}
+                      {s.status === 'early' && <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">Early</Badge>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
