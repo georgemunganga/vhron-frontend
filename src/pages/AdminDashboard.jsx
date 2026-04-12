@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +42,10 @@ import {
   ExternalLink,
   CheckCircle2,
   BarChart3,
-  ClipboardList
+  ClipboardList,
+  Hospital,
+  Truck,
+  Presentation
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
@@ -937,9 +940,9 @@ const AdminDashboard = () => {
 
 // ============ LOCATION TYPE BREAKDOWN COMPONENT ============
 const LOCATION_CONFIG = {
-  'Facility': { color: 'teal', bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700', badge: 'bg-teal-100 text-teal-700', icon: '🏥' },
-  'Outreach': { color: 'blue', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-700', icon: '🚐' },
-  'Workshop or Meeting': { color: 'amber', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700', icon: '📋' },
+  'Facility': { color: 'teal', bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700', badge: 'bg-teal-100 text-teal-700', Icon: Hospital },
+  'Outreach': { color: 'blue', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-700', Icon: Truck },
+  'Workshop or Meeting': { color: 'amber', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700', Icon: Presentation },
 };
 
 const AdminLocationBreakdown = ({ locationBreakdown }) => {
@@ -968,7 +971,7 @@ const AdminLocationBreakdown = ({ locationBreakdown }) => {
                 className={`p-4 rounded-xl border ${cfg.bg} ${cfg.border} text-left transition-all hover:shadow-md ${expandedType === lt ? 'ring-2 ring-offset-1 ring-teal-400' : ''}`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xl">{cfg.icon}</span>
+                  {cfg.Icon && <cfg.Icon className={`w-5 h-5 ${cfg.text}`} />}
                   <Badge className={`${cfg.badge} border-0 text-xs`}>{data.count} on duty</Badge>
                 </div>
                 <p className={`text-2xl font-bold font-['Manrope'] ${cfg.text}`}>{data.count}</p>
@@ -985,8 +988,9 @@ const AdminLocationBreakdown = ({ locationBreakdown }) => {
         {expandedType && locationBreakdown[expandedType]?.staff?.length > 0 && (
           <div className="border border-slate-200 rounded-xl overflow-hidden">
             <div className={`px-4 py-2 ${LOCATION_CONFIG[expandedType]?.bg || 'bg-slate-50'} border-b border-slate-200`}>
-              <p className="text-sm font-semibold text-slate-700">
-                {LOCATION_CONFIG[expandedType]?.icon} {expandedType} — {locationBreakdown[expandedType].count} staff currently on duty
+              <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                {LOCATION_CONFIG[expandedType]?.Icon && React.createElement(LOCATION_CONFIG[expandedType].Icon, { className: `w-4 h-4 ${LOCATION_CONFIG[expandedType]?.text}` })}
+                {expandedType} — {locationBreakdown[expandedType].count} staff currently on duty
               </p>
             </div>
             <div className="divide-y divide-slate-100">

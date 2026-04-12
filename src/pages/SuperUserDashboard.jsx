@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,8 @@ import {
   ArrowLeft, Users, Activity, Download, Search, Shield, Building2,
   Edit, Trash2, KeyRound, UserPlus, Clock, Settings, BarChart3,
   ChevronRight, AlertTriangle, CheckCircle2, XCircle, RefreshCw, Plus,
-  Landmark, Network, ChevronDown, User2, Phone, Mail, X, CalendarDays, ExternalLink, ClipboardList
+  Landmark, Network, ChevronDown, User2, Phone, Mail, X, CalendarDays, ExternalLink, ClipboardList,
+  Hospital, Truck, Presentation
 } from "lucide-react";
 import { API, authFetch } from "@/lib/api";
 import Logo from "@/components/Logo";
@@ -283,9 +284,9 @@ const OverviewTab = () => {
 
 // ============ SUPERUSER LOCATION BREAKDOWN ============
 const SU_LOCATION_CONFIG = {
-  'Facility': { bg: 'bg-teal-900/30', border: 'border-teal-700', text: 'text-teal-300', badge: 'bg-teal-800 text-teal-200', icon: '🏥' },
-  'Outreach': { bg: 'bg-blue-900/30', border: 'border-blue-700', text: 'text-blue-300', badge: 'bg-blue-800 text-blue-200', icon: '🚐' },
-  'Workshop or Meeting': { bg: 'bg-amber-900/30', border: 'border-amber-700', text: 'text-amber-300', badge: 'bg-amber-800 text-amber-200', icon: '📋' },
+  'Facility': { bg: 'bg-teal-900/30', border: 'border-teal-700', text: 'text-teal-300', badge: 'bg-teal-800 text-teal-200', Icon: Hospital },
+  'Outreach': { bg: 'bg-blue-900/30', border: 'border-blue-700', text: 'text-blue-300', badge: 'bg-blue-800 text-blue-200', Icon: Truck },
+  'Workshop or Meeting': { bg: 'bg-amber-900/30', border: 'border-amber-700', text: 'text-amber-300', badge: 'bg-amber-800 text-amber-200', Icon: Presentation },
 };
 
 const SuperUserLocationBreakdown = ({ locationBreakdown }) => {
@@ -312,7 +313,7 @@ const SuperUserLocationBreakdown = ({ locationBreakdown }) => {
               className={`p-4 rounded-xl border ${cfg.bg} ${cfg.border} text-left transition-all hover:opacity-90 ${expandedType === lt ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-slate-900' : ''}`}
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xl">{cfg.icon}</span>
+                {cfg.Icon && <cfg.Icon className={`w-5 h-5 ${cfg.text}`} />}
                 <span className={`text-xs px-2 py-0.5 rounded-full ${cfg.badge}`}>{data.count} on duty</span>
               </div>
               <p className={`text-2xl font-bold font-['Manrope'] ${cfg.text}`}>{data.count}</p>
@@ -329,8 +330,9 @@ const SuperUserLocationBreakdown = ({ locationBreakdown }) => {
       {expandedType && locationBreakdown[expandedType]?.staff?.length > 0 && (
         <div className="border border-slate-700 rounded-xl overflow-hidden">
           <div className={`px-4 py-2 ${SU_LOCATION_CONFIG[expandedType]?.bg || 'bg-slate-800'} border-b border-slate-700`}>
-            <p className="text-sm font-semibold text-slate-200">
-              {SU_LOCATION_CONFIG[expandedType]?.icon} {expandedType} — {locationBreakdown[expandedType].count} staff currently on duty
+            <p className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+              {SU_LOCATION_CONFIG[expandedType]?.Icon && React.createElement(SU_LOCATION_CONFIG[expandedType].Icon, { className: `w-4 h-4 ${SU_LOCATION_CONFIG[expandedType]?.text}` })}
+              {expandedType} — {locationBreakdown[expandedType].count} staff currently on duty
             </p>
           </div>
           <div className="divide-y divide-slate-800">
